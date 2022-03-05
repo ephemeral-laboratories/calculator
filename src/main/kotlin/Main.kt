@@ -1,17 +1,13 @@
 package garden.ephemeral.calculator
 
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
+import androidx.compose.ui.window.singleWindowApplication
 import garden.ephemeral.calculator.ui.AppTheme
 import garden.ephemeral.calculator.ui.MainUi
 
-fun main() = application {
-    Window(
-        title = "Calculator",
-        onCloseRequest = ::exitApplication
-    ) {
-        AppTheme {
-            MainUi()
-        }
+fun main() = singleWindowApplication(
+    title = "Calculator",
+) {
+    AppTheme {
+        MainUi()
     }
 }

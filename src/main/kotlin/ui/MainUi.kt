@@ -80,7 +80,7 @@ fun MainUi() {
         bottomBar = @Composable {
             TextField(
                 value = appState.inputText,
-                onValueChange = { newValue -> appState.inputText = newValue },
+                onValueChange = appState::inputText::set,
                 singleLine = true,
                 textStyle = valueTextStyle,
                 modifier = Modifier
@@ -116,10 +116,11 @@ fun MainUi() {
                 ) {
                     items(appState.history) { item ->
                         Column {
+                            // Newlines added here purely for people who copy the text
                             val input = item.input.prettyPrint(appState.numberFormat)
-                            Text(text = "$input =")
+                            Text(text = "$input =\n", maxLines = 1)
                             val output = item.output.prettyPrint(appState.numberFormat)
-                            Text(text = output, style = valueTextStyle)
+                            Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
                         }
                     }
                 }
