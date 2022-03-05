@@ -34,23 +34,33 @@ class Value(val value: Any) : BaseLeafNode() {
 
     private fun formatComplex(value: Complex, numberFormat: NumberFormat): String {
         return buildString {
-            if (value.real != 0.0 || value.imaginary == 0.0) {
-                append(numberFormat.format(value.real))
+            val formattedReal = numberFormat.format(abs(value.real))
+            val formattedImaginary = numberFormat.format(abs(value.imaginary))
+            val hasReal = formattedReal != "0"
+            val hasImaginary = formattedImaginary != "0"
+            val realIsNegative = hasReal && value.real < 0
+            val imaginaryIsNegative = hasImaginary && value.imaginary < 0
+
+            if (!hasReal && !hasImaginary) {
+                return "0"
             }
 
-            var imaginary = value.imaginary
-            if (value.real != 0.0 && imaginary != 0.0) {
-                if (imaginary < 0.0) {
-                    append(" - ")
-                    imaginary = -imaginary
-                } else {
-                    append(" + ")
+            if (hasReal) {
+                if (realIsNegative) {
+                    append('-')
+                }
+                append(formattedReal)
+                if (hasImaginary) {
+                    append(if (imaginaryIsNegative) " - " else " + ")
                 }
             }
 
-            if (value.imaginary != 0.0) {
-                if (imaginary != 1.0) {
-                    append(numberFormat.format(imaginary))
+            if (hasImaginary) {
+                if (imaginaryIsNegative && !hasReal) {
+                    append('-')
+                }
+                if (formattedImaginary != "1") {
+                    append(formattedImaginary)
                 }
                 append('i')
             }
