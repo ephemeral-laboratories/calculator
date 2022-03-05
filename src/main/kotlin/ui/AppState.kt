@@ -16,6 +16,7 @@ class AppState {
     val outputState = LazyListState()
     var inputText by mutableStateOf(TextFieldValue(""))
     var isInputError by mutableStateOf(false)
+    var themeOption by mutableStateOf(ThemeOption.SYSTEM_DEFAULT)
     var numberFormatOption by mutableStateOf(NumberFormatOption.DECIMAL)
     var decimalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.PERIOD)
     var dozenalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.SEMICOLON)

@@ -32,9 +32,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import garden.ephemeral.calculator.ui.common.Localizable
 import garden.ephemeral.calculator.ui.components.ExposedDropDownMenu
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.reflect.KMutableProperty0
 
 @Composable
 fun MainUi() {
@@ -49,38 +51,53 @@ fun MainUi() {
         }
     }
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        drawerContent = @Composable { DrawerContent(appState) },
-        drawerShape = customDrawerShape,
-        bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) }
-    ) { padding ->
-        MainContent(appState, scaffoldState, valueTextStyle, scope, padding)
+    AppTheme(appState.themeOption) {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            drawerContent = @Composable { DrawerContent(appState) },
+            drawerShape = customDrawerShape,
+            bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) }
+        ) { padding ->
+            MainContent(appState, scaffoldState, valueTextStyle, scope, padding)
+        }
     }
 }
 
 @Composable
 fun DrawerContent(appState: AppState) {
+    OptionDropDown(
+        label = AppStrings.Theme,
+        values = ThemeOption.values(),
+        property = appState::themeOption
+    )
+    OptionDropDown(
+        label = AppStrings.NumberFormat,
+        values = NumberFormatOption.values(),
+        property = appState::numberFormatOption
+    )
+    OptionDropDown(
+        label = AppStrings.RadixSeparator,
+        values = RadixSeparatorOption.values(),
+        property = when (appState.numberFormatOption) {
+            NumberFormatOption.DECIMAL -> appState::decimalRadixSeparatorOption
+            NumberFormatOption.DOZENAL -> appState::dozenalRadixSeparatorOption
+        }
+    )
+}
+
+@Composable
+private fun <T : Localizable> OptionDropDown(
+    label: String,
+    values: Array<T>,
+    property: KMutableProperty0<T>,
+) {
     ExposedDropDownMenu(
-        values = NumberFormatOption.values().asIterable(),
-        selectedValue = appState.numberFormatOption,
-        onChange = appState::numberFormatOption::set,
-        label = @Composable { Text(text = AppStrings.NumberFormat, softWrap = false) },
+        values = values.asIterable(),
+        selectedValue = property.get(),
+        onChange = property::set,
+        label = @Composable { Text(text = label, softWrap = false) },
         modifier = Modifier
             // Works around the longer label not pushing the size to be bigger
-            .width(180.dp)
-            .padding(start = 16.dp, top = 16.dp),
-    )
-    val radixSeparatorOption = when (appState.numberFormatOption) {
-        NumberFormatOption.DECIMAL -> AppState::decimalRadixSeparatorOption
-        NumberFormatOption.DOZENAL -> AppState::dozenalRadixSeparatorOption
-    }
-    ExposedDropDownMenu(
-        values = RadixSeparatorOption.values().asIterable(),
-        selectedValue = radixSeparatorOption.get(appState),
-        onChange = { newValue -> radixSeparatorOption.set(appState, newValue) },
-        label = @Composable { Text(text = AppStrings.RadixSeparator, softWrap = false) },
-        modifier = Modifier
             .width(180.dp)
             .padding(start = 16.dp, top = 16.dp),
     )

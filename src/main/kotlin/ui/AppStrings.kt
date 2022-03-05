@@ -5,6 +5,11 @@ object AppStrings {
     val InputError get() = "Input error"
     val Settings get() = "Settings"
 
+    val Theme get() = "Theme"
+    val SystemDefault get() = "System default"
+    val Light get() = "Light"
+    val Dark get() = "Dark"
+
     val NumberFormat get() = "Number format"
     val Decimal get() = "Decimal"
     val Dozenal get() = "Dozenal"
