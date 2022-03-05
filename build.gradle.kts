@@ -10,7 +10,8 @@ plugins {
 }
 
 group = "garden.ephemeral.calculator"
-version = "1.0"
+version = "1.0.0-SNAPSHOT"
+description = "Simple calculator application built in Compose Desktop"
 
 dependencies {
     val komplexVersion: String by project.extra
