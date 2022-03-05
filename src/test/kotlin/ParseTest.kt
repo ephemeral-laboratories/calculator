@@ -16,6 +16,7 @@ import garden.ephemeral.calculator.nodes.ops.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.text.ExpressionParser
 import garden.ephemeral.calculator.text.NumberFormats
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

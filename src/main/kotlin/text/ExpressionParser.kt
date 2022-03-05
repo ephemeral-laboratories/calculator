@@ -1,4 +1,4 @@
-package garden.ephemeral.calculator
+package garden.ephemeral.calculator.text
 
 import com.ibm.icu.text.NumberFormat
 import garden.ephemeral.calculator.grammar.ExpressionLexer

@@ -7,6 +7,10 @@ import java.text.FieldPosition
 import java.text.ParsePosition
 
 class DozenalFormat: NumberFormat() {
+    // XXX: It would be better to have something akin to DecimalFormatSymbols,
+    //      but we'll get there next step!
+    var radixSeparator = ';'
+
     override fun format(number: Double, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer {
         requireNotNull(toAppendTo)
 
@@ -41,7 +45,7 @@ class DozenalFormat: NumberFormat() {
         }
 
         if (minimumFractionDigits > 0 || fractionDigits.isNotEmpty()) {
-            toAppendTo.append(RADIX_SEPARATOR)
+            toAppendTo.append(radixSeparator)
         }
 
         for (digit in fractionDigits) {
@@ -103,7 +107,7 @@ class DozenalFormat: NumberFormat() {
 
         var integerPart: String
         val fractionPart: String
-        val radixSeparatorIndex = text.indexOf(RADIX_SEPARATOR)
+        val radixSeparatorIndex = text.indexOf(radixSeparator)
         if (radixSeparatorIndex >= 0) {
             integerPart = text.substring(0, radixSeparatorIndex)
             fractionPart = text.substring(radixSeparatorIndex + 1)
@@ -149,7 +153,6 @@ class DozenalFormat: NumberFormat() {
     companion object {
         const val RADIX = 12
         const val MINUS = '-'
-        const val RADIX_SEPARATOR = ';'
         const val DIGITS = "0123456789↊↋"
     }
 }

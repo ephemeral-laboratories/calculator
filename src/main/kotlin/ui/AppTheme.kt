@@ -1,4 +1,4 @@
-package garden.ephemeral.calculator
+package garden.ephemeral.calculator.ui
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography

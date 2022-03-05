@@ -100,7 +100,7 @@ PI: 'π' | 'p' 'i';
 E: 'e';
 COMMA: ',';
 
-fragment RadixSeparator: ';';
+fragment RadixSeparator: ( ';' | '.' | ',' );
 fragment Digit: ( [0-9] | '↊' | '↋' );
 
 WS: ( ' ' | '\t' | '\r' | '\n' ) -> skip;

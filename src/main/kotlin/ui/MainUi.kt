@@ -1,0 +1,147 @@
+package garden.ephemeral.calculator.ui
+
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import garden.ephemeral.calculator.ui.components.ExposedDropDownMenu
+import kotlinx.coroutines.launch
+
+@Composable
+fun MainUi() {
+    val appState = remember { AppState() }
+    val focusRequester = remember { FocusRequester() }
+    val valueTextStyle = LocalTextStyle.current.copy(fontSize = 32.sp)
+
+    val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
+
+    val customDrawerShape: Shape = object : Shape {
+        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+            return Outline.Rectangle(Rect(left = 0.0f, top = 0.0f, right = 200.0f, bottom = size.height))
+        }
+    }
+
+    Scaffold(
+        scaffoldState = scaffoldState,
+        drawerContent = @Composable {
+            ExposedDropDownMenu(
+                values = NumberFormatOption.values().asIterable(),
+                selectedValue = appState.numberFormatOption,
+                onChange = appState::numberFormatOption::set,
+                label = @Composable { Text(text = "Number format", softWrap = false) },
+                modifier = Modifier
+                    // Works around the longer label not pushing the size to be bigger
+                    .width(180.dp)
+                    .padding(start = 16.dp, top = 16.dp),
+            )
+            val radixSeparatorOption = when (appState.numberFormatOption) {
+                NumberFormatOption.DECIMAL -> AppState::decimalRadixSeparatorOption
+                NumberFormatOption.DOZENAL -> AppState::dozenalRadixSeparatorOption
+            }
+            ExposedDropDownMenu(
+                values = RadixSeparatorOption.values().asIterable(),
+                selectedValue = radixSeparatorOption.get(appState),
+                onChange = { newValue -> radixSeparatorOption.set(appState, newValue) },
+                label = @Composable { Text(text = "Radix separator", softWrap = false) },
+                modifier = Modifier
+                    .width(180.dp)
+                    .padding(start = 16.dp, top = 16.dp),
+            )
+        },
+        drawerShape = customDrawerShape,
+        bottomBar = @Composable {
+            TextField(
+                value = appState.inputText,
+                onValueChange = { newValue -> appState.inputText = newValue },
+                singleLine = true,
+                textStyle = valueTextStyle,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    .onKeyEvent @OptIn(ExperimentalComposeUiApi::class) { event ->
+                        var consumed = false
+                        if (event.key == Key.Enter) {
+                            appState.execute(scope = scope)
+                            consumed = true
+                        }
+                        consumed
+                    },
+            )
+
+            SideEffect {
+                focusRequester.requestFocus()
+            }
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .padding(bottom = padding.calculateBottomPadding())
+        ) {
+            SelectionContainer {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.Bottom),
+                    state = appState.outputState,
+                ) {
+                    items(appState.history) { item ->
+                        Column {
+                            val input = item.input.prettyPrint(appState.numberFormat)
+                            Text(text = "$input =")
+                            val output = item.output.prettyPrint(appState.numberFormat)
+                            Text(text = output, style = valueTextStyle)
+                        }
+                    }
+                }
+            }
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        scaffoldState.drawerState.open()
+                    }
+                },
+                modifier = Modifier
+                    .background(MaterialTheme.colors.background.copy(alpha = 0.95f), CircleShape),
+            ) {
+                // TODO: i18n
+                Icon(Icons.Outlined.Settings, "Settings")
+            }
+            VerticalScrollbar(
+                rememberScrollbarAdapter(appState.outputState),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight(),
+            )
+        }
+    }
+}
