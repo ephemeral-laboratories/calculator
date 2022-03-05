@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.text.NumberFormats
+import garden.ephemeral.math.complex.Complex
 import garden.ephemeral.math.complex.i
 import garden.ephemeral.math.complex.minus
 import garden.ephemeral.math.complex.plus
@@ -32,6 +33,10 @@ class PrettyPrintTest {
                 arguments((-2).i, "-2i"),
                 arguments(1 + 2.i, "1 + 2i"),
                 arguments(1 - 2.i, "1 - 2i"),
+                arguments(Double.NaN, "undefined"),
+                arguments(Complex(Double.NaN, 1.0), "undefined"),
+                arguments(Double.POSITIVE_INFINITY, "∞"),
+                arguments(Double.NEGATIVE_INFINITY, "-∞"),
             )
         }
     }

@@ -14,8 +14,20 @@ class Value(val value: Any) : BaseLeafNode() {
 
     override fun prettyPrint(numberFormat: NumberFormat): String {
         return when (value) {
-            is Double -> numberFormat.format(value)
-            is Complex -> formatComplex(value, numberFormat)
+            is Double -> {
+                if (value.isNaN()) {
+                    "undefined"
+                } else {
+                    numberFormat.format(value)
+                }
+            }
+            is Complex -> {
+                if (value.real.isNaN() || value.imaginary.isNaN()) {
+                    "undefined"
+                } else {
+                    formatComplex(value, numberFormat)
+                }
+            }
             else -> value.toString()
         }
     }
