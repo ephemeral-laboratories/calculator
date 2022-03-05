@@ -5,6 +5,7 @@ import garden.ephemeral.calculator.nodes.BaseBranchNode
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.values.Value
 import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.TerminalNode
 import java.text.ParseException
 
 class Function1Node(val function: Function1, val arg: Node): BaseBranchNode() {
@@ -27,8 +28,8 @@ class Function1Node(val function: Function1, val arg: Node): BaseBranchNode() {
     companion object {
         fun create(nameNode: ParseTree, argNode: Node): Function1Node {
             val name = nameNode.text
-            // TODO: Can we get the offset?
-            val function = Function1.findByName(name) ?: throw ParseException("Function not found: $name", 0)
+            val offset = (nameNode as TerminalNode).symbol.startIndex
+            val function = Function1.findByName(name) ?: throw ParseException("Function not found: $name", offset)
             return Function1Node(function, argNode)
         }
     }
