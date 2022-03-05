@@ -55,14 +55,7 @@ fun MainUi() {
         drawerShape = customDrawerShape,
         bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-                .padding(bottom = padding.calculateBottomPadding())
-        ) {
-            MainContent(appState, scaffoldState, valueTextStyle, scope)
-        }
+        MainContent(appState, scaffoldState, valueTextStyle, scope, padding)
     }
 }
 
@@ -125,47 +118,55 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
 }
 
 @Composable
-fun BoxScope.MainContent(
+fun MainContent(
     appState: AppState,
     scaffoldState: ScaffoldState,
     valueTextStyle: TextStyle,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    padding: PaddingValues,
 ) {
-    SelectionContainer {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 7.dp)
-                .wrapContentHeight(Alignment.Bottom),
-            state = appState.outputState,
-        ) {
-            items(appState.history) { item ->
-                Column {
-                    // Newlines added here purely for people who copy the text
-                    val input = item.input.prettyPrint(appState.numberFormat)
-                    Text(text = "$input =\n", maxLines = 1)
-                    val output = item.output.prettyPrint(appState.numberFormat)
-                    Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            // Best effort to line the text up between the two views, but still off by 0.5 dp :(
+            .padding(15.dp)
+            .padding(padding)
+    ) {
+        SelectionContainer {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentHeight(Alignment.Bottom),
+                state = appState.outputState,
+            ) {
+                items(appState.history) { item ->
+                    Column {
+                        // Newlines added here purely for people who copy the text
+                        val input = item.input.prettyPrint(appState.numberFormat)
+                        Text(text = "$input =\n", maxLines = 1)
+                        val output = item.output.prettyPrint(appState.numberFormat)
+                        Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
+                    }
                 }
             }
         }
+        IconButton(
+            onClick = {
+                scope.launch {
+                    scaffoldState.drawerState.open()
+                }
+            },
+            modifier = Modifier
+                .background(MaterialTheme.colors.background.copy(alpha = 0.95f), CircleShape),
+        ) {
+            // TODO: i18n
+            Icon(Icons.Outlined.Settings, "Settings")
+        }
+        VerticalScrollbar(
+            rememberScrollbarAdapter(appState.outputState),
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight(),
+        )
     }
-    IconButton(
-        onClick = {
-            scope.launch {
-                scaffoldState.drawerState.open()
-            }
-        },
-        modifier = Modifier
-            .background(MaterialTheme.colors.background.copy(alpha = 0.95f), CircleShape),
-    ) {
-        // TODO: i18n
-        Icon(Icons.Outlined.Settings, "Settings")
-    }
-    VerticalScrollbar(
-        rememberScrollbarAdapter(appState.outputState),
-        modifier = Modifier
-            .align(Alignment.CenterEnd)
-            .fillMaxHeight(),
-    )
 }
