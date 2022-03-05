@@ -120,6 +120,7 @@ fun MainUi() {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(start = 7.dp)
                         .wrapContentHeight(Alignment.Bottom),
                     state = appState.outputState,
                 ) {
