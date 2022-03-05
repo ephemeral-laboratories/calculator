@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -41,6 +42,7 @@ fun MainUi() {
     val valueTextStyle = LocalTextStyle.current.copy(fontSize = 32.sp)
 
     val scaffoldState = rememberScaffoldState()
+    val colorScheme = MaterialTheme.colors
     val scope = rememberCoroutineScope()
 
     val customDrawerShape: Shape = object : Shape {
@@ -80,12 +82,14 @@ fun MainUi() {
         bottomBar = @Composable {
             TextField(
                 value = appState.inputText,
-                onValueChange = { newValue ->
-                    appState.inputText = newValue
-                    if (newValue.text.contains('\n')) {
-                        appState.inputText = newValue.copy(text = newValue.text.replace("\n", ""))
+                onValueChange = appState::updateInputText,
+                trailingIcon = @Composable {
+                    if (appState.isInputError) {
+                        // TODO: i18n
+                        Icon(Icons.Filled.Error, "Input error", tint = MaterialTheme.colors.error)
                     }
                 },
+                isError = appState.isInputError,
                 singleLine = true,
                 textStyle = valueTextStyle,
                 modifier = Modifier
@@ -94,7 +98,7 @@ fun MainUi() {
                     .onKeyEvent @OptIn(ExperimentalComposeUiApi::class) { event ->
                         var consumed = false
                         if (event.key == Key.Enter) {
-                            appState.execute(scope = scope)
+                            appState.execute(colorScheme = colorScheme, scope = scope)
                             consumed = true
                         }
                         consumed

@@ -22,6 +22,7 @@ dependencies {
     antlr("org.antlr:antlr4:$antlrVersion")
 
     implementation(compose.desktop.currentOs)
+    implementation(compose.materialIconsExtended)
     implementation("garden.ephemeral.math:komplex:$komplexVersion")
     implementation("org.antlr:antlr4-runtime:$antlrVersion")
 
