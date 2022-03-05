@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -28,21 +27,20 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import garden.ephemeral.calculator.ui.components.ExposedDropDownMenu
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun MainUi() {
     val appState = remember { AppState() }
-    val focusRequester = remember { FocusRequester() }
     val valueTextStyle = LocalTextStyle.current.copy(fontSize = 32.sp)
-
     val scaffoldState = rememberScaffoldState()
-    val colorScheme = MaterialTheme.colors
     val scope = rememberCoroutineScope()
 
     val customDrawerShape: Shape = object : Shape {
@@ -53,62 +51,9 @@ fun MainUi() {
 
     Scaffold(
         scaffoldState = scaffoldState,
-        drawerContent = @Composable {
-            ExposedDropDownMenu(
-                values = NumberFormatOption.values().asIterable(),
-                selectedValue = appState.numberFormatOption,
-                onChange = appState::numberFormatOption::set,
-                label = @Composable { Text(text = "Number format", softWrap = false) },
-                modifier = Modifier
-                    // Works around the longer label not pushing the size to be bigger
-                    .width(180.dp)
-                    .padding(start = 16.dp, top = 16.dp),
-            )
-            val radixSeparatorOption = when (appState.numberFormatOption) {
-                NumberFormatOption.DECIMAL -> AppState::decimalRadixSeparatorOption
-                NumberFormatOption.DOZENAL -> AppState::dozenalRadixSeparatorOption
-            }
-            ExposedDropDownMenu(
-                values = RadixSeparatorOption.values().asIterable(),
-                selectedValue = radixSeparatorOption.get(appState),
-                onChange = { newValue -> radixSeparatorOption.set(appState, newValue) },
-                label = @Composable { Text(text = "Radix separator", softWrap = false) },
-                modifier = Modifier
-                    .width(180.dp)
-                    .padding(start = 16.dp, top = 16.dp),
-            )
-        },
+        drawerContent = @Composable { DrawerContent(appState) },
         drawerShape = customDrawerShape,
-        bottomBar = @Composable {
-            TextField(
-                value = appState.inputText,
-                onValueChange = appState::updateInputText,
-                trailingIcon = @Composable {
-                    if (appState.isInputError) {
-                        // TODO: i18n
-                        Icon(Icons.Filled.Error, "Input error", tint = MaterialTheme.colors.error)
-                    }
-                },
-                isError = appState.isInputError,
-                singleLine = true,
-                textStyle = valueTextStyle,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester)
-                    .onKeyEvent @OptIn(ExperimentalComposeUiApi::class) { event ->
-                        var consumed = false
-                        if (event.key == Key.Enter) {
-                            appState.execute(colorScheme = colorScheme, scope = scope)
-                            consumed = true
-                        }
-                        consumed
-                    },
-            )
-
-            SideEffect {
-                focusRequester.requestFocus()
-            }
-        }
+        bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -116,43 +61,111 @@ fun MainUi() {
                 .padding(8.dp)
                 .padding(bottom = padding.calculateBottomPadding())
         ) {
-            SelectionContainer {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(start = 7.dp)
-                        .wrapContentHeight(Alignment.Bottom),
-                    state = appState.outputState,
-                ) {
-                    items(appState.history) { item ->
-                        Column {
-                            // Newlines added here purely for people who copy the text
-                            val input = item.input.prettyPrint(appState.numberFormat)
-                            Text(text = "$input =\n", maxLines = 1)
-                            val output = item.output.prettyPrint(appState.numberFormat)
-                            Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
-                        }
-                    }
-                }
-            }
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.open()
-                    }
-                },
-                modifier = Modifier
-                    .background(MaterialTheme.colors.background.copy(alpha = 0.95f), CircleShape),
-            ) {
-                // TODO: i18n
-                Icon(Icons.Outlined.Settings, "Settings")
-            }
-            VerticalScrollbar(
-                rememberScrollbarAdapter(appState.outputState),
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .fillMaxHeight(),
-            )
+            MainContent(appState, scaffoldState, valueTextStyle, scope)
         }
     }
+}
+
+@Composable
+fun DrawerContent(appState: AppState) {
+    ExposedDropDownMenu(
+        values = NumberFormatOption.values().asIterable(),
+        selectedValue = appState.numberFormatOption,
+        onChange = appState::numberFormatOption::set,
+        label = @Composable { Text(text = "Number format", softWrap = false) },
+        modifier = Modifier
+            // Works around the longer label not pushing the size to be bigger
+            .width(180.dp)
+            .padding(start = 16.dp, top = 16.dp),
+    )
+    val radixSeparatorOption = when (appState.numberFormatOption) {
+        NumberFormatOption.DECIMAL -> AppState::decimalRadixSeparatorOption
+        NumberFormatOption.DOZENAL -> AppState::dozenalRadixSeparatorOption
+    }
+    ExposedDropDownMenu(
+        values = RadixSeparatorOption.values().asIterable(),
+        selectedValue = radixSeparatorOption.get(appState),
+        onChange = { newValue -> radixSeparatorOption.set(appState, newValue) },
+        label = @Composable { Text(text = "Radix separator", softWrap = false) },
+        modifier = Modifier
+            .width(180.dp)
+            .padding(start = 16.dp, top = 16.dp),
+    )
+}
+
+@Composable
+fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: CoroutineScope) {
+    val focusRequester = remember { FocusRequester() }
+    val colorScheme = MaterialTheme.colors
+
+    TextField(
+        value = appState.inputText,
+        onValueChange = appState::updateInputText,
+        trailingIcon = @Composable {
+            if (appState.isInputError) {
+                // TODO: i18n
+                Icon(Icons.Filled.Error, "Input error", tint = MaterialTheme.colors.error)
+            }
+        },
+        isError = appState.isInputError,
+        singleLine = true,
+        textStyle = valueTextStyle,
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester)
+            .onKeyEvent @OptIn(ExperimentalComposeUiApi::class) { event ->
+                var consumed = false
+                if (event.key == Key.Enter) {
+                    appState.execute(colorScheme = colorScheme, scope = scope)
+                    consumed = true
+                }
+                consumed
+            },
+    )
+}
+
+@Composable
+fun BoxScope.MainContent(
+    appState: AppState,
+    scaffoldState: ScaffoldState,
+    valueTextStyle: TextStyle,
+    scope: CoroutineScope
+) {
+    SelectionContainer {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 7.dp)
+                .wrapContentHeight(Alignment.Bottom),
+            state = appState.outputState,
+        ) {
+            items(appState.history) { item ->
+                Column {
+                    // Newlines added here purely for people who copy the text
+                    val input = item.input.prettyPrint(appState.numberFormat)
+                    Text(text = "$input =\n", maxLines = 1)
+                    val output = item.output.prettyPrint(appState.numberFormat)
+                    Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
+                }
+            }
+        }
+    }
+    IconButton(
+        onClick = {
+            scope.launch {
+                scaffoldState.drawerState.open()
+            }
+        },
+        modifier = Modifier
+            .background(MaterialTheme.colors.background.copy(alpha = 0.95f), CircleShape),
+    ) {
+        // TODO: i18n
+        Icon(Icons.Outlined.Settings, "Settings")
+    }
+    VerticalScrollbar(
+        rememberScrollbarAdapter(appState.outputState),
+        modifier = Modifier
+            .align(Alignment.CenterEnd)
+            .fillMaxHeight(),
+    )
 }
