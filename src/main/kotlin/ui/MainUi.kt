@@ -80,7 +80,12 @@ fun MainUi() {
         bottomBar = @Composable {
             TextField(
                 value = appState.inputText,
-                onValueChange = appState::inputText::set,
+                onValueChange = { newValue ->
+                    appState.inputText = newValue
+                    if (newValue.text.contains('\n')) {
+                        appState.inputText = newValue.copy(text = newValue.text.replace("\n", ""))
+                    }
+                },
                 singleLine = true,
                 textStyle = valueTextStyle,
                 modifier = Modifier
