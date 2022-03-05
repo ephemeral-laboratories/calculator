@@ -65,7 +65,7 @@ fun DrawerContent(appState: AppState) {
         values = NumberFormatOption.values().asIterable(),
         selectedValue = appState.numberFormatOption,
         onChange = appState::numberFormatOption::set,
-        label = @Composable { Text(text = "Number format", softWrap = false) },
+        label = @Composable { Text(text = AppStrings.NumberFormat, softWrap = false) },
         modifier = Modifier
             // Works around the longer label not pushing the size to be bigger
             .width(180.dp)
@@ -79,7 +79,7 @@ fun DrawerContent(appState: AppState) {
         values = RadixSeparatorOption.values().asIterable(),
         selectedValue = radixSeparatorOption.get(appState),
         onChange = { newValue -> radixSeparatorOption.set(appState, newValue) },
-        label = @Composable { Text(text = "Radix separator", softWrap = false) },
+        label = @Composable { Text(text = AppStrings.RadixSeparator, softWrap = false) },
         modifier = Modifier
             .width(180.dp)
             .padding(start = 16.dp, top = 16.dp),
@@ -96,8 +96,7 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
         onValueChange = appState::updateInputText,
         trailingIcon = @Composable {
             if (appState.isInputError) {
-                // TODO: i18n
-                Icon(Icons.Filled.Error, "Input error", tint = MaterialTheme.colors.error)
+                Icon(Icons.Filled.Error, AppStrings.InputError, tint = MaterialTheme.colors.error)
             }
         },
         isError = appState.isInputError,
@@ -159,8 +158,7 @@ fun MainContent(
             modifier = Modifier
                 .background(MaterialTheme.colors.background.copy(alpha = 0.95f), CircleShape),
         ) {
-            // TODO: i18n
-            Icon(Icons.Outlined.Settings, "Settings")
+            Icon(Icons.Outlined.Settings, AppStrings.Settings)
         }
         VerticalScrollbar(
             rememberScrollbarAdapter(appState.outputState),

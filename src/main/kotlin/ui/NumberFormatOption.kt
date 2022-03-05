@@ -8,8 +8,7 @@ enum class NumberFormatOption(
     override val localizedName: String,
     val numberFormatFactory: (Char?) -> NumberFormat,
 ): Localizable {
-    // TODO: i18n
-    DECIMAL("Decimal", NumberFormats::createDecimalFormat),
-    DOZENAL("Dozenal", NumberFormats::createDozenalFormat),
+    DECIMAL(AppStrings.Decimal, NumberFormats::createDecimalFormat),
+    DOZENAL(AppStrings.Dozenal, NumberFormats::createDozenalFormat),
     ;
 }

@@ -6,7 +6,7 @@ enum class RadixSeparatorOption(
     override val localizedName: String,
     val symbol: Char? = null,
 ): Localizable {
-    PERIOD("Period (.)", '.'),
-    COMMA("Comma (,)", ','),
-    SEMICOLON("Semicolon (;)", ';'),
+    PERIOD(AppStrings.Period, '.'),
+    COMMA(AppStrings.Comma, ','),
+    SEMICOLON(AppStrings.Semicolon, ';'),
 }
