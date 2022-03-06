@@ -41,17 +41,18 @@ import kotlin.reflect.KMutableProperty0
 @Composable
 fun MainUi() {
     val appState = remember { AppState() }
-    val valueTextStyle = LocalTextStyle.current.copy(fontSize = 32.sp)
-    val scaffoldState = rememberScaffoldState()
-    val scope = rememberCoroutineScope()
-
-    val customDrawerShape: Shape = object : Shape {
-        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
-            return Outline.Rectangle(Rect(left = 0.0f, top = 0.0f, right = 200.0f, bottom = size.height))
-        }
-    }
 
     AppTheme(appState.themeOption) {
+        val valueTextStyle = LocalTextStyle.current.copy(fontSize = 32.sp)
+        val scaffoldState = rememberScaffoldState()
+        val scope = rememberCoroutineScope()
+
+        val customDrawerShape: Shape = object : Shape {
+            override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+                return Outline.Rectangle(Rect(left = 0.0f, top = 0.0f, right = 200.0f, bottom = size.height))
+            }
+        }
+
         Scaffold(
             scaffoldState = scaffoldState,
             drawerContent = @Composable { DrawerContent(appState) },
