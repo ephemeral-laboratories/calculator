@@ -34,7 +34,7 @@ class ParseTest {
 
     @BeforeEach
     fun setUp() {
-        parser = ExpressionParser(NumberFormats.dozenalFormat)
+        parser = ExpressionParser(NumberFormats.createDozenalFormat())
     }
 
     @Test

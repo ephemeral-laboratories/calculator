@@ -6,19 +6,34 @@ import java.math.BigInteger
 import java.text.FieldPosition
 import java.text.ParsePosition
 
-class DozenalFormat : NumberFormat() {
-    // XXX: It would be better to have something akin to DecimalFormatSymbols,
-    //      but we'll get there next step!
-    var radixSeparator = ';'
+/**
+ * Generalisation of radix-based positional formatting.
+ */
+class PositionalFormat(
+    private val radix: Int,
+    private val symbols: PositionalFormatSymbols = PositionalFormatSymbols(),
+) : NumberFormat() {
+    init {
+        require(radix == symbols.digits.length) { "Radix ($radix) and symbols ($symbols.digits) don't match!" }
+    }
 
     override fun format(number: Double, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer {
         requireNotNull(toAppendTo)
 
         val positiveNumber = if (number < 0.0) {
-            toAppendTo.append(MINUS)
+            toAppendTo.append(symbols.minus)
             -number
         } else {
             number
+        }
+
+        if (positiveNumber.isNaN()) {
+            toAppendTo.append(symbols.notANumber)
+            return toAppendTo
+        }
+        if (positiveNumber.isInfinite()) {
+            toAppendTo.append(symbols.infinity)
+            return toAppendTo
         }
 
         // Format everything before the radix point
@@ -29,7 +44,7 @@ class DozenalFormat : NumberFormat() {
         var remainder = positiveNumber - integerPart
         val fractionDigits = mutableListOf<Int>()
         for (i in 1..maximumFractionDigits) {
-            remainder *= RADIX
+            remainder *= radix
             val digit = remainder.toInt()
             fractionDigits.add(digit)
             remainder -= digit
@@ -45,11 +60,11 @@ class DozenalFormat : NumberFormat() {
         }
 
         if (minimumFractionDigits > 0 || fractionDigits.isNotEmpty()) {
-            toAppendTo.append(radixSeparator)
+            toAppendTo.append(symbols.radixSeparator)
         }
 
         for (digit in fractionDigits) {
-            toAppendTo.append(digitToChar(digit))
+            toAppendTo.append(symbols.digitToChar(digit))
         }
 
         return toAppendTo
@@ -60,7 +75,7 @@ class DozenalFormat : NumberFormat() {
         requireNotNull(pos)
 
         var positiveNumber = if (number < 0.0) {
-            toAppendTo.append(MINUS)
+            toAppendTo.append(symbols.minus)
             -number
         } else {
             number
@@ -69,9 +84,9 @@ class DozenalFormat : NumberFormat() {
         // Collect digits
         val digits = mutableListOf<Int>()
         while (positiveNumber > 0) {
-            val digit = (positiveNumber % RADIX).toInt()
+            val digit = (positiveNumber % radix).toInt()
             digits.add(digit)
-            positiveNumber /= RADIX
+            positiveNumber /= radix
         }
         while (digits.size < minimumIntegerDigits) {
             digits.add(0)
@@ -79,27 +94,24 @@ class DozenalFormat : NumberFormat() {
 
         // Output in the right order
         for (digit in digits.reversed()) {
-            toAppendTo.append(digitToChar(digit))
+            toAppendTo.append(symbols.digitToChar(digit))
         }
 
         return toAppendTo
     }
 
-    override fun format(number: BigInteger?, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer {
-        throw UnsupportedOperationException("Formatting BigInteger not yet supported")
-    }
+    // BigInteger we could conceivably support, I guess.
 
-    override fun format(number: BigDecimal?, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer {
-        throw UnsupportedOperationException("Formatting BigDecimal not yet supported")
-    }
+    override fun format(number: BigInteger?, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer =
+        willNotSupport("Formatting BigInteger")
 
-    override fun format(
-        number: com.ibm.icu.math.BigDecimal?,
-        toAppendTo: StringBuffer?,
-        pos: FieldPosition?
-    ): StringBuffer {
-        throw UnsupportedOperationException("Formatting BigDecimal not yet supported")
-    }
+    override fun format(number: BigDecimal?, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer =
+        willNotSupport("Formatting BigDecimal")
+
+    override fun format(number: com.ibm.icu.math.BigDecimal?, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer =
+        willNotSupport("Formatting BigDecimal")
+
+    private fun willNotSupport(thing: String): Nothing = throw UnsupportedOperationException("$thing not supported")
 
     override fun parse(text: String?, parsePosition: ParsePosition?): Number {
         requireNotNull(text)
@@ -107,7 +119,7 @@ class DozenalFormat : NumberFormat() {
 
         var integerPart: String
         val fractionPart: String
-        val radixSeparatorIndex = text.indexOf(radixSeparator)
+        val radixSeparatorIndex = text.indexOf(symbols.radixSeparator)
         if (radixSeparatorIndex >= 0) {
             integerPart = text.substring(0, radixSeparatorIndex)
             fractionPart = text.substring(radixSeparatorIndex + 1)
@@ -116,7 +128,7 @@ class DozenalFormat : NumberFormat() {
             fractionPart = ""
         }
 
-        val sign = if (integerPart.startsWith(MINUS)) {
+        val sign = if (integerPart.startsWith(symbols.minus)) {
             integerPart = integerPart.substring(1)
             -1
         } else {
@@ -125,34 +137,20 @@ class DozenalFormat : NumberFormat() {
 
         var integer = 0L
         for (ch in integerPart) {
-            integer *= RADIX
-            integer += charToDigit(ch)
+            integer *= radix
+            integer += symbols.charToDigit(ch)
         }
 
         var fraction = 0.0
         var multiplier = 1.0
         for (ch in fractionPart) {
-            multiplier /= RADIX
-            fraction += charToDigit(ch) * multiplier
+            multiplier /= radix
+            fraction += symbols.charToDigit(ch) * multiplier
         }
 
         // XXX: Do we want to support partial parsing?
         parsePosition.index = text.length
 
         return sign * integer + fraction
-    }
-
-    private fun digitToChar(digit: Int): Char {
-        return DIGITS[digit]
-    }
-
-    private fun charToDigit(ch: Char): Int {
-        return DIGITS.indexOf(ch)
-    }
-
-    companion object {
-        const val RADIX = 12
-        const val MINUS = '-'
-        const val DIGITS = "0123456789↊↋"
     }
 }

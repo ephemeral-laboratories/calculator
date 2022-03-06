@@ -4,9 +4,9 @@ import garden.ephemeral.calculator.ui.common.Localizable
 
 enum class RadixSeparatorOption(
     override val localizedName: String,
-    val symbol: Char? = null,
+    val symbol: String? = null,
 ) : Localizable {
-    PERIOD(AppStrings.Period, '.'),
-    COMMA(AppStrings.Comma, ','),
-    SEMICOLON(AppStrings.Semicolon, ';'),
+    PERIOD(AppStrings.Period, "."),
+    COMMA(AppStrings.Comma, ","),
+    SEMICOLON(AppStrings.Semicolon, ";"),
 }

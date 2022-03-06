@@ -1,38 +1,39 @@
 package garden.ephemeral.calculator.text
-import com.ibm.icu.text.DecimalFormat
-import com.ibm.icu.text.DecimalFormatSymbols
+
 import com.ibm.icu.text.NumberFormat
 
 object NumberFormats {
-    val dozenalFormat: NumberFormat = DozenalFormat().apply {
-        minimumIntegerDigits = 1
-        minimumFractionDigits = 0
-        maximumFractionDigits = 10
+    private val dozenalSymbols by lazy { PositionalFormatSymbols() }
+    private val decimalSymbols by lazy {
+        PositionalFormatSymbols(
+            digits = "0123456789",
+            minus = "-",
+            radixSeparator = ".",
+        )
     }
 
-    val decimalFormat: NumberFormat = NumberFormat.getNumberInstance().apply {
-        minimumIntegerDigits = 1
-        minimumFractionDigits = 0
-        maximumFractionDigits = 12
-    }
+    fun createDozenalFormat(customRadixSeparator: String? = null): NumberFormat {
+        val symbols = if (customRadixSeparator != null) {
+            dozenalSymbols.copy(radixSeparator = customRadixSeparator)
+        } else {
+            dozenalSymbols
+        }
 
-    fun createDozenalFormat(customRadixSeparator: Char?): NumberFormat {
-        return DozenalFormat().apply {
+        return PositionalFormat(12, symbols).apply {
             minimumIntegerDigits = 1
             minimumFractionDigits = 0
             maximumFractionDigits = 10
-            if (customRadixSeparator != null) {
-                radixSeparator = customRadixSeparator
-            }
         }
     }
 
-    fun createDecimalFormat(customSeparator: Char?): NumberFormat {
-        val symbols = DecimalFormatSymbols.getInstance()
-        if (customSeparator != null) {
-            symbols.decimalSeparator = customSeparator
+    fun createDecimalFormat(customRadixSeparator: String? = null): NumberFormat {
+        val symbols = if (customRadixSeparator != null) {
+            decimalSymbols.copy(radixSeparator = customRadixSeparator)
+        } else {
+            decimalSymbols
         }
-        return DecimalFormat("0.#", symbols).apply {
+
+        return PositionalFormat(10, symbols).apply {
             minimumIntegerDigits = 1
             minimumFractionDigits = 0
             maximumFractionDigits = 12

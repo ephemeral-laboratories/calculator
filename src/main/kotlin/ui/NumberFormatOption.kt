@@ -8,7 +8,7 @@ import java.util.*
 
 enum class NumberFormatOption(
     override val localizedName: String,
-    val numberFormatFactory: (Char?) -> NumberFormat,
+    val numberFormatFactory: (String?) -> NumberFormat,
     val defaultRadixSeparator: () -> RadixSeparatorOption,
 ) : Localizable {
     DECIMAL(

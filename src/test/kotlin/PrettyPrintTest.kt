@@ -17,7 +17,7 @@ class PrettyPrintTest {
     @ParameterizedTest
     @MethodSource("examples")
     fun `unified test`(input: Any, expected: String) {
-        val result = Value(input).prettyPrint(NumberFormats.decimalFormat)
+        val result = Value(input).prettyPrint(NumberFormats.createDecimalFormat())
         assertThat(result).isEqualTo(expected)
     }
 
