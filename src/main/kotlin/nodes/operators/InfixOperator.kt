@@ -2,6 +2,7 @@ package garden.ephemeral.calculator.nodes.ops
 
 import garden.ephemeral.math.complex.Complex
 import garden.ephemeral.math.complex.toComplex
+import kotlin.math.pow
 
 enum class InfixOperator(
     val printedSymbol: String,
@@ -13,6 +14,7 @@ enum class InfixOperator(
     TIMES("×", Double::times, Complex::times),
     IMPLICIT_TIMES("", Double::times, Complex::times),
     DIVIDE("÷", Double::div, Complex::div),
+    POWER("^", Double::pow, Complex::pow),
     ;
 
     fun apply(value1: Any, value2: Any): Any {

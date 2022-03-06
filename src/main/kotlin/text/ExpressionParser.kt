@@ -74,6 +74,9 @@ class ExpressionParser(private val numberFormat: NumberFormat) {
             is ExpressionParser.DivideExpressionContext ->
                 InfixOperatorNode(InfixOperator.DIVIDE, transform(tree.getChild(0)), transform(tree.getChild(2)))
 
+            is ExpressionParser.PowerExpressionContext ->
+                InfixOperatorNode(InfixOperator.POWER, transform(tree.getChild(0)), transform(tree.getChild(2)))
+
             is ExpressionParser.UnaryMinusExpressionContext ->
                 PrefixOperatorNode(PrefixOperator.UNARY_MINUS, transform(tree.getChild(1)))
 

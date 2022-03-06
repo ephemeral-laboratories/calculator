@@ -18,6 +18,7 @@ expression
     | timesExpression
     | implicitTimesExpression
     | divideExpression
+    | powerExpression
     | unaryMinusExpression
     ;
 
@@ -26,31 +27,37 @@ parenthesizedExpression
     ;
 
 plusExpression
-    : (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | unaryMinusExpression | parenthesizedExpression)
+    : (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
       PLUS
-      (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | unaryMinusExpression | parenthesizedExpression)
+      (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
     ;
 
 minusExpression
-    : (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | unaryMinusExpression | parenthesizedExpression)
+    : (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
       MINUS
-      (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | unaryMinusExpression | parenthesizedExpression)
+      (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
     ;
 
 timesExpression
-    : (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
+    : (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
       TIMES
-      (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
+      (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
     ;
 
 implicitTimesExpression
-    : (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
-      (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
+    : (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
+      (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
     ;
 
 divideExpression
-    : (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
+    : (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
       DIVIDE
+      (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
+    ;
+
+powerExpression
+    : (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
+      POWER
       (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
     ;
 
@@ -106,6 +113,7 @@ PLUS: '+';
 MINUS: '-' | '−';
 TIMES: '*' | '×';
 DIVIDE: '/' | '÷';
+POWER: '^';
 OPEN_PAREN: '(';
 CLOSE_PAREN: ')';
 IMAG_UNIT: 'i';

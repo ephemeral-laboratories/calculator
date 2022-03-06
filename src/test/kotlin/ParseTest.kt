@@ -88,6 +88,7 @@ class ParseTest {
                 arguments("1×2", InfixOperatorNode(InfixOperator.TIMES, Value(1.0), Value(2.0))),
                 arguments("1/2", InfixOperatorNode(InfixOperator.DIVIDE, Value(1.0), Value(2.0))),
                 arguments("1÷2", InfixOperatorNode(InfixOperator.DIVIDE, Value(1.0), Value(2.0))),
+                arguments("2^2", InfixOperatorNode(InfixOperator.POWER, Value(2.0), Value(2.0))),
 
                 // Operator precedence
                 arguments(
