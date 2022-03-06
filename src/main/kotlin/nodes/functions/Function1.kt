@@ -5,8 +5,8 @@ import kotlin.math.*
 
 enum class Function1(
     val printedName: String,
-    val realFunction: (Double) -> Double,
-    val complexFunction: (Complex) -> Complex,
+    val realFunction: (Double) -> Any,
+    val complexFunction: (Complex) -> Any,
 ) {
     SIN("sin", ::sin, ::sin),
     COS("cos", ::cos, ::cos),
@@ -34,7 +34,7 @@ enum class Function1(
     ACOTH("acoth", ::acoth, ::acoth),
     EXP("exp", ::exp, ::exp),
     LOG("log", ::ln, ::ln),
-    SQRT("sqrt", ::sqrt, ::sqrt),
+    SQRT("sqrt", ::maybeComplexSqrt, ::sqrt),
     ;
 
     fun apply(value: Any): Any {

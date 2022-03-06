@@ -1,5 +1,6 @@
 package garden.ephemeral.calculator.nodes.functions
 
+import garden.ephemeral.math.complex.complexSqrt
 import kotlin.math.*
 
 internal fun sec(x: Double) = 1.0 / cos(x)
@@ -15,3 +16,11 @@ internal fun acot(x: Double) = atan(1.0 / x)
 internal fun asech(x: Double) = acosh(1.0 / x)
 internal fun acsch(x: Double) = asinh(1.0 / x)
 internal fun acoth(x: Double) = atanh(1.0 / x)
+
+fun maybeComplexSqrt(x: Double): Any {
+    return if (x < 0.0) {
+        complexSqrt(x)
+    } else {
+        sqrt(x)
+    }
+}

@@ -6,8 +6,8 @@ import kotlin.math.pow
 
 enum class Function2(
     val printedName: String,
-    val realFunction: (Double, Double) -> Double,
-    val complexFunction: (Complex, Complex) -> Complex,
+    val realFunction: (Double, Double) -> Any,
+    val complexFunction: (Complex, Complex) -> Any,
 ) {
     POW("pow", Double::pow, Complex::pow),
     ;
