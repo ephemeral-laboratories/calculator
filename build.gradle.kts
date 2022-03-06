@@ -1,6 +1,7 @@
 import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
 
 plugins {
     kotlin("jvm") version "1.6.10"
@@ -56,8 +57,18 @@ compose.desktop {
         mainClass = "garden.ephemeral.calculator.MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "Calculator"
+            packageName = project.name.capitalizeAsciiOnly()
             packageVersion = "1.0.0"
+            description = project.description
+            vendor = "Ephemeral Laboratories"
+            copyright = "Copyright © 2022 $vendor"
+
+            windows {
+                upgradeUuid = "3e9ee76f-453c-4819-9371-41745b72b8cc"
+                menuGroup = packageName
+                perUserInstall = true
+                iconFile.set(file("???"))
+            }
         }
     }
 }
