@@ -14,6 +14,7 @@ import garden.ephemeral.calculator.nodes.ops.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.math.complex.Complex
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.misc.ParseCancellationException
 import org.antlr.v4.runtime.tree.ParseTree
@@ -86,21 +87,42 @@ class ExpressionParser(private val numberFormat: NumberFormat) {
                 Function2Node.create(tree.getChild(0), transform(tree.getChild(2)), transform(tree.getChild(4)))
 
             is ExpressionParser.ValueContext ->
-                if (tree.IMAG_UNIT() != null) {
-                    ConstantNode(Constant.I)
-                } else if (tree.TAU() != null) {
+                transform(tree.getChild(0))
+
+            is ExpressionParser.RealNumberContext -> {
+                val sign = signFromToken(tree.sign)
+                val magnitude = numberFormat.parse(sign + tree.magnitude.text).toDouble()
+                Value(magnitude)
+            }
+
+            is ExpressionParser.ComplexNumberContext -> {
+                val real = if (tree.real != null) {
+                    val realSign = signFromToken(tree.realSign)
+                    numberFormat.parse(realSign + tree.real.text).toDouble()
+                } else {
+                    0.0
+                }
+                val imagSign = signFromToken(tree.imagSign)
+                val imag = numberFormat.parse(imagSign + (tree.imag?.text ?: "1")).toDouble()
+                Value(Complex(real, imag))
+            }
+
+            is ExpressionParser.ConstantContext ->
+                if (tree.TAU() != null) {
                     ConstantNode(Constant.TAU)
                 } else if (tree.PI() != null) {
                     ConstantNode(Constant.PI)
                 } else if (tree.E() != null) {
                     ConstantNode(Constant.E)
                 } else {
-                    Value(numberFormat.parse(tree.NUMBER().text).toDouble())
+                    throw UnsupportedOperationException("Unknown tree node: $tree")
                 }
 
             else -> throw UnsupportedOperationException("Unknown tree node: $tree")
         }
     }
+
+    private fun signFromToken(token: Token?): String = if (token?.type == ExpressionLexer.MINUS) "-" else ""
 
     private class ErrorListener : BaseErrorListener() {
         var message: String? = null

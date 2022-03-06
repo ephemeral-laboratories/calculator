@@ -72,20 +72,33 @@ function1Expression
       | 'exp' | 'log' | 'sqrt'
       | 'abs' | 'arg' | 'Re' | 'Im'
       )
-      OPEN_PAREN expression CLOSE_PAREN
+      OPEN_PAREN arg=expression CLOSE_PAREN
     ;
 
 function2Expression
     : 'pow'
-      OPEN_PAREN expression COMMA expression CLOSE_PAREN
+      OPEN_PAREN arg1=expression COMMA arg2=expression CLOSE_PAREN
     ;
 
 value
-    : NUMBER
-    | TAU
+    : complexNumber
+    | realNumber
+    | constant
+    ;
+
+complexNumber
+    : realSign=( PLUS | MINUS )? real=NUMBER imagSign=( PLUS | MINUS ) ( imag=NUMBER )? IMAG_UNIT
+    | imagSign=( PLUS | MINUS )? ( imag=NUMBER )? IMAG_UNIT
+    ;
+
+realNumber
+    : sign=( PLUS | MINUS )? magnitude=NUMBER
+    ;
+
+constant
+    : TAU
     | PI
     | E
-    | IMAG_UNIT
     ;
 
 NUMBER: Digit+ ( RadixSeparator Digit+ )?;

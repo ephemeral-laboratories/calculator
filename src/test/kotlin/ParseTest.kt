@@ -19,6 +19,7 @@ import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.text.ExpressionParser
 import garden.ephemeral.calculator.text.NumberFormats
 import garden.ephemeral.math.complex.i
+import garden.ephemeral.math.complex.minus
 import garden.ephemeral.math.complex.plus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -65,11 +66,19 @@ class ParseTest {
                 arguments("π", ConstantNode(Constant.PI)),
                 arguments("pi", ConstantNode(Constant.PI)),
                 arguments("e", ConstantNode(Constant.E)),
-                arguments("i", ConstantNode(Constant.I)),
 
                 // Unary operators
-                arguments("-2", PrefixOperatorNode(PrefixOperator.UNARY_MINUS, Value(2.0))),
-                arguments("−2", PrefixOperatorNode(PrefixOperator.UNARY_MINUS, Value(2.0))),
+                arguments(
+                    "-(3+5)",
+                    PrefixOperatorNode(
+                        PrefixOperator.UNARY_MINUS,
+                        Parentheses(InfixOperatorNode(InfixOperator.PLUS, Value(3.0), Value(5.0)))
+                    )
+                ),
+
+                // Real value simplification
+                arguments("-2", Value(-2.0)),
+                arguments("−2", Value(-2.0)),
 
                 // Binary operators
                 arguments("1+2", InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0))),
@@ -103,17 +112,13 @@ class ParseTest {
                     "2π",
                     InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.PI))
                 ),
-                arguments(
-                    "2i",
-                    InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.I))
-                ),
 
-                // TODO: Better simplification
-                // Complex values
-//                arguments("2i", Value(2.i)),
-//                arguments("1 + 2i", Value(1 + 2.i)),
-//                arguments("1 - 2i", Value(1 + 2.i)),
-//                arguments("-2i", Value((-2).i)),
+                // Complex value simplification
+                arguments("i", Value(1.i)),
+                arguments("2i", Value(2.i)),
+                arguments("1 + 2i", Value(1 + 2.i)),
+                arguments("1 - 2i", Value(1 - 2.i)),
+                arguments("-2i", Value((-2).i)),
             )
         }
 
