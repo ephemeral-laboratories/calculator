@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
 import java.text.ParseException
 
-class Function2Node(val function: Function2, val arg1: Node, val arg2: Node): BaseBranchNode() {
+class Function2Node(val function: Function2, val arg1: Node, val arg2: Node) : BaseBranchNode() {
     override fun prettyPrint(numberFormat: NumberFormat): String {
         val name = function.printedName
         val arg1String = arg1.prettyPrint(numberFormat)
@@ -22,9 +22,9 @@ class Function2Node(val function: Function2, val arg1: Node, val arg2: Node): Ba
 
     override fun isCloseTo(other: Node, delta: Double): Boolean {
         return other is Function2Node &&
-                function == other.function &&
-                arg1.isCloseTo(other.arg1, delta) &&
-                arg2.isCloseTo(other.arg2, delta)
+            function == other.function &&
+            arg1.isCloseTo(other.arg1, delta) &&
+            arg2.isCloseTo(other.arg2, delta)
     }
 
     companion object {

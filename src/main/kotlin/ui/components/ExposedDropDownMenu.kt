@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 // See https://stackoverflow.com/questions/67111020/exposed-drop-down-menu-for-jetpack-compose/6904285
 
 @Composable
-fun <T: Localizable> ExposedDropDownMenu(
+fun <T : Localizable> ExposedDropDownMenu(
     values: Iterable<T>,
     selectedValue: T,
     onChange: (T) -> Unit,
@@ -72,7 +72,7 @@ fun <T: Localizable> ExposedDropDownMenu(
 }
 
 @Composable
-fun <T: Localizable> OutlinedExposedDropDownMenu(
+fun <T : Localizable> OutlinedExposedDropDownMenu(
     values: Iterable<T>,
     selectedValue: T,
     onChange: (T) -> Unit,
@@ -101,7 +101,7 @@ fun <T: Localizable> OutlinedExposedDropDownMenu(
 }
 
 @Composable
-private fun <T: Localizable> SimpleExposedDropDownMenuImpl(
+private fun <T : Localizable> SimpleExposedDropDownMenuImpl(
     values: Iterable<T>,
     selectedValue: T,
     onChange: (T) -> Unit,

@@ -11,7 +11,7 @@ import androidx.compose.ui.text.platform.Font
 
 @Composable
 fun AppTheme(option: ThemeOption, content: @Composable () -> Unit) {
-    val colors = when(option) {
+    val colors = when (option) {
         ThemeOption.SYSTEM_DEFAULT -> if (isSystemInDarkTheme()) darkColors() else lightColors()
         ThemeOption.DARK -> darkColors()
         ThemeOption.LIGHT -> lightColors()

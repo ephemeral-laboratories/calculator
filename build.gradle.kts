@@ -7,6 +7,7 @@ plugins {
     id("org.jetbrains.compose") version "1.1.0"
     antlr
     id("utf8-workarounds")
+    id("com.diffplug.spotless") version "6.3.0"
 }
 
 group = "garden.ephemeral.calculator"
@@ -58,5 +59,14 @@ compose.desktop {
             packageName = "Calculator"
             packageVersion = "1.0.0"
         }
+    }
+}
+
+spotless {
+    kotlin {
+        ktlint("0.44.0").userData(mapOf("disabled_rules" to "no-wildcard-imports"))
+    }
+    kotlinGradle {
+        ktlint("0.44.0")
     }
 }

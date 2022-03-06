@@ -7,7 +7,7 @@ import garden.ephemeral.calculator.ui.common.Localizable
 enum class NumberFormatOption(
     override val localizedName: String,
     val numberFormatFactory: (Char?) -> NumberFormat,
-): Localizable {
+) : Localizable {
     DECIMAL(AppStrings.Decimal, NumberFormats::createDecimalFormat),
     DOZENAL(AppStrings.Dozenal, NumberFormats::createDozenalFormat),
     ;

@@ -46,13 +46,15 @@ class AppState {
             } catch (e: ParseException) {
                 // XXX: Playing a sound would be nice too
                 isInputError = true
-                inputText = inputText.copy(annotatedString = buildAnnotatedString {
-                    append(inputText.text)
-                    addStyle(
-                        SpanStyle(color = colorScheme.error, textDecoration = TextDecoration.Underline),
-                        e.errorOffset, e.errorOffset + 1
-                    )
-                })
+                inputText = inputText.copy(
+                    annotatedString = buildAnnotatedString {
+                        append(inputText.text)
+                        addStyle(
+                            SpanStyle(color = colorScheme.error, textDecoration = TextDecoration.Underline),
+                            e.errorOffset, e.errorOffset + 1
+                        )
+                    }
+                )
                 return
             }
 

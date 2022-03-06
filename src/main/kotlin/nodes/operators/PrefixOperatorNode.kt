@@ -5,7 +5,7 @@ import garden.ephemeral.calculator.nodes.BaseBranchNode
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.values.Value
 
-class PrefixOperatorNode(val operator: PrefixOperator, val child: Node): BaseBranchNode() {
+class PrefixOperatorNode(val operator: PrefixOperator, val child: Node) : BaseBranchNode() {
     override fun prettyPrint(numberFormat: NumberFormat): String {
         return "${operator.printedSymbol}${child.prettyPrint(numberFormat)}"
     }
@@ -16,8 +16,8 @@ class PrefixOperatorNode(val operator: PrefixOperator, val child: Node): BaseBra
 
     override fun isCloseTo(other: Node, delta: Double): Boolean {
         return other is PrefixOperatorNode &&
-                operator == other.operator &&
-                child.isCloseTo(other.child, delta)
+            operator == other.operator &&
+            child.isCloseTo(other.child, delta)
     }
 
     override fun attributesForToString(): Map<String, Any> = mapOf("operator" to operator)

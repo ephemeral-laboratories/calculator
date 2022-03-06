@@ -53,14 +53,16 @@ class EvaluateTest {
                         InfixOperator.PLUS,
                         Value(1.0),
                         InfixOperatorNode(InfixOperator.TIMES, Value(2.0), Value(3.0))
-                    ), Value(7.0)
+                    ),
+                    Value(7.0)
                 ),
                 arguments(
                     InfixOperatorNode(
                         InfixOperator.TIMES,
                         InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
                         Value(3.0)
-                    ), Value(9.0)
+                    ),
+                    Value(9.0)
                 ),
 
                 arguments(Function1Node(Function1.SIN, Value(1.0)), Value(0.8414709848078965)),

@@ -6,7 +6,7 @@ import java.math.BigInteger
 import java.text.FieldPosition
 import java.text.ParsePosition
 
-class DozenalFormat: NumberFormat() {
+class DozenalFormat : NumberFormat() {
     // XXX: It would be better to have something akin to DecimalFormatSymbols,
     //      but we'll get there next step!
     var radixSeparator = ';'

@@ -27,9 +27,9 @@ class InfixOperatorNode(
 
     override fun isCloseTo(other: Node, delta: Double): Boolean {
         return other is InfixOperatorNode &&
-                operator == other.operator &&
-                first.isCloseTo(other.first, delta) &&
-                second.isCloseTo(other.second, delta)
+            operator == other.operator &&
+            first.isCloseTo(other.first, delta) &&
+            second.isCloseTo(other.second, delta)
     }
 
     override fun attributesForToString(): Map<String, Any> = mapOf("operator" to operator)

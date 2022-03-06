@@ -11,7 +11,7 @@ class ConstantNode(val constant: Constant) : BaseLeafNode() {
 
     override fun isCloseTo(other: Node, delta: Double): Boolean {
         return other is ConstantNode &&
-                constant == other.constant
+            constant == other.constant
     }
 
     override fun attributesForToString(): Map<String, Any> = mapOf("constant" to constant)
