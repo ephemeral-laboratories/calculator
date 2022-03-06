@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -132,6 +133,10 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
                 consumed
             },
     )
+
+    SideEffect {
+        focusRequester.requestFocus()
+    }
 }
 
 @Composable
