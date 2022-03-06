@@ -18,8 +18,8 @@ class AppState {
     var isInputError by mutableStateOf(false)
     var themeOption by mutableStateOf(ThemeOption.SYSTEM_DEFAULT)
     var numberFormatOption by mutableStateOf(NumberFormatOption.DECIMAL)
-    var decimalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.PERIOD)
-    var dozenalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.SEMICOLON)
+    var decimalRadixSeparatorOption by mutableStateOf(NumberFormatOption.DECIMAL.defaultRadixSeparator())
+    var dozenalRadixSeparatorOption by mutableStateOf(NumberFormatOption.DOZENAL.defaultRadixSeparator())
     val history: MutableList<HistoryEntry> = mutableStateListOf()
 
     val numberFormat by derivedStateOf {
