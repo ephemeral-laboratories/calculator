@@ -70,6 +70,7 @@ function1Expression
       | 'asin' | 'acos' | 'atan' | 'asec' | 'acsc' | 'acot'
       | 'asinh' | 'acosh' | 'atanh' | 'asech' | 'acsch' | 'acoth'
       | 'exp' | 'log' | 'sqrt'
+      | 'abs' | 'arg' | 'Re' | 'Im'
       )
       OPEN_PAREN expression CLOSE_PAREN
     ;

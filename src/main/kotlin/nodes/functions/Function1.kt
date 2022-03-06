@@ -35,6 +35,10 @@ enum class Function1(
     EXP("exp", ::exp, ::exp),
     LOG("log", ::ln, ::ln),
     SQRT("sqrt", ::maybeComplexSqrt, ::sqrt),
+    ABS("abs", ::abs, Complex::norm),
+    ARG("arg", { 0.0 }, Complex::argument),
+    RE("Re", { x -> x }, Complex::real),
+    IM("Im", { 0.0 }, Complex::imaginary),
     ;
 
     fun apply(value: Any): Any {

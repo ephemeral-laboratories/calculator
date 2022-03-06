@@ -18,6 +18,8 @@ import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.text.ExpressionParser
 import garden.ephemeral.calculator.text.NumberFormats
+import garden.ephemeral.math.complex.i
+import garden.ephemeral.math.complex.plus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -42,7 +44,7 @@ class ParseTest {
     }
 
     @ParameterizedTest
-    @MethodSource("examples", "function1Examples", "function2Examples")
+    @MethodSource("examples", "function1Examples", "function1ComplexExamples", "function2Examples")
     fun `unified test`(input: String, expected: Node) {
         val result = parser.parse(input)
         assertThat(result).isCloseTo(expected)
@@ -105,6 +107,13 @@ class ParseTest {
                     "2i",
                     InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.I))
                 ),
+
+                // TODO: Better simplification
+                // Complex values
+//                arguments("2i", Value(2.i)),
+//                arguments("1 + 2i", Value(1 + 2.i)),
+//                arguments("1 - 2i", Value(1 + 2.i)),
+//                arguments("-2i", Value((-2).i)),
             )
         }
 
@@ -140,6 +149,18 @@ class ParseTest {
                 "sqrt" to Function1.SQRT,
             ).map { (name, function) ->
                 arguments("$name(1)", Function1Node(function, Value(1.0)))
+            }
+        }
+
+        @JvmStatic
+        fun function1ComplexExamples(): List<Arguments> {
+            return mapOf(
+                "abs" to Function1.ABS,
+                "arg" to Function1.ARG,
+                "Re" to Function1.RE,
+                "Im" to Function1.IM,
+            ).map { (name, function) ->
+                arguments("$name(2 + 3i)", Function1Node(function, Value(2 + 3.i)))
             }
         }
 
