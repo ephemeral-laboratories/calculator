@@ -9,7 +9,11 @@ import java.text.ParsePosition
  * Value format which chooses the right format based on the value type.
  */
 class ValueFormat(radix: Int, symbols: PositionalFormatSymbols) : Format() {
-    private var realFormat = PositionalFormat(radix, symbols)
+    private var realFormat = PositionalFormat(radix, symbols).apply {
+        minimumIntegerDigits = 1
+        minimumFractionDigits = 0
+        maximumFractionDigits = 10
+    }
     private var complexFormat = ComplexFormat(realFormat, symbols)
 
     override fun format(value: Any?, toAppendTo: StringBuffer, pos: FieldPosition): StringBuffer {
