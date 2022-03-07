@@ -1,7 +1,7 @@
 package garden.ephemeral.calculator.nodes
 
-import com.ibm.icu.text.NumberFormat
 import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.text.ValueFormat
 
 /**
  * Base interface implemented by all expression nodes.
@@ -11,10 +11,10 @@ interface Node {
     /**
      * Pretty prints the node.
      *
-     * @param numberFormat the format to use for printing numbers.
+     * @param valueFormat the format to use for printing numbers.
      * @return the node as a pretty-printed string.
      */
-    fun prettyPrint(numberFormat: NumberFormat): String
+    fun prettyPrint(valueFormat: ValueFormat): String
 
     /**
      * Evaluates the node, returning the final value.

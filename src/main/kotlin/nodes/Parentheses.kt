@@ -1,11 +1,11 @@
 package garden.ephemeral.calculator.nodes
 
-import com.ibm.icu.text.NumberFormat
 import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.text.ValueFormat
 
 class Parentheses(private val inner: Node) : BaseBranchNode() {
-    override fun prettyPrint(numberFormat: NumberFormat): String {
-        val innerString = inner.prettyPrint(numberFormat)
+    override fun prettyPrint(valueFormat: ValueFormat): String {
+        val innerString = inner.prettyPrint(valueFormat)
         return "($innerString)"
     }
 

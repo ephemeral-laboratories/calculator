@@ -17,7 +17,8 @@ import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.text.ExpressionParser
-import garden.ephemeral.calculator.text.NumberFormats
+import garden.ephemeral.calculator.text.PositionalFormatSymbols
+import garden.ephemeral.calculator.text.ValueFormat
 import garden.ephemeral.math.complex.i
 import garden.ephemeral.math.complex.minus
 import garden.ephemeral.math.complex.plus
@@ -34,7 +35,7 @@ class ParseTest {
 
     @BeforeEach
     fun setUp() {
-        parser = ExpressionParser(NumberFormats.createDozenalFormat())
+        parser = ExpressionParser(ValueFormat(12, PositionalFormatSymbols()))
     }
 
     @Test

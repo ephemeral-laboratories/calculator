@@ -1,11 +1,11 @@
 package garden.ephemeral.calculator.nodes.values
 
-import com.ibm.icu.text.NumberFormat
 import garden.ephemeral.calculator.nodes.BaseLeafNode
 import garden.ephemeral.calculator.nodes.Node
+import garden.ephemeral.calculator.text.ValueFormat
 
 class ConstantNode(val constant: Constant) : BaseLeafNode() {
-    override fun prettyPrint(numberFormat: NumberFormat): String = constant.printedName
+    override fun prettyPrint(valueFormat: ValueFormat): String = constant.printedName
 
     override fun evaluate(): Value = Value(constant.value)
 

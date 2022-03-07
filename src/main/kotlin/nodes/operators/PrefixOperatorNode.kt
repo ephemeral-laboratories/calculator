@@ -1,13 +1,15 @@
 package garden.ephemeral.calculator.nodes.ops
 
-import com.ibm.icu.text.NumberFormat
 import garden.ephemeral.calculator.nodes.BaseBranchNode
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.text.ValueFormat
 
 class PrefixOperatorNode(val operator: PrefixOperator, val child: Node) : BaseBranchNode() {
-    override fun prettyPrint(numberFormat: NumberFormat): String {
-        return "${operator.printedSymbol}${child.prettyPrint(numberFormat)}"
+    override fun prettyPrint(valueFormat: ValueFormat): String {
+        val symbol = operator.printedSymbol
+        val inner = child.prettyPrint(valueFormat)
+        return "$symbol$inner"
     }
 
     override fun evaluate(): Value {

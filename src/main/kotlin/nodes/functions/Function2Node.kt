@@ -1,18 +1,18 @@
 package garden.ephemeral.calculator.nodes.functions
 
-import com.ibm.icu.text.NumberFormat
 import garden.ephemeral.calculator.nodes.BaseBranchNode
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.text.ValueFormat
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
 import java.text.ParseException
 
 class Function2Node(val function: Function2, val arg1: Node, val arg2: Node) : BaseBranchNode() {
-    override fun prettyPrint(numberFormat: NumberFormat): String {
+    override fun prettyPrint(valueFormat: ValueFormat): String {
         val name = function.printedName
-        val arg1String = arg1.prettyPrint(numberFormat)
-        val arg2String = arg2.prettyPrint(numberFormat)
+        val arg1String = arg1.prettyPrint(valueFormat)
+        val arg2String = arg2.prettyPrint(valueFormat)
         return "$name($arg1String, $arg2String)"
     }
 

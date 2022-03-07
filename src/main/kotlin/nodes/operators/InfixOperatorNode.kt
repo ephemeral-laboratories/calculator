@@ -1,18 +1,18 @@
 package garden.ephemeral.calculator.nodes.ops
 
-import com.ibm.icu.text.NumberFormat
 import garden.ephemeral.calculator.nodes.BaseBranchNode
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.text.ValueFormat
 
 class InfixOperatorNode(
     private val operator: InfixOperator,
     private val first: Node,
     private val second: Node,
 ) : BaseBranchNode() {
-    override fun prettyPrint(numberFormat: NumberFormat): String {
-        val firstPart = first.prettyPrint(numberFormat)
-        val secondPart = second.prettyPrint(numberFormat)
+    override fun prettyPrint(valueFormat: ValueFormat): String {
+        val firstPart = first.prettyPrint(valueFormat)
+        val secondPart = second.prettyPrint(valueFormat)
         val symbol = operator.printedSymbol
         return if (symbol.isEmpty()) {
             "$firstPart$secondPart"

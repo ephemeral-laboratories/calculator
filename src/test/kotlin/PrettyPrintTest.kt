@@ -3,7 +3,8 @@ package garden.ephemeral.calculator
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import garden.ephemeral.calculator.nodes.values.Value
-import garden.ephemeral.calculator.text.NumberFormats
+import garden.ephemeral.calculator.text.ValueFormat
+import garden.ephemeral.calculator.ui.NumberFormatOption
 import garden.ephemeral.math.complex.Complex
 import garden.ephemeral.math.complex.i
 import garden.ephemeral.math.complex.minus
@@ -17,7 +18,7 @@ class PrettyPrintTest {
     @ParameterizedTest
     @MethodSource("examples")
     fun `unified test`(input: Any, expected: String) {
-        val result = Value(input).prettyPrint(NumberFormats.createDecimalFormat())
+        val result = Value(input).prettyPrint(ValueFormat(10, NumberFormatOption.DECIMAL.defaultSymbols))
         assertThat(result).isEqualTo(expected)
     }
 
@@ -48,8 +49,8 @@ class PrettyPrintTest {
                 arguments(1 - 1.i, "1 - i"),
 
                 // Special values courtesy of IETF
-                arguments(Double.NaN, "undefined"),
-                arguments(Complex(Double.NaN, 1.0), "undefined"),
+                arguments(Double.NaN, "NaN"),
+                arguments(Complex(Double.NaN, 1.0), "NaN"),
                 arguments(Double.POSITIVE_INFINITY, "∞"),
                 arguments(Double.NEGATIVE_INFINITY, "-∞"),
 

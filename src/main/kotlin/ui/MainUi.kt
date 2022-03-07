@@ -164,9 +164,9 @@ fun MainContent(
                 items(appState.history) { item ->
                     Column {
                         // Newlines added here purely for people who copy the text
-                        val input = item.input.prettyPrint(appState.numberFormat)
+                        val input = item.input.prettyPrint(appState.valueFormat)
                         Text(text = "$input =\n", maxLines = 1)
-                        val output = item.output.prettyPrint(appState.numberFormat)
+                        val output = item.output.prettyPrint(appState.valueFormat)
                         Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
                     }
                 }

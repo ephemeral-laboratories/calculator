@@ -11,7 +11,7 @@ import java.text.ParsePosition
  */
 class PositionalFormat(
     private val radix: Int,
-    private val symbols: PositionalFormatSymbols = PositionalFormatSymbols(),
+    val symbols: PositionalFormatSymbols = PositionalFormatSymbols(),
 ) : NumberFormat() {
     init {
         require(radix == symbols.digits.length) { "Radix ($radix) and symbols ($symbols.digits) don't match!" }

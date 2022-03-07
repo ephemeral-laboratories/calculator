@@ -3,6 +3,7 @@ package garden.ephemeral.calculator.ui
 object AppStrings {
     // TODO: i18n
     val InputError get() = "Input error"
+    val Undefined get() = "undefined"
     val Settings get() = "Settings"
 
     val Theme get() = "Theme"

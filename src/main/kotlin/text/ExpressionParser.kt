@@ -1,6 +1,5 @@
 package garden.ephemeral.calculator.text
 
-import com.ibm.icu.text.NumberFormat
 import garden.ephemeral.calculator.grammar.ExpressionLexer
 import garden.ephemeral.calculator.grammar.ExpressionParser
 import garden.ephemeral.calculator.nodes.Node
@@ -20,7 +19,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException
 import org.antlr.v4.runtime.tree.ParseTree
 import java.text.ParseException
 
-class ExpressionParser(private val numberFormat: NumberFormat) {
+class ExpressionParser(private val valueFormat: ValueFormat) {
     fun parse(input: String): Node {
         val errorListener = ErrorListener()
 
@@ -94,19 +93,19 @@ class ExpressionParser(private val numberFormat: NumberFormat) {
 
             is ExpressionParser.RealNumberContext -> {
                 val sign = signFromToken(tree.sign)
-                val magnitude = numberFormat.parse(sign + tree.magnitude.text).toDouble()
+                val magnitude = valueFormat.parse(sign + tree.magnitude.text)
                 Value(magnitude)
             }
 
             is ExpressionParser.ComplexNumberContext -> {
                 val real = if (tree.real != null) {
                     val realSign = signFromToken(tree.realSign)
-                    numberFormat.parse(realSign + tree.real.text).toDouble()
+                    valueFormat.parse(realSign + tree.real.text)
                 } else {
                     0.0
                 }
                 val imagSign = signFromToken(tree.imagSign)
-                val imag = numberFormat.parse(imagSign + (tree.imag?.text ?: "1")).toDouble()
+                val imag = valueFormat.parse(imagSign + (tree.imag?.text ?: "1"))
                 Value(Complex(real, imag))
             }
 

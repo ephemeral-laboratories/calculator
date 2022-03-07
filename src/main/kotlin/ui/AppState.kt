@@ -8,6 +8,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import garden.ephemeral.calculator.text.ExpressionParser
+import garden.ephemeral.calculator.text.ValueFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.ParseException
@@ -18,16 +19,20 @@ class AppState {
     var isInputError by mutableStateOf(false)
     var themeOption by mutableStateOf(ThemeOption.SYSTEM_DEFAULT)
     var numberFormatOption by mutableStateOf(NumberFormatOption.DECIMAL)
-    var decimalRadixSeparatorOption by mutableStateOf(NumberFormatOption.DECIMAL.defaultRadixSeparator())
-    var dozenalRadixSeparatorOption by mutableStateOf(NumberFormatOption.DOZENAL.defaultRadixSeparator())
+    var decimalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.defaultFor(NumberFormatOption.DECIMAL))
+    var dozenalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.defaultFor(NumberFormatOption.DOZENAL))
     val history: MutableList<HistoryEntry> = mutableStateListOf()
 
-    val numberFormat by derivedStateOf {
+    val valueFormat by derivedStateOf {
         val radixSeparatorOption = when (numberFormatOption) {
             NumberFormatOption.DOZENAL -> dozenalRadixSeparatorOption
             NumberFormatOption.DECIMAL -> decimalRadixSeparatorOption
         }
-        numberFormatOption.numberFormatFactory(radixSeparatorOption.symbol)
+        val symbols = numberFormatOption.defaultSymbols.copy(
+            radixSeparator = radixSeparatorOption.symbol,
+            notANumber = AppStrings.Undefined,
+        )
+        ValueFormat(numberFormatOption.radix, symbols)
     }
 
     fun updateInputText(newValue: TextFieldValue) {
@@ -42,7 +47,7 @@ class AppState {
         val text = inputText.text
         if (text.isNotEmpty()) {
             val expression = try {
-                ExpressionParser(numberFormat).parse(text)
+                ExpressionParser(valueFormat).parse(text)
             } catch (e: ParseException) {
                 // XXX: Playing a sound would be nice too
                 isInputError = true
