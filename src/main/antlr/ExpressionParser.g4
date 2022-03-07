@@ -1,8 +1,8 @@
 
-grammar Expression;
+parser grammar ExpressionParser;
 
-@header {
-    package garden.ephemeral.calculator.grammar;
+options {
+    tokenVocab = ExpressionLexer;
 }
 
 start
@@ -72,18 +72,18 @@ functionExpression
     ;
 
 function1Expression
-    : ( 'sin' | 'cos' | 'tan' | 'sec' | 'csc' | 'cot'
-      | 'sinh' | 'cosh' | 'tanh' | 'sech' | 'csch' | 'coth'
-      | 'asin' | 'acos' | 'atan' | 'asec' | 'acsc' | 'acot'
-      | 'asinh' | 'acosh' | 'atanh' | 'asech' | 'acsch' | 'acoth'
-      | 'exp' | 'log' | 'sqrt'
-      | 'abs' | 'arg' | 'Re' | 'Im'
+    : ( SIN | COS | TAN | SEC | CSC | COT
+      | SINH | COSH | TANH | SECH | CSCH | COTH
+      | ASIN | ACOS | ATAN | ASEC | ACSC | ACOT
+      | ASINH | ACOSH | ATANH | ASECH | ACSCH | ACOTH
+      | EXP | LOG | SQRT
+      | ABS | ARG | RE | IM
       )
       OPEN_PAREN arg=expression CLOSE_PAREN
     ;
 
 function2Expression
-    : 'pow'
+    : POW
       OPEN_PAREN arg1=expression COMMA arg2=expression CLOSE_PAREN
     ;
 
@@ -107,22 +107,3 @@ constant
     | PI
     | E
     ;
-
-NUMBER: Digit+ ( RadixSeparator Digit+ )?;
-PLUS: '+';
-MINUS: '-' | '−';
-TIMES: '*' | '×';
-DIVIDE: '/' | '÷';
-POWER: '^';
-OPEN_PAREN: '(';
-CLOSE_PAREN: ')';
-IMAG_UNIT: 'i';
-TAU: 'τ' | 't' 'a' 'u';
-PI: 'π' | 'p' 'i';
-E: 'e';
-COMMA: ',';
-
-fragment RadixSeparator: ( ';' | '.' | ',' );
-fragment Digit: ( [0-9] | '↊' | '↋' );
-
-WS: ( ' ' | '\t' | '\r' | '\n' ) -> skip;

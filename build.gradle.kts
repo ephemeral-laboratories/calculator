@@ -34,6 +34,11 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 
+tasks.withType<AntlrTask> {
+    arguments = arguments + listOf("-package", "garden.ephemeral.calculator.grammar")
+    outputDirectory = file("$buildDir/generated-src/antlr/main/garden/ephemeral/calculator/grammar")
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
 }
