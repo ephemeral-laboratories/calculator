@@ -132,6 +132,9 @@ class PositionalFormat(
             integerPart = integerPart.substring(1)
             -1
         } else {
+            if (integerPart.startsWith(symbols.plus)) {
+                integerPart = integerPart.substring(1)
+            }
             1
         }
 
