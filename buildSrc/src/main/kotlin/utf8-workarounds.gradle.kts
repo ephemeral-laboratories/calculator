@@ -3,7 +3,7 @@
 // that is _still_ not the default encoding for all these tasks. :(
 
 tasks.withType<AntlrTask> {
-    arguments = listOf("-encoding", "UTF-8")
+    arguments = arguments + listOf("-encoding", "UTF-8")
 }
 
 tasks.withType<JavaCompile> {
