@@ -29,19 +29,19 @@ class MainUiTest {
     }
 
     @Test
-    fun `options are not open by default`() {
-        compose.onNodeWithTag("Options").assertIsNotDisplayed()
+    fun `settings are not open by default`() {
+        compose.onNodeWithTag("Settings").assertIsNotDisplayed()
     }
 
     @Test
-    fun `opening options`() {
-        compose.onNodeWithTag("OptionsButton").performClick()
-        compose.onNodeWithTag("Options").assertIsDisplayed()
+    fun `opening settings`() {
+        compose.onNodeWithTag("SettingsButton").performClick()
+        compose.onNodeWithTag("Settings").assertIsDisplayed()
     }
 
     @Test
     fun `changing theme to light mode`() {
-        compose.onNodeWithTag("OptionsButton").performClick()
+        compose.onNodeWithTag("SettingsButton").performClick()
         compose.onNodeWithTag("ThemeDropDown").performClick()
         compose.onNodeWithTag("ThemeDropDownMenuItem.LIGHT").performClick()
         compose.onNodeWithTag("MainScaffold").assertBackgroundColor(md_theme_light_surface)
@@ -49,7 +49,7 @@ class MainUiTest {
 
     @Test
     fun `changing theme to dark mode`() {
-        compose.onNodeWithTag("OptionsButton").performClick()
+        compose.onNodeWithTag("SettingsButton").performClick()
         compose.onNodeWithTag("ThemeDropDown").performClick()
         compose.onNodeWithTag("ThemeDropDownMenuItem.DARK").performClick()
         compose.onNodeWithTag("MainScaffold").assertBackgroundColor(md_theme_dark_surface)

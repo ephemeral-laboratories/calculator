@@ -84,7 +84,7 @@ fun MainUi() {
         ) {
             Scaffold(
                 bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) },
-                modifier = Modifier.testTag("MainScaffold")
+                modifier = Modifier.testTag("MainScaffold"),
             ) { padding ->
                 MainContent(appState, drawerState, valueTextStyle, scope, padding)
             }
@@ -100,7 +100,7 @@ fun DrawerContent(appState: AppState) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.Start,
             modifier = Modifier
-                .testTag("Options")
+                .testTag("Settings")
                 .padding(16.dp),
         ) {
             OptionDropDown(
@@ -149,7 +149,7 @@ private fun <T : Localizable> OptionDropDown(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { b -> expanded = b },
-        modifier = Modifier.testTag(testTag)
+        modifier = Modifier.testTag(testTag),
     ) {
         Column {
             TextField(
@@ -165,7 +165,7 @@ private fun <T : Localizable> OptionDropDown(
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.testTag("${testTag}Menu")
+                modifier = Modifier.testTag("${testTag}Menu"),
             ) {
                 values.forEach { value ->
                     val scope = rememberCoroutineScope()
@@ -278,7 +278,7 @@ fun MainContent(
                 }
             },
             modifier = Modifier
-                .testTag("OptionsButton")
+                .testTag("SettingsButton")
                 .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f), CircleShape),
         ) {
             Icon(Icons.Outlined.Settings, stringResource(Res.string.settings))
