@@ -77,7 +77,7 @@ function1Expression
       | ASIN | ACOS | ATAN | ASEC | ACSC | ACOT
       | ASINH | ACOSH | ATANH | ASECH | ACSCH | ACOTH
       | EXP | LOG | SQRT
-      | ABS | ARG | RE | IM
+      | ABS | ARG | SGN | RE | IM
       )
       OPEN_PAREN arg=expression CLOSE_PAREN
     ;

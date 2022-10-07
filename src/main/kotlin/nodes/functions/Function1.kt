@@ -37,6 +37,7 @@ enum class Function1(
     SQRT("sqrt", ::maybeComplexSqrt, ::sqrt),
     ABS("abs", ::abs, Complex::norm),
     ARG("arg", { 0.0 }, Complex::argument),
+    SGN("sgn", { x -> sign(x) }, { z -> z / z.norm }),
     RE("Re", { x -> x }, Complex::real),
     IM("Im", { 0.0 }, Complex::imaginary),
     ;

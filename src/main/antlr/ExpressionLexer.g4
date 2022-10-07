@@ -30,6 +30,7 @@ LOG: 'log';
 SQRT: 'sqrt';
 ABS: 'abs';
 ARG: 'arg';
+SGN: 'sgn';
 RE: 'Re';
 IM: 'Im';
 POW: 'pow';
