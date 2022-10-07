@@ -74,19 +74,23 @@ class PositionalFormatTest {
             arguments(Double.NEGATIVE_INFINITY, "-∞"),
             arguments(0.0, "0"),
             arguments(0.5, "0.5"),
+            arguments(0.99999, "1"),
             arguments(1.0, "1"),
             arguments(1.2, "1.2"),
             arguments(1.23, "1.23"),
             arguments(1.234, "1.234"),
             arguments(1.2345, "1.234"),
             arguments(1.2355, "1.236"),
+            arguments(1.99999, "2"),
             arguments(-0.5, "-0.5"),
+            arguments(-0.99999, "-1"),
             arguments(-1.0, "-1"),
             arguments(-1.2, "-1.2"),
             arguments(-1.23, "-1.23"),
             arguments(-1.234, "-1.234"),
             arguments(-1.2345, "-1.234"),
             arguments(-1.2355, "-1.236"),
+            arguments(-1.99999, "-2"),
         )
     }
 }

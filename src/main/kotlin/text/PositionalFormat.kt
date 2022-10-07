@@ -36,62 +36,9 @@ class PositionalFormat(
             return toAppendTo
         }
 
-        // Format everything before the radix point
-        val integerPart = positiveNumber.toLong()
-        format(integerPart, toAppendTo, pos)
-
-        // Collect fraction digits
-        var remainder = positiveNumber - integerPart
-        val fractionDigits = mutableListOf<Int>()
-        for (i in 0..maximumFractionDigits) {
-            remainder *= radix
-            val digit = remainder.toInt()
-            fractionDigits.add(digit)
-            remainder -= digit
-        }
-
-        // Round last digit
-        if (fractionDigits.size > maximumFractionDigits) {
-            val lastDigit = fractionDigits.removeLast()
-            val halfRadix = radix / 2
-
-            tailrec fun roundUp(index: Int) {
-                fractionDigits[index]++
-                if (fractionDigits[index] == radix) {
-                    fractionDigits[index] = 0
-                    roundUp(index - 1)
-                }
-            }
-
-            if (lastDigit < halfRadix) {
-                // round down, nothing more to do
-            } else if (lastDigit > halfRadix) {
-                // round up
-                roundUp(fractionDigits.lastIndex)
-            } else {
-                // round half even
-                if (fractionDigits[fractionDigits.lastIndex] % 2 != 0) {
-                    roundUp(fractionDigits.lastIndex)
-                }
-            }
-        }
-
-        // Trim training zeroes
-        while (fractionDigits.size > minimumFractionDigits) {
-            if (fractionDigits[fractionDigits.lastIndex] == 0) {
-                fractionDigits.removeLast()
-            } else {
-                break
-            }
-        }
-
-        if (minimumFractionDigits > 0 || fractionDigits.isNotEmpty()) {
-            toAppendTo.append(symbols.radixSeparator)
-        }
-
-        for (digit in fractionDigits) {
-            toAppendTo.append(symbols.digitToChar(digit))
-        }
+        val buffer = DigitBuffer(radix)
+        fillDigits(positiveNumber, buffer)
+        appendDigits(buffer, toAppendTo)
 
         return toAppendTo
     }
@@ -100,30 +47,60 @@ class PositionalFormat(
         requireNotNull(toAppendTo)
         requireNotNull(pos)
 
-        var positiveNumber = if (number < 0.0) {
+        val positiveNumber = if (number < 0.0) {
             toAppendTo.append(symbols.minus)
             -number
         } else {
             number
         }
 
-        // Collect digits
-        val digits = mutableListOf<Int>()
-        while (positiveNumber > 0) {
-            val digit = (positiveNumber % radix).toInt()
-            digits.add(digit)
-            positiveNumber /= radix
-        }
-        while (digits.size < minimumIntegerDigits) {
-            digits.add(0)
-        }
-
-        // Output in the right order
-        for (digit in digits.reversed()) {
-            toAppendTo.append(symbols.digitToChar(digit))
-        }
+        val buffer = DigitBuffer(radix)
+        fillDigits(positiveNumber, buffer)
+        appendDigits(buffer, toAppendTo)
 
         return toAppendTo
+    }
+
+    private fun fillDigits(value: Double, buffer: DigitBuffer) {
+        val integerPart = value.toLong()
+
+        fillDigits(integerPart, buffer)
+
+        buffer.markRadixPoint()
+
+        var remainder = value - integerPart
+        repeat(maximumFractionDigits + 1) {
+            remainder *= radix
+            val digit = remainder.toInt()
+            buffer.append(digit)
+            remainder -= digit
+        }
+
+        buffer.enforceLimits(minimumIntegerDigits, minimumFractionDigits, maximumFractionDigits)
+    }
+
+    private fun fillDigits(value: Long, buffer: DigitBuffer) {
+        var remainingIntegerPart = value
+        while (remainingIntegerPart > 0) {
+            val digit = remainingIntegerPart % radix
+            val stillToProcess = remainingIntegerPart / radix
+            buffer.prepend(digit.toInt())
+            remainingIntegerPart = stillToProcess
+        }
+    }
+
+    private fun appendDigits(buffer: DigitBuffer, destination: Appendable) {
+        buffer.integerDigits
+            .map(symbols::digitToChar)
+            .forEach(destination::append)
+
+        if (buffer.fractionDigits.isNotEmpty()) {
+            destination.append(symbols.radixSeparator)
+
+            buffer.fractionDigits
+                .map(symbols::digitToChar)
+                .forEach(destination::append)
+        }
     }
 
     // BigInteger we could conceivably support, I guess.
