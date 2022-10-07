@@ -180,6 +180,6 @@ class PositionalFormat(
         // XXX: Do we want to support partial parsing?
         parsePosition.index = text.length
 
-        return sign * integer + fraction
+        return sign * (integer + fraction)
     }
 }
