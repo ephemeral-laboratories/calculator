@@ -1,27 +1,40 @@
 package garden.ephemeral.calculator.text
 
 import garden.ephemeral.math.complex.Complex
-import java.text.FieldPosition
 import java.text.Format
-import java.text.ParsePosition
 import kotlin.math.abs
 
-class ComplexFormat(private var realFormat: Format, private var symbols: PositionalFormatSymbols) : Format() {
-    override fun format(obj: Any?, toAppendTo: StringBuffer, pos: FieldPosition?): StringBuffer {
-        require(obj is Complex) { "Only supports Complex, got: $obj" }
-
-        return format(obj, toAppendTo)
+class ComplexFormat(private var realFormat: Format, private var symbols: PositionalFormatSymbols) {
+    /**
+     * Formats a complex value.
+     *
+     * @param value the complex value.
+     * @return the formatted value.
+     */
+    fun format(value: Complex): String {
+        val builder = StringBuilder()
+        format(value, builder)
+        return builder.toString()
     }
 
-    fun format(value: Complex, toAppendTo: StringBuffer): StringBuffer {
+    /**
+     * Formats a complex value.
+     *
+     * @param value the complex value.
+     * @param toAppendTo the string buffer to append to.
+     */
+    fun format(value: Complex, toAppendTo: Appendable) {
         if (value.real.isNaN() && value.imaginary.isNaN()) {
-            return toAppendTo.append(symbols.notANumber)
+            toAppendTo.append(symbols.notANumber)
+            return
         }
         if (value.real.isInfinite() || value.imaginary.isInfinite()) {
-            return toAppendTo.append(symbols.infinity)
+            toAppendTo.append(symbols.infinity)
+            return
         }
         if (value.real.isNaN() || value.imaginary.isNaN()) {
-            return toAppendTo.append(symbols.notANumber)
+            toAppendTo.append(symbols.notANumber)
+            return
         }
 
         val formattedReal = realFormat.format(abs(value.real))
@@ -32,7 +45,8 @@ class ComplexFormat(private var realFormat: Format, private var symbols: Positio
         val imaginaryIsNegative = hasImaginary && value.imaginary < 0
 
         if (!hasReal && !hasImaginary) {
-            return toAppendTo.append(symbols.digitZero)
+            toAppendTo.append(symbols.digitZero)
+            return
         }
 
         if (hasReal) {
@@ -55,11 +69,5 @@ class ComplexFormat(private var realFormat: Format, private var symbols: Positio
             }
             toAppendTo.append(symbols.i)
         }
-
-        return toAppendTo
-    }
-
-    override fun parseObject(source: String?, pos: ParsePosition): Any {
-        throw UnsupportedOperationException("Parse not supported (handled elsewhere)")
     }
 }

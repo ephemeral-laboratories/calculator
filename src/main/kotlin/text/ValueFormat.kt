@@ -2,13 +2,11 @@ package garden.ephemeral.calculator.text
 
 import garden.ephemeral.math.complex.Complex
 import java.text.FieldPosition
-import java.text.Format
-import java.text.ParsePosition
 
 /**
  * Value format which chooses the right format based on the value type.
  */
-class ValueFormat(radix: Int, symbols: PositionalFormatSymbols) : Format() {
+class ValueFormat(radix: Int, symbols: PositionalFormatSymbols) {
     var realFormat = PositionalFormat(radix, symbols).apply {
         minimumIntegerDigits = 1
         minimumFractionDigits = 0
@@ -16,27 +14,19 @@ class ValueFormat(radix: Int, symbols: PositionalFormatSymbols) : Format() {
     }
     private var complexFormat = ComplexFormat(realFormat, symbols)
 
-    override fun format(value: Any?, toAppendTo: StringBuffer, pos: FieldPosition): StringBuffer {
-        return when (value) {
-            is Double -> realFormat.format(value, toAppendTo, pos)
+    fun format(value: Any?): String {
+        val builder = StringBuffer()
+        format(value, builder)
+        return builder.toString()
+    }
+
+    fun format(value: Any?, toAppendTo: StringBuffer) {
+        when (value) {
+            // XXX: Stuck with accepting a StringBuffer because NumberFormat wants it.
+            //      Can we just avoid using NumberFormat entirely?
+            is Double -> realFormat.format(value, toAppendTo, FieldPosition(0))
             is Complex -> complexFormat.format(value, toAppendTo)
-            else -> return toAppendTo.append(value.toString())
+            else -> toAppendTo.append(value.toString())
         }
-    }
-
-    /**
-     * Parses the source string.
-     *
-     * @param source the source string.
-     * @return the parsed value. Returns `null` if no value could be parsed.
-     */
-    fun parse(source: String): Double? {
-        return parseObject(source, ParsePosition(0)) as Double?
-    }
-
-    override fun parseObject(source: String?, pos: ParsePosition): Any? {
-        // XXX: Only supports parsing reals at the moment because complex numbers are
-        //      handled by ExpressionParser.
-        return realFormat.parseObject(source, pos)
     }
 }
