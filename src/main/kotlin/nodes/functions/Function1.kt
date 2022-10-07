@@ -40,6 +40,7 @@ enum class Function1(
     SGN("sgn", { x -> sign(x) }, { z -> z / z.norm }),
     RE("Re", { x -> x }, Complex::real),
     IM("Im", { 0.0 }, Complex::imaginary),
+    CONJ("conj", { x -> x }, Complex::conjugate),
     ;
 
     fun apply(value: Any): Any {

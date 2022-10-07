@@ -33,6 +33,7 @@ ARG: 'arg';
 SGN: 'sgn';
 RE: 'Re';
 IM: 'Im';
+CONJ: 'conj';
 POW: 'pow';
 
 NUMBER: Digit+ ( RadixSeparator Digit+ )?;
