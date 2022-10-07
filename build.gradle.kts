@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "garden.ephemeral.calculator"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 description = "Simple calculator application built in Compose Desktop"
 
 dependencies {
@@ -49,8 +49,8 @@ tasks.withType<Test> {
 
 // ANTLR plugin sets `compileJava` to depend on `generateGrammarSource`,
 // but not `compileKotlin`, which causes a warning.
-tasks.named("compileKotlin") {
-    dependsOn("generateGrammarSource")
+tasks.compileKotlin {
+    dependsOn(tasks.generateGrammarSource)
 }
 
 compose.desktop {
@@ -59,7 +59,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = project.name.capitalizeAsciiOnly()
-            packageVersion = "1.0.0"
+            packageVersion = project.version.toString()
             description = project.description
             vendor = "Ephemeral Laboratories"
             copyright = "Copyright © 2022 $vendor"
@@ -68,7 +68,13 @@ compose.desktop {
                 upgradeUuid = "3e9ee76f-453c-4819-9371-41745b72b8cc"
                 menuGroup = packageName
                 perUserInstall = true
-                iconFile.set(file("???"))
+                iconFile.set(file("src/installers/AppIcon.ico"))
+            }
+            macOS {
+                iconFile.set(file("src/installers/AppIcon.icns"))
+            }
+            linux {
+                iconFile.set(file("src/installers/AppIcon.png"))
             }
         }
     }

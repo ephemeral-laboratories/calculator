@@ -67,24 +67,34 @@ fun MainUi() {
 
 @Composable
 fun DrawerContent(appState: AppState) {
-    OptionDropDown(
-        label = AppStrings.Theme,
-        values = ThemeOption.values(),
-        property = appState::themeOption
-    )
-    OptionDropDown(
-        label = AppStrings.NumberFormat,
-        values = NumberFormatOption.values(),
-        property = appState::numberFormatOption
-    )
-    OptionDropDown(
-        label = AppStrings.RadixSeparator,
-        values = RadixSeparatorOption.values(),
-        property = when (appState.numberFormatOption) {
-            NumberFormatOption.DECIMAL -> appState::decimalRadixSeparatorOption
-            NumberFormatOption.DOZENAL -> appState::dozenalRadixSeparatorOption
+    Column {
+        OptionDropDown(
+            label = AppStrings.Theme,
+            values = ThemeOption.values(),
+            property = appState::themeOption
+        )
+        OptionDropDown(
+            label = AppStrings.NumberFormat,
+            values = NumberFormatOption.values(),
+            property = appState::numberFormatOption
+        )
+        OptionDropDown(
+            label = AppStrings.RadixSeparator,
+            values = RadixSeparatorOption.values(),
+            property = when (appState.numberFormatOption) {
+                NumberFormatOption.DECIMAL -> appState::decimalRadixSeparatorOption
+                NumberFormatOption.DOZENAL -> appState::dozenalRadixSeparatorOption
+            }
+        )
+
+        Box(
+            modifier = Modifier.fillMaxHeight().padding(16.dp),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            val version = System.getProperty("jpackage.app-version") ?: "[DEV]"
+            Text("Version $version")
         }
-    )
+    }
 }
 
 @Composable
