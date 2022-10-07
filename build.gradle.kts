@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "garden.ephemeral.calculator"
-version = "1.0.0"
+version = "1.0.0-SNAPSHOT"
 description = "Simple calculator application built in Compose Desktop"
 
 dependencies {
@@ -56,10 +56,11 @@ tasks.compileKotlin {
 compose.desktop {
     application {
         mainClass = "garden.ephemeral.calculator.MainKt"
+        jvmArgs("-Djpackage.app-version.unmangled=${project.version}")
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = project.name.capitalizeAsciiOnly()
-            packageVersion = project.version.toString()
+            packageVersion = project.version.toString().removeSuffix("-SNAPSHOT")
             description = project.description
             vendor = "Ephemeral Laboratories"
             copyright = "Copyright © 2022 $vendor"
@@ -67,7 +68,6 @@ compose.desktop {
             windows {
                 upgradeUuid = "3e9ee76f-453c-4819-9371-41745b72b8cc"
                 menuGroup = packageName
-                perUserInstall = true
                 iconFile.set(file("src/installers/AppIcon.ico"))
             }
             macOS {

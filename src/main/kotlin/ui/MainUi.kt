@@ -89,7 +89,7 @@ fun DrawerContent(appState: AppState) {
             modifier = Modifier.fillMaxHeight().padding(16.dp),
             contentAlignment = Alignment.BottomStart
         ) {
-            val version = System.getProperty("jpackage.app-version") ?: "[DEV]"
+            val version = System.getProperty("jpackage.app-version.unmangled") ?: "[DEV]"
             Text("Version $version")
         }
     }
