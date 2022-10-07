@@ -1,8 +1,10 @@
 package garden.ephemeral.calculator.text
 
 import assertk.assertThat
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
+import assertk.assertions.prop
 import garden.ephemeral.calculator.isCloseTo
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.Parentheses
@@ -33,7 +35,11 @@ class ExpressionParserTest {
 
     @BeforeEach
     fun setUp() {
-        parser = ExpressionParser(ValueFormat(12, PositionalFormatSymbols()))
+        parser = ExpressionParser(PositionalFormat(12, PositionalFormatSymbols()).apply {
+            minimumIntegerDigits = 1
+            minimumFractionDigits = 0
+            maximumFractionDigits = 10
+        })
     }
 
     @Test
@@ -41,6 +47,15 @@ class ExpressionParserTest {
         assertThat {
             parser.parse("2f")
         }.isFailure().isInstanceOf(ParseException::class)
+            .prop(ParseException::getErrorOffset).isEqualTo(1)
+    }
+
+    @Test
+    fun `excessively long number input`() {
+        assertThat {
+            parser.parse("3 + 1000000000000000000000000")
+        }.isFailure().isInstanceOf(ParseException::class)
+            .prop(ParseException::getErrorOffset).isEqualTo(4)
     }
 
     @ParameterizedTest

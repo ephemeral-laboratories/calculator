@@ -3,6 +3,7 @@ package garden.ephemeral.calculator.text
 import assertk.assertThat
 import assertk.assertions.isCloseTo
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import garden.ephemeral.calculator.ui.NumberFormatOption
 import org.junit.jupiter.api.Test
@@ -10,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.text.ParseException
 
 class PositionalFormatTest {
     @ParameterizedTest
@@ -18,6 +20,13 @@ class PositionalFormatTest {
         val format = newPositionalFormat()
         val number = format.parse(example)
         assertThat(number).isInstanceOf(Double::class).isCloseTo(expected, 0.00000001)
+    }
+
+    @Test
+    fun `parse overflow`() {
+        val format = newPositionalFormat()
+        assertThat { format.parse("1000000000000000000000000") }
+            .isFailure().isInstanceOf(ParseException::class)
     }
 
     @ParameterizedTest

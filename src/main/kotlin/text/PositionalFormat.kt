@@ -116,7 +116,7 @@ class PositionalFormat(
 
     private fun willNotSupport(thing: String): Nothing = throw UnsupportedOperationException("$thing not supported")
 
-    override fun parse(text: String?, parsePosition: ParsePosition?): Number {
+    override fun parse(text: String?, parsePosition: ParsePosition?): Number? {
         requireNotNull(text)
         requireNotNull(parsePosition)
 
@@ -141,10 +141,18 @@ class PositionalFormat(
             1
         }
 
-        var integer = 0L
+        var bigInteger = BigInteger.ZERO
+        val bigRadix = radix.toBigInteger()
         for (ch in integerPart) {
-            integer *= radix
-            integer += symbols.charToDigit(ch)
+            bigInteger *= bigRadix
+            bigInteger += symbols.charToDigit(ch).toBigInteger()
+        }
+        val integer: Long
+        try {
+            integer = bigInteger.longValueExact()
+        } catch (e: ArithmeticException) {
+            // Indicates error by leaving the index unchanged
+            return null
         }
 
         var fraction = 0.0

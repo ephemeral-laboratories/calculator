@@ -9,7 +9,7 @@ import java.text.ParsePosition
  * Value format which chooses the right format based on the value type.
  */
 class ValueFormat(radix: Int, symbols: PositionalFormatSymbols) : Format() {
-    private var realFormat = PositionalFormat(radix, symbols).apply {
+    var realFormat = PositionalFormat(radix, symbols).apply {
         minimumIntegerDigits = 1
         minimumFractionDigits = 0
         maximumFractionDigits = 10
@@ -24,11 +24,17 @@ class ValueFormat(radix: Int, symbols: PositionalFormatSymbols) : Format() {
         }
     }
 
-    fun parse(source: String): Double {
-        return parseObject(source, ParsePosition(0)) as Double
+    /**
+     * Parses the source string.
+     *
+     * @param source the source string.
+     * @return the parsed value. Returns `null` if no value could be parsed.
+     */
+    fun parse(source: String): Double? {
+        return parseObject(source, ParsePosition(0)) as Double?
     }
 
-    override fun parseObject(source: String?, pos: ParsePosition): Any {
+    override fun parseObject(source: String?, pos: ParsePosition): Any? {
         // XXX: Only supports parsing reals at the moment because complex numbers are
         //      handled by ExpressionParser.
         return realFormat.parseObject(source, pos)

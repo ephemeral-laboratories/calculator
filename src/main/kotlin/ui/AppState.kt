@@ -47,7 +47,7 @@ class AppState {
         val text = inputText.text
         if (text.isNotEmpty()) {
             val expression = try {
-                ExpressionParser(valueFormat).parse(text)
+                ExpressionParser(valueFormat.realFormat).parse(text)
             } catch (e: ParseException) {
                 // XXX: Playing a sound would be nice too
                 isInputError = true

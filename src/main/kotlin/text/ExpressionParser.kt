@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException
 import org.antlr.v4.runtime.tree.ParseTree
 import java.text.ParseException
 
-class ExpressionParser(private val valueFormat: ValueFormat) {
+class ExpressionParser(private val realFormat: PositionalFormat) {
     fun parse(input: String): Node {
         val errorListener = ErrorListener()
 
@@ -92,20 +92,23 @@ class ExpressionParser(private val valueFormat: ValueFormat) {
                 transform(tree.getChild(0))
 
             is ExpressionParser.RealNumberContext -> {
-                val sign = signFromToken(tree.sign)
-                val magnitude = valueFormat.parse(sign + tree.magnitude.text)
-                Value(magnitude)
+                val real = signFromToken(tree.sign) * parseReal(tree.magnitude.text, tree.start)
+                Value(real)
             }
 
             is ExpressionParser.ComplexNumberContext -> {
-                val real = if (tree.real != null) {
-                    val realSign = signFromToken(tree.realSign)
-                    valueFormat.parse(realSign + tree.real.text)
+                val real = signFromToken(tree.realSign) * if (tree.real != null) {
+                    parseReal(tree.real.text, tree.real)
                 } else {
                     0.0
                 }
-                val imagSign = signFromToken(tree.imagSign)
-                val imag = valueFormat.parse(imagSign + (tree.imag?.text ?: "1"))
+                val imag = signFromToken(tree.imagSign) * if (tree.imag != null) {
+                    parseReal(tree.imag.text, tree.imag)
+                } else {
+                    // Even if there's no imag token, there must have still been an i token,
+                    // so we want 1 for the imaginary part, not 0.
+                    1.0
+                }
                 Value(Complex(real, imag))
             }
 
@@ -124,7 +127,18 @@ class ExpressionParser(private val valueFormat: ValueFormat) {
         }
     }
 
-    private fun signFromToken(token: Token?): String = if (token?.type == ExpressionLexer.MINUS) "-" else ""
+    private fun parseReal(source: String, token: Token): Double {
+        try {
+            return realFormat.parse(source) as Double
+        } catch (e: ParseException) {
+            // Rethrowing with the right index for the full input string
+            throw ParseException("Failure parsing number", token.startIndex).also {
+                it.initCause(e)
+            }
+        }
+    }
+
+    private fun signFromToken(token: Token?): Double = if (token?.type == ExpressionLexer.MINUS) -1.0 else 1.0
 
     private class ErrorListener : BaseErrorListener() {
         var message: String? = null
