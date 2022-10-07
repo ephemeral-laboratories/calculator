@@ -1,9 +1,8 @@
-package garden.ephemeral.calculator
+package garden.ephemeral.calculator.nodes
 
 import assertk.Assert
 import assertk.assertions.support.expected
 import assertk.assertions.support.show
-import garden.ephemeral.calculator.nodes.Node
 
 private const val EPSILON = 0.0000000000001
 

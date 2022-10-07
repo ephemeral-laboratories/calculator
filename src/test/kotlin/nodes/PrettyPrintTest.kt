@@ -1,4 +1,4 @@
-package garden.ephemeral.calculator
+package garden.ephemeral.calculator.nodes
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo

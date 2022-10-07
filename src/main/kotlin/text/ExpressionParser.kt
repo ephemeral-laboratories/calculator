@@ -31,9 +31,9 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
         parser.addErrorListener(errorListener)
         parser.errorHandler = BailErrorStrategy()
 
-        val expression: ExpressionParser.ExpressionContext
+        val expression: ExpressionParser.StartContext
         try {
-            expression = parser.expression()
+            expression = parser.start()
             if (errorListener.message != null) {
                 throw ParseException("Parsed, but $errorListener", errorListener.start)
             }
@@ -52,58 +52,72 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
 
     private fun transform(tree: ParseTree): Node {
         return when (tree) {
-            is ExpressionParser.ExpressionContext ->
-                transform(tree.getChild(0))
+            is ExpressionParser.StartContext ->
+                transform(tree.expression())
 
             is ExpressionParser.ParenthesizedExpressionContext ->
-                Parentheses(transform(tree.getChild(1)))
+                Parentheses(transform(tree.expression()))
 
-            is ExpressionParser.PlusExpressionContext ->
-                InfixOperatorNode(InfixOperator.PLUS, transform(tree.getChild(0)), transform(tree.getChild(2)))
+            is ExpressionParser.PlusExpressionContext -> InfixOperatorNode(
+                InfixOperator.PLUS,
+                transform(tree.plusChildExpression(0)),
+                transform(tree.plusChildExpression(1))
+            )
 
-            is ExpressionParser.MinusExpressionContext ->
-                InfixOperatorNode(InfixOperator.MINUS, transform(tree.getChild(0)), transform(tree.getChild(2)))
+            is ExpressionParser.MinusExpressionContext -> InfixOperatorNode(
+                InfixOperator.MINUS,
+                transform(tree.minusChildExpression(0)),
+                transform(tree.minusChildExpression(1))
+            )
 
-            is ExpressionParser.TimesExpressionContext ->
-                InfixOperatorNode(InfixOperator.TIMES, transform(tree.getChild(0)), transform(tree.getChild(2)))
+            is ExpressionParser.TimesExpressionContext -> InfixOperatorNode(
+                InfixOperator.TIMES,
+                transform(tree.timesChildExpression(0)),
+                transform(tree.timesChildExpression(1))
+            )
 
-            is ExpressionParser.ImplicitTimesExpressionContext ->
-                InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, transform(tree.getChild(0)), transform(tree.getChild(1)))
+            is ExpressionParser.ImplicitTimesExpressionContext -> InfixOperatorNode(
+                InfixOperator.IMPLICIT_TIMES,
+                transform(tree.implicitTimesChildExpression(0)),
+                transform(tree.implicitTimesChildExpression(1))
+            )
 
-            is ExpressionParser.DivideExpressionContext ->
-                InfixOperatorNode(InfixOperator.DIVIDE, transform(tree.getChild(0)), transform(tree.getChild(2)))
+            is ExpressionParser.DivideExpressionContext -> InfixOperatorNode(
+                InfixOperator.DIVIDE,
+                transform(tree.divideChildExpression(0)),
+                transform(tree.divideChildExpression(1))
+            )
 
-            is ExpressionParser.PowerExpressionContext ->
-                InfixOperatorNode(InfixOperator.POWER, transform(tree.getChild(0)), transform(tree.getChild(2)))
+            is ExpressionParser.PowerExpressionContext -> InfixOperatorNode(
+                InfixOperator.POWER,
+                transform(tree.powerChildExpression(0)),
+                transform(tree.powerChildExpression(1))
+            )
 
-            is ExpressionParser.UnaryMinusExpressionContext ->
-                PrefixOperatorNode(PrefixOperator.UNARY_MINUS, transform(tree.getChild(1)))
-
-            is ExpressionParser.FunctionExpressionContext ->
-                transform(tree.getChild(0))
+            is ExpressionParser.UnaryMinusExpressionContext -> PrefixOperatorNode(
+                PrefixOperator.UNARY_MINUS,
+                transform(tree.unaryMinusChildExpression())
+            )
 
             is ExpressionParser.Function1ExpressionContext ->
-                Function1Node.create(tree.getChild(0), transform(tree.getChild(2)))
+                Function1Node.create(tree.func, transform(tree.arg))
 
             is ExpressionParser.Function2ExpressionContext ->
-                Function2Node.create(tree.getChild(0), transform(tree.getChild(2)), transform(tree.getChild(4)))
-
-            is ExpressionParser.ValueContext ->
-                transform(tree.getChild(0))
+                Function2Node.create(tree.func, transform(tree.arg1), transform(tree.arg2))
 
             is ExpressionParser.RealNumberContext -> {
-                val real = signFromToken(tree.sign) * parseReal(tree.magnitude.text, tree.start)
+                val real = signFromToken(tree.sign) * parseReal(tree.magnitude)
                 Value(real)
             }
 
             is ExpressionParser.ComplexNumberContext -> {
                 val real = signFromToken(tree.realSign) * if (tree.real != null) {
-                    parseReal(tree.real.text, tree.real)
+                    parseReal(tree.real)
                 } else {
                     0.0
                 }
                 val imag = signFromToken(tree.imagSign) * if (tree.imag != null) {
-                    parseReal(tree.imag.text, tree.imag)
+                    parseReal(tree.imag)
                 } else {
                     // Even if there's no imag token, there must have still been an i token,
                     // so we want 1 for the imaginary part, not 0.
@@ -123,13 +137,30 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                     throw UnsupportedOperationException("Unknown tree node: $tree")
                 }
 
+            // All the nodes which are just wrappers for alternatives.
+            // For these, we _could_ write long-winded expressions like:
+            //     tree.branch1() ?: tree.branch2() ?: tree.branch3() ?: ...
+            // But it's ugly in its own way, so we'll just treat them all
+            // the same and unwrap the single child.
+            is ExpressionParser.ExpressionContext,
+            is ExpressionParser.PlusChildExpressionContext,
+            is ExpressionParser.MinusChildExpressionContext,
+            is ExpressionParser.TimesChildExpressionContext,
+            is ExpressionParser.ImplicitTimesChildExpressionContext,
+            is ExpressionParser.DivideChildExpressionContext,
+            is ExpressionParser.PowerChildExpressionContext,
+            is ExpressionParser.UnaryMinusChildExpressionContext,
+            is ExpressionParser.FunctionExpressionContext,
+            is ExpressionParser.ValueContext ->
+                transform(tree.getChild(0))
+
             else -> throw UnsupportedOperationException("Unknown tree node: $tree")
         }
     }
 
-    private fun parseReal(source: String, token: Token): Double {
+    private fun parseReal(token: Token): Double {
         try {
-            return realFormat.parse(source) as Double
+            return realFormat.parse(token.text) as Double
         } catch (e: ParseException) {
             // Rethrowing with the right index for the full input string
             throw ParseException("Failure parsing number", token.startIndex).also {

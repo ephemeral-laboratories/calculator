@@ -1,7 +1,6 @@
-package garden.ephemeral.calculator
+package garden.ephemeral.calculator.nodes
 
 import assertk.assertThat
-import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.functions.Function1
 import garden.ephemeral.calculator.nodes.functions.Function1Node
 import garden.ephemeral.calculator.nodes.functions.Function2

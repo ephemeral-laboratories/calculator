@@ -5,13 +5,13 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.prop
-import garden.ephemeral.calculator.isCloseTo
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.Parentheses
 import garden.ephemeral.calculator.nodes.functions.Function1
 import garden.ephemeral.calculator.nodes.functions.Function1Node
 import garden.ephemeral.calculator.nodes.functions.Function2
 import garden.ephemeral.calculator.nodes.functions.Function2Node
+import garden.ephemeral.calculator.nodes.isCloseTo
 import garden.ephemeral.calculator.nodes.ops.InfixOperator
 import garden.ephemeral.calculator.nodes.ops.InfixOperatorNode
 import garden.ephemeral.calculator.nodes.ops.PrefixOperator

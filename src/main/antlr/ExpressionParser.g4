@@ -26,44 +26,70 @@ parenthesizedExpression
     : OPEN_PAREN expression CLOSE_PAREN
     ;
 
-plusExpression
-    : (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
-      PLUS
-      (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
+plusExpression: plusChildExpression PLUS plusChildExpression;
+plusChildExpression
+    : value
+    | functionExpression
+    | timesExpression
+    | implicitTimesExpression
+    | divideExpression
+    | powerExpression
+    | unaryMinusExpression
+    | parenthesizedExpression
     ;
 
-minusExpression
-    : (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
-      MINUS
-      (value | functionExpression | timesExpression | implicitTimesExpression | divideExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
+minusExpression: minusChildExpression MINUS minusChildExpression;
+minusChildExpression
+    : value
+    | functionExpression
+    | timesExpression
+    | implicitTimesExpression
+    | divideExpression
+    | powerExpression
+    | unaryMinusExpression
+    | parenthesizedExpression
     ;
 
-timesExpression
-    : (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
-      TIMES
-      (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
+timesExpression: timesChildExpression TIMES timesChildExpression;
+timesChildExpression
+    : value
+    | functionExpression
+    | powerExpression
+    | unaryMinusExpression
+    | parenthesizedExpression
     ;
 
-implicitTimesExpression
-    : (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
-      (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
+implicitTimesExpression: implicitTimesChildExpression implicitTimesChildExpression;
+implicitTimesChildExpression
+    : value
+    | functionExpression
+    | powerExpression
+    | unaryMinusExpression
+    | parenthesizedExpression
     ;
 
-divideExpression
-    : (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
-      DIVIDE
-      (value | functionExpression | powerExpression | unaryMinusExpression | parenthesizedExpression)
+divideExpression: divideChildExpression DIVIDE divideChildExpression;
+divideChildExpression
+    : value
+    | functionExpression
+    | powerExpression
+    | unaryMinusExpression
+    | parenthesizedExpression
     ;
 
-powerExpression
-    : (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
-      POWER
-      (value | functionExpression | unaryMinusExpression | parenthesizedExpression)
+powerExpression: powerChildExpression POWER powerChildExpression;
+powerChildExpression
+    : value
+    | functionExpression
+    | unaryMinusExpression
+    | parenthesizedExpression
     ;
 
-unaryMinusExpression
-    : MINUS
-      (value | functionExpression | parenthesizedExpression)
+unaryMinusExpression: MINUS unaryMinusChildExpression;
+unaryMinusChildExpression
+    : value
+    | functionExpression
+    | parenthesizedExpression
     ;
 
 functionExpression
@@ -72,7 +98,7 @@ functionExpression
     ;
 
 function1Expression
-    : ( SIN | COS | TAN | SEC | CSC | COT
+    : func=( SIN | COS | TAN | SEC | CSC | COT
       | SINH | COSH | TANH | SECH | CSCH | COTH
       | ASIN | ACOS | ATAN | ASEC | ACSC | ACOT
       | ASINH | ACOSH | ATANH | ASECH | ACSCH | ACOTH
@@ -83,7 +109,7 @@ function1Expression
     ;
 
 function2Expression
-    : POW
+    : func=POW
       OPEN_PAREN arg1=expression COMMA arg2=expression CLOSE_PAREN
     ;
 
