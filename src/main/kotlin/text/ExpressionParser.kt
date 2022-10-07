@@ -58,11 +58,18 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.ParenthesizedExpressionContext ->
                 Parentheses(transform(tree.expression()))
 
-            is ExpressionParser.PlusExpressionContext -> InfixOperatorNode(
-                InfixOperator.PLUS,
-                transform(tree.plusChildExpression(0)),
-                transform(tree.plusChildExpression(1))
-            )
+            is ExpressionParser.PlusExpressionContext -> {
+                val children = tree.plusChildExpression()
+                var node = InfixOperatorNode(
+                    InfixOperator.PLUS,
+                    transform(children[0]),
+                    transform(children[1])
+                )
+                children.asSequence().drop(2).forEach { expression ->
+                    node = InfixOperatorNode(InfixOperator.PLUS, node, transform(expression))
+                }
+                node
+            }
 
             is ExpressionParser.MinusExpressionContext -> InfixOperatorNode(
                 InfixOperator.MINUS,
@@ -70,17 +77,32 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 transform(tree.minusChildExpression(1))
             )
 
-            is ExpressionParser.TimesExpressionContext -> InfixOperatorNode(
-                InfixOperator.TIMES,
-                transform(tree.timesChildExpression(0)),
-                transform(tree.timesChildExpression(1))
-            )
+            is ExpressionParser.TimesExpressionContext -> {
+                val children = tree.timesChildExpression()
+                var node = InfixOperatorNode(
+                    InfixOperator.TIMES,
+                    transform(children[0]),
+                    transform(children[1])
+                )
+                children.asSequence().drop(2).forEach { expression ->
+                    node = InfixOperatorNode(InfixOperator.TIMES, node, transform(expression))
+                }
+                node
+            }
 
-            is ExpressionParser.ImplicitTimesExpressionContext -> InfixOperatorNode(
-                InfixOperator.IMPLICIT_TIMES,
-                transform(tree.implicitTimesChildExpression(0)),
-                transform(tree.implicitTimesChildExpression(1))
-            )
+            is ExpressionParser.ImplicitTimesExpressionContext -> {
+                val first = tree.implicitTimesFirstChildExpression()
+                val children = tree.implicitTimesChildExpression()
+                var node = InfixOperatorNode(
+                    InfixOperator.IMPLICIT_TIMES,
+                    transform(first),
+                    transform(children[0])
+                )
+                children.asSequence().drop(1).forEach { expression ->
+                    node = InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, node, transform(expression))
+                }
+                node
+            }
 
             is ExpressionParser.DivideExpressionContext -> InfixOperatorNode(
                 InfixOperator.DIVIDE,
@@ -94,10 +116,15 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 transform(tree.powerChildExpression(1))
             )
 
-            is ExpressionParser.UnaryMinusExpressionContext -> PrefixOperatorNode(
-                PrefixOperator.UNARY_MINUS,
-                transform(tree.unaryMinusChildExpression())
-            )
+            is ExpressionParser.UnaryMinusExpressionContext -> {
+                // Simplify things like -2 to a single value
+                val childNode = transform(tree.unaryMinusChildExpression())
+                if (childNode is Value) {
+                    Value(PrefixOperator.UNARY_MINUS.apply(childNode.value))
+                } else {
+                    PrefixOperatorNode(PrefixOperator.UNARY_MINUS, childNode)
+                }
+            }
 
             is ExpressionParser.Function1ExpressionContext ->
                 Function1Node.create(tree.func, transform(tree.arg))
@@ -106,7 +133,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 Function2Node.create(tree.func, transform(tree.arg1), transform(tree.arg2))
 
             is ExpressionParser.RealNumberContext -> {
-                val real = signFromToken(tree.sign) * parseReal(tree.magnitude)
+                val real = parseReal(tree.magnitude)
                 Value(real)
             }
 
@@ -146,6 +173,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.PlusChildExpressionContext,
             is ExpressionParser.MinusChildExpressionContext,
             is ExpressionParser.TimesChildExpressionContext,
+            is ExpressionParser.ImplicitTimesFirstChildExpressionContext,
             is ExpressionParser.ImplicitTimesChildExpressionContext,
             is ExpressionParser.DivideChildExpressionContext,
             is ExpressionParser.PowerChildExpressionContext,

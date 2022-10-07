@@ -26,7 +26,7 @@ parenthesizedExpression
     : OPEN_PAREN expression CLOSE_PAREN
     ;
 
-plusExpression: plusChildExpression PLUS plusChildExpression;
+plusExpression: plusChildExpression ( PLUS plusChildExpression )+;
 plusChildExpression
     : value
     | functionExpression
@@ -42,6 +42,7 @@ minusExpression: minusChildExpression MINUS minusChildExpression;
 minusChildExpression
     : value
     | functionExpression
+    | plusExpression
     | timesExpression
     | implicitTimesExpression
     | divideExpression
@@ -50,7 +51,7 @@ minusChildExpression
     | parenthesizedExpression
     ;
 
-timesExpression: timesChildExpression TIMES timesChildExpression;
+timesExpression: timesChildExpression ( TIMES timesChildExpression )+;
 timesChildExpression
     : value
     | functionExpression
@@ -59,12 +60,19 @@ timesChildExpression
     | parenthesizedExpression
     ;
 
-implicitTimesExpression: implicitTimesChildExpression implicitTimesChildExpression;
-implicitTimesChildExpression
+implicitTimesExpression: implicitTimesFirstChildExpression ( implicitTimesChildExpression )+;
+implicitTimesFirstChildExpression
     : value
     | functionExpression
     | powerExpression
     | unaryMinusExpression
+    | parenthesizedExpression
+    ;
+implicitTimesChildExpression
+    : value
+    | functionExpression
+    | powerExpression
+    // Can't have unary minus - think about why
     | parenthesizedExpression
     ;
 
@@ -125,7 +133,7 @@ complexNumber
     ;
 
 realNumber
-    : sign=( PLUS | MINUS )? magnitude=NUMBER
+    : magnitude=NUMBER
     ;
 
 constant
