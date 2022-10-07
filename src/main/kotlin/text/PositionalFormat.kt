@@ -43,11 +43,37 @@ class PositionalFormat(
         // Collect fraction digits
         var remainder = positiveNumber - integerPart
         val fractionDigits = mutableListOf<Int>()
-        for (i in 1..maximumFractionDigits) {
+        for (i in 0..maximumFractionDigits) {
             remainder *= radix
             val digit = remainder.toInt()
             fractionDigits.add(digit)
             remainder -= digit
+        }
+
+        // Round last digit
+        if (fractionDigits.size > maximumFractionDigits) {
+            val lastDigit = fractionDigits.removeLast()
+            val halfRadix = radix / 2
+
+            tailrec fun roundUp(index: Int) {
+                fractionDigits[index]++
+                if (fractionDigits[index] == radix) {
+                    fractionDigits[index] = 0
+                    roundUp(index - 1)
+                }
+            }
+
+            if (lastDigit < halfRadix) {
+                // round down, nothing more to do
+            } else if (lastDigit > halfRadix) {
+                // round up
+                roundUp(fractionDigits.lastIndex)
+            } else {
+                // round half even
+                if (fractionDigits[fractionDigits.lastIndex] % 2 != 0) {
+                    roundUp(fractionDigits.lastIndex)
+                }
+            }
         }
 
         // Trim training zeroes
