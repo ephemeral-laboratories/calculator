@@ -1,8 +1,9 @@
-package garden.ephemeral.calculator
+package garden.ephemeral.calculator.text
 
 import assertk.assertThat
 import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
+import garden.ephemeral.calculator.isCloseTo
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.Parentheses
 import garden.ephemeral.calculator.nodes.functions.Function1
@@ -16,9 +17,6 @@ import garden.ephemeral.calculator.nodes.ops.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
-import garden.ephemeral.calculator.text.ExpressionParser
-import garden.ephemeral.calculator.text.PositionalFormatSymbols
-import garden.ephemeral.calculator.text.ValueFormat
 import garden.ephemeral.math.complex.i
 import garden.ephemeral.math.complex.minus
 import garden.ephemeral.math.complex.plus
@@ -30,7 +28,7 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.text.ParseException
 
-class ParseTest {
+class ExpressionParserTest {
     lateinit var parser: ExpressionParser
 
     @BeforeEach
@@ -60,6 +58,7 @@ class ParseTest {
                 arguments("42", Value(50.0)),
                 arguments("↊↋", Value(131.0)),
                 arguments("123;45", Value(171.36805555555557)),
+                arguments(";53", Value(0.43749999999999994)),
 
                 // Constants
                 arguments("τ", ConstantNode(Constant.TAU)),

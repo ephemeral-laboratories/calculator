@@ -36,7 +36,10 @@ IM: 'Im';
 CONJ: 'conj';
 POW: 'pow';
 
-NUMBER: Digit+ ( RadixSeparator Digit+ )?;
+NUMBER
+  : Digit+ ( RadixSeparator Digit+ )?
+  | RadixSeparator Digit+
+  ;
 PLUS: '+';
 MINUS: '-' | '−';
 TIMES: '*' | '×';
