@@ -1,11 +1,9 @@
 package garden.ephemeral.calculator.ui
 
-import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
@@ -164,24 +162,36 @@ fun MainContent(
             .padding(15.dp)
             .padding(padding)
     ) {
-        SelectionContainer {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentHeight(Alignment.Bottom),
-                state = appState.outputState,
-            ) {
-                items(appState.history) { item ->
-                    Column {
-                        // Newlines added here purely for people who copy the text
-                        val input = item.input.prettyPrint(appState.valueFormat)
-                        Text(text = "$input =\n", maxLines = 1)
-                        val output = item.output.prettyPrint(appState.valueFormat)
-                        Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
+        @OptIn(ExperimentalFoundationApi::class)
+        ContextMenuArea(
+            items = {
+                listOf(
+                    ContextMenuItem("Clear") {
+                        appState.clearHistory()
+                    }
+                )
+            }
+        ) {
+            SelectionContainer {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.Bottom),
+                    state = appState.outputState,
+                ) {
+                    items(appState.history) { item ->
+                        Column {
+                            // Newlines added here purely for people who copy the text
+                            val input = item.input.prettyPrint(appState.valueFormat)
+                            Text(text = "$input =\n", maxLines = 1)
+                            val output = item.output.prettyPrint(appState.valueFormat)
+                            Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
+                        }
                     }
                 }
             }
         }
+
         IconButton(
             onClick = {
                 scope.launch {
@@ -193,6 +203,7 @@ fun MainContent(
         ) {
             Icon(Icons.Outlined.Settings, AppStrings.Settings)
         }
+
         VerticalScrollbar(
             rememberScrollbarAdapter(appState.outputState),
             modifier = Modifier

@@ -71,4 +71,8 @@ class AppState {
         }
         inputText = TextFieldValue()
     }
+
+    fun clearHistory() {
+        history.clear()
+    }
 }
