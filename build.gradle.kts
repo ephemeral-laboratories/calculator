@@ -16,22 +16,17 @@ version = "1.0.0-SNAPSHOT"
 description = "Simple calculator application built in Compose Desktop"
 
 dependencies {
-    val komplexVersion: String by project.extra
-    val antlrVersion: String by project.extra
-    val junitVersion: String by project.extra
-    val assertkVersion: String by project.extra
-
-    antlr("org.antlr:antlr4:$antlrVersion")
+    antlr(libs.antlr4)
 
     implementation(compose.desktop.currentOs)
     implementation(compose.materialIconsExtended)
-    implementation("garden.ephemeral.math:komplex:$komplexVersion")
-    implementation("org.antlr:antlr4-runtime:$antlrVersion")
+    implementation(libs.komplex)
+    implementation(libs.antlr4.runtime)
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
-    testImplementation("com.willowtreeapps.assertk:assertk-jvm:$assertkVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
+    testImplementation(libs.assertk)
+    testRuntimeOnly(libs.junit.jupiter.engine)
 }
 
 tasks.withType<AntlrTask> {
