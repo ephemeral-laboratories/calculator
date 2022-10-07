@@ -22,10 +22,12 @@ dependencies {
     implementation(compose.materialIconsExtended)
     implementation(libs.antlr4.runtime)
 
+    testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.jupiter.params)
     testImplementation(libs.assertk)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.vintage.engine)
 }
 
 tasks.withType<AntlrTask> {

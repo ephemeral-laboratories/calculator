@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
@@ -61,12 +62,18 @@ class AppState {
                 inputText = inputText.copy(
                     annotatedString = buildAnnotatedString {
                         append(inputText.text)
+                        // Sometimes the error is at EOS, so we add something to the text just so that
+                        // we will have something to highlight and select.
+                        if (e.errorOffset >= inputText.text.length) {
+                            append('?')
+                        }
                         addStyle(
                             style = SpanStyle(color = colorScheme.error, textDecoration = TextDecoration.Underline),
                             start = e.errorOffset,
                             end = e.errorOffset + 1,
                         )
                     },
+                    selection = TextRange(e.errorOffset, e.errorOffset + 1),
                 )
                 return
             }

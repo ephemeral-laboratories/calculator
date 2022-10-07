@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
@@ -47,10 +49,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import garden.ephemeral.calculator.calculator.generated.resources.Res
@@ -83,6 +84,7 @@ fun MainUi() {
         ) {
             Scaffold(
                 bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) },
+                modifier = Modifier.testTag("MainScaffold")
             ) { padding ->
                 MainContent(appState, drawerState, valueTextStyle, scope, padding)
             }
@@ -98,19 +100,23 @@ fun DrawerContent(appState: AppState) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.Start,
             modifier = Modifier
+                .testTag("Options")
                 .padding(16.dp),
         ) {
             OptionDropDown(
+                testTag = "ThemeDropDown",
                 label = stringResource(Res.string.theme),
                 values = ThemeOption.entries,
                 property = appState::themeOption,
             )
             OptionDropDown(
+                testTag = "NumberFormatDropDown",
                 label = stringResource(Res.string.number_format),
                 values = NumberFormatOption.entries,
                 property = appState::numberFormatOption,
             )
             OptionDropDown(
+                testTag = "RadixSeparatorDropDown",
                 label = stringResource(Res.string.radix_separator),
                 values = RadixSeparatorOption.entries,
                 property = when (appState.numberFormatOption) {
@@ -133,6 +139,7 @@ fun DrawerContent(appState: AppState) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun <T : Localizable> OptionDropDown(
+    testTag: String,
     label: String,
     values: Iterable<T>,
     property: KMutableProperty0<T>,
@@ -142,6 +149,7 @@ private fun <T : Localizable> OptionDropDown(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { b -> expanded = b },
+        modifier = Modifier.testTag(testTag)
     ) {
         Column {
             TextField(
@@ -150,13 +158,14 @@ private fun <T : Localizable> OptionDropDown(
                     Text(text = label)
                 },
                 onValueChange = {},
-                modifier = Modifier.menuAnchor(),
+                modifier = Modifier.menuAnchor().testTag("${testTag}TextField"),
                 readOnly = true,
             )
 
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
+                modifier = Modifier.testTag("${testTag}Menu")
             ) {
                 values.forEach { value ->
                     val scope = rememberCoroutineScope()
@@ -171,6 +180,7 @@ private fun <T : Localizable> OptionDropDown(
                                 expanded = false
                             }
                         },
+                        modifier = Modifier.testTag("${testTag}MenuItem.$value"),
                     )
                 }
             }
@@ -193,23 +203,21 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
                     imageVector = Icons.Filled.Error,
                     contentDescription = stringResource(Res.string.input_error),
                     tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag("MainTextFieldErrorIcon"),
                 )
             }
         },
         isError = appState.isInputError,
         singleLine = true,
         textStyle = valueTextStyle,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = {
+            appState.execute(colorScheme = colorScheme, scope = scope)
+        }),
         modifier = Modifier
+            .testTag("MainTextField")
             .fillMaxWidth()
-            .focusRequester(focusRequester)
-            .onKeyEvent { event ->
-                var consumed = false
-                if (event.key == Key.Enter) {
-                    appState.execute(colorScheme = colorScheme, scope = scope)
-                    consumed = true
-                }
-                consumed
-            },
+            .focusRequester(focusRequester),
     )
 
     SideEffect {
@@ -245,6 +253,7 @@ fun MainContent(
             SelectionContainer {
                 LazyColumn(
                     modifier = Modifier
+                        .testTag("HistoryList")
                         .fillMaxSize()
                         .wrapContentHeight(Alignment.Bottom),
                     state = appState.outputState,
@@ -269,6 +278,7 @@ fun MainContent(
                 }
             },
             modifier = Modifier
+                .testTag("OptionsButton")
                 .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f), CircleShape),
         ) {
             Icon(Icons.Outlined.Settings, stringResource(Res.string.settings))
