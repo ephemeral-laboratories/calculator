@@ -5,10 +5,10 @@ import garden.ephemeral.calculator.nodes.functions.Function1
 import garden.ephemeral.calculator.nodes.functions.Function1Node
 import garden.ephemeral.calculator.nodes.functions.Function2
 import garden.ephemeral.calculator.nodes.functions.Function2Node
-import garden.ephemeral.calculator.nodes.ops.InfixOperator
-import garden.ephemeral.calculator.nodes.ops.InfixOperatorNode
-import garden.ephemeral.calculator.nodes.ops.PrefixOperator
-import garden.ephemeral.calculator.nodes.ops.PrefixOperatorNode
+import garden.ephemeral.calculator.nodes.operators.InfixOperator
+import garden.ephemeral.calculator.nodes.operators.InfixOperatorNode
+import garden.ephemeral.calculator.nodes.operators.PrefixOperator
+import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value

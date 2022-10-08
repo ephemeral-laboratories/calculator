@@ -1,4 +1,4 @@
-package garden.ephemeral.calculator.nodes.ops
+package garden.ephemeral.calculator.nodes.operators
 
 import garden.ephemeral.calculator.nodes.BaseBranchNode
 import garden.ephemeral.calculator.nodes.Node

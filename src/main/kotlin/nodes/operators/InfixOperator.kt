@@ -1,4 +1,4 @@
-package garden.ephemeral.calculator.nodes.ops
+package garden.ephemeral.calculator.nodes.operators
 
 import garden.ephemeral.math.complex.Complex
 import garden.ephemeral.math.complex.toComplex
