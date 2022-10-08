@@ -35,11 +35,13 @@ class ExpressionParserTest {
 
     @BeforeEach
     fun setUp() {
-        parser = ExpressionParser(PositionalFormat(12, PositionalFormatSymbols()).apply {
-            minimumIntegerDigits = 1
-            minimumFractionDigits = 0
-            maximumFractionDigits = 10
-        })
+        parser = ExpressionParser(
+            PositionalFormat(12, PositionalFormatSymbols()).apply {
+                minimumIntegerDigits = 1
+                minimumFractionDigits = 0
+                maximumFractionDigits = 10
+            }
+        )
     }
 
     @Test
@@ -107,28 +109,32 @@ class ExpressionParserTest {
 
                 // Binary operators but the cases which are unambiguous if you have more than 2
                 arguments(
-                    "1+2+3", InfixOperatorNode(
+                    "1+2+3",
+                    InfixOperatorNode(
                         InfixOperator.PLUS,
                         InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
                         Value(3.0)
                     )
                 ),
                 arguments(
-                    "1*2*3", InfixOperatorNode(
+                    "1*2*3",
+                    InfixOperatorNode(
                         InfixOperator.TIMES,
                         InfixOperatorNode(InfixOperator.TIMES, Value(1.0), Value(2.0)),
                         Value(3.0)
                     )
                 ),
                 arguments(
-                    "1×2×3", InfixOperatorNode(
+                    "1×2×3",
+                    InfixOperatorNode(
                         InfixOperator.TIMES,
                         InfixOperatorNode(InfixOperator.TIMES, Value(1.0), Value(2.0)),
                         Value(3.0)
                     )
                 ),
                 arguments(
-                    "2πe", InfixOperatorNode(
+                    "2πe",
+                    InfixOperatorNode(
                         InfixOperator.IMPLICIT_TIMES,
                         InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.PI)),
                         ConstantNode(Constant.E)
@@ -137,21 +143,24 @@ class ExpressionParserTest {
 
                 // Operator precedence
                 arguments(
-                    "1+2-3", InfixOperatorNode(
+                    "1+2-3",
+                    InfixOperatorNode(
                         InfixOperator.MINUS,
                         InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
                         Value(3.0)
                     )
                 ),
                 arguments(
-                    "1+2*3", InfixOperatorNode(
+                    "1+2*3",
+                    InfixOperatorNode(
                         InfixOperator.PLUS,
                         Value(1.0),
                         InfixOperatorNode(InfixOperator.TIMES, Value(2.0), Value(3.0))
                     )
                 ),
                 arguments(
-                    "(1+2)*3", InfixOperatorNode(
+                    "(1+2)*3",
+                    InfixOperatorNode(
                         InfixOperator.TIMES,
                         Parentheses(InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0))),
                         Value(3.0)

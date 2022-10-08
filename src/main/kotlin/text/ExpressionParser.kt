@@ -4,7 +4,9 @@ import garden.ephemeral.calculator.grammar.ExpressionLexer
 import garden.ephemeral.calculator.grammar.ExpressionParser
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.Parentheses
+import garden.ephemeral.calculator.nodes.functions.Function1
 import garden.ephemeral.calculator.nodes.functions.Function1Node
+import garden.ephemeral.calculator.nodes.functions.Function2
 import garden.ephemeral.calculator.nodes.functions.Function2Node
 import garden.ephemeral.calculator.nodes.ops.InfixOperator
 import garden.ephemeral.calculator.nodes.ops.InfixOperatorNode
@@ -126,11 +128,19 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 }
             }
 
-            is ExpressionParser.Function1ExpressionContext ->
-                Function1Node.create(tree.func, transform(tree.arg))
+            is ExpressionParser.Function1ExpressionContext -> {
+                val name = tree.func.text
+                val function = Function1.findByName(name)
+                    ?: throw ParseException("Function not found: $name", tree.func.startIndex)
+                Function1Node(function, transform(tree.arg))
+            }
 
-            is ExpressionParser.Function2ExpressionContext ->
-                Function2Node.create(tree.func, transform(tree.arg1), transform(tree.arg2))
+            is ExpressionParser.Function2ExpressionContext -> {
+                val name = tree.func.text
+                val function = Function2.findByName(name)
+                    ?: throw ParseException("Function not found: $name", tree.func.startIndex)
+                Function2Node(function, transform(tree.arg1), transform(tree.arg2))
+            }
 
             is ExpressionParser.RealNumberContext -> {
                 val real = parseReal(tree.magnitude)
