@@ -3,6 +3,9 @@ komplex = "1.0.0"
 antlr4 = "4.9.3"
 junit = "5.8.2"
 assertk = "0.25"
+compose = "1.6.0-rc02"
+spotless = "6.3.0"
+kotlin = "1.9.22" # "2.0.0-Beta4"
 
 [libraries]
 komplex = {module = "garden.ephemeral.math:komplex", version.ref = "komplex"}
@@ -12,3 +15,8 @@ junit-jupiter-api = {module = "org.junit.jupiter:junit-jupiter-api", version.ref
 junit-jupiter-params = {module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit"}
 assertk = {module = "com.willowtreeapps.assertk:assertk-jvm", version.ref = "assertk"}
 junit-jupiter-engine = {module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit"}
+
+[plugins]
+kotlin-jvm = {id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}
+compose = {id = "org.jetbrains.compose", version.ref = "compose"}
+spotless = {id = "com.diffplug.spotless", version.ref = "spotless"}

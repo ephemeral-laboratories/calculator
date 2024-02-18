@@ -1,14 +1,13 @@
 import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
 
 plugins {
-    kotlin("jvm") version "1.6.10"
-    id("org.jetbrains.compose") version "1.1.0"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.compose)
+    alias(libs.plugins.spotless)
     antlr
     id("utf8-workarounds")
-    id("com.diffplug.spotless") version "6.3.0"
 }
 
 group = "garden.ephemeral.calculator"
@@ -59,7 +58,7 @@ compose.desktop {
         jvmArgs("-Djpackage.app-version.unmangled=${project.version}")
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = project.name.capitalizeAsciiOnly()
+            packageName = "Calculator"
             packageVersion = project.version.toString().removeSuffix("-SNAPSHOT")
             description = project.description
             vendor = "Ephemeral Laboratories"
