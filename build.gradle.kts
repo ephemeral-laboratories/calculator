@@ -62,7 +62,7 @@ compose.desktop {
             packageVersion = project.version.toString().removeSuffix("-SNAPSHOT")
             description = project.description
             vendor = "Ephemeral Laboratories"
-            copyright = "Copyright © 2022 $vendor"
+            copyright = "Copyright © 2022,2024 $vendor"
 
             windows {
                 upgradeUuid = "3e9ee76f-453c-4819-9371-41745b72b8cc"
@@ -81,9 +81,9 @@ compose.desktop {
 
 spotless {
     kotlin {
-        ktlint("0.44.0").userData(mapOf("disabled_rules" to "no-wildcard-imports"))
+        ktlint(libs.versions.ktlint.get())
     }
     kotlinGradle {
-        ktlint("0.44.0")
+        ktlint(libs.versions.ktlint.get())
     }
 }

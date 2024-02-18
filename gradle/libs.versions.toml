@@ -4,7 +4,8 @@ antlr4 = "4.9.3"
 junit = "5.8.2"
 assertk = "0.25"
 compose = "1.6.0-rc02"
-spotless = "6.3.0"
+spotless = "6.22.0"
+ktlint = "0.48.0"
 kotlin = "1.9.22" # "2.0.0-Beta4"
 
 [libraries]
