@@ -25,6 +25,7 @@ import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.misc.ParseCancellationException
 import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.TerminalNodeImpl
 import java.text.ParseException
 
 class ExpressionParser(private val realFormat: PositionalFormat) {
@@ -66,34 +67,30 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.ParenthesizedExpressionContext ->
                 Parentheses(transform(tree.expression()))
 
-            is ExpressionParser.PlusExpressionContext -> {
-                val children = tree.plusChildExpression()
-                var node = InfixOperatorNode(
-                    InfixOperator.PLUS,
-                    transform(children[0]),
-                    transform(children[1]),
-                )
-                children.asSequence().drop(2).forEach { expression ->
-                    node = InfixOperatorNode(InfixOperator.PLUS, node, transform(expression))
+            is ExpressionParser.PlusMinusExpressionContext -> {
+                var node = transform(tree.getChild(0))
+                for (i in 1 until tree.childCount step 2) {
+                    val operator = (tree.getChild(i) as TerminalNodeImpl).symbol
+                    val nextChild = tree.getChild(i + 1)
+                    node = InfixOperatorNode(
+                        if (operator.type == ExpressionLexer.PLUS) InfixOperator.PLUS else InfixOperator.MINUS,
+                        node,
+                        transform(nextChild),
+                    )
                 }
                 node
             }
 
-            is ExpressionParser.MinusExpressionContext -> InfixOperatorNode(
-                InfixOperator.MINUS,
-                transform(tree.minusChildExpression(0)),
-                transform(tree.minusChildExpression(1)),
-            )
-
-            is ExpressionParser.TimesExpressionContext -> {
-                val children = tree.timesChildExpression()
-                var node = InfixOperatorNode(
-                    InfixOperator.TIMES,
-                    transform(children[0]),
-                    transform(children[1]),
-                )
-                children.asSequence().drop(2).forEach { expression ->
-                    node = InfixOperatorNode(InfixOperator.TIMES, node, transform(expression))
+            is ExpressionParser.TimesDivideExpressionContext -> {
+                var node = transform(tree.getChild(0))
+                for (i in 1 until tree.childCount step 2) {
+                    val operator = (tree.getChild(i) as TerminalNodeImpl).symbol
+                    val nextChild = tree.getChild(i + 1)
+                    node = InfixOperatorNode(
+                        if (operator.type == ExpressionLexer.TIMES) InfixOperator.TIMES else InfixOperator.DIVIDE,
+                        node,
+                        transform(nextChild),
+                    )
                 }
                 node
             }
@@ -111,12 +108,6 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 }
                 node
             }
-
-            is ExpressionParser.DivideExpressionContext -> InfixOperatorNode(
-                InfixOperator.DIVIDE,
-                transform(tree.divideChildExpression(0)),
-                transform(tree.divideChildExpression(1)),
-            )
 
             is ExpressionParser.PowerExpressionContext -> InfixOperatorNode(
                 InfixOperator.POWER,
@@ -186,12 +177,10 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             // But it's ugly in its own way, so we'll just treat them all
             // the same and unwrap the single child.
             is ExpressionParser.ExpressionContext,
-            is ExpressionParser.PlusChildExpressionContext,
-            is ExpressionParser.MinusChildExpressionContext,
-            is ExpressionParser.TimesChildExpressionContext,
+            is ExpressionParser.PlusMinusChildExpressionContext,
+            is ExpressionParser.TimesDivideChildExpressionContext,
             is ExpressionParser.ImplicitTimesFirstChildExpressionContext,
             is ExpressionParser.ImplicitTimesChildExpressionContext,
-            is ExpressionParser.DivideChildExpressionContext,
             is ExpressionParser.PowerChildExpressionContext,
             is ExpressionParser.UnaryMinusChildExpressionContext,
             is ExpressionParser.FunctionExpressionContext,

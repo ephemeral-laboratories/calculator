@@ -141,6 +141,24 @@ class ExpressionParserTest {
                     ),
                 ),
 
+                // Implicit operators
+                arguments(
+                    "2π",
+                    InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.PI)),
+                ),
+                arguments(
+                    "2(3)",
+                    InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), Parentheses(Value(3.0))),
+                ),
+                arguments(
+                    "2(1+2)",
+                    InfixOperatorNode(
+                        InfixOperator.IMPLICIT_TIMES,
+                        Value(2.0),
+                        Parentheses(InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0))),
+                    ),
+                ),
+
                 // Operator precedence
                 arguments(
                     "1+2-3",
@@ -148,6 +166,14 @@ class ExpressionParserTest {
                         InfixOperator.MINUS,
                         InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
                         Value(3.0),
+                    ),
+                ),
+                arguments(
+                    "3-1+2",
+                    InfixOperatorNode(
+                        InfixOperator.PLUS,
+                        InfixOperatorNode(InfixOperator.MINUS, Value(3.0), Value(1.0)),
+                        Value(2.0),
                     ),
                 ),
                 arguments(
@@ -166,11 +192,37 @@ class ExpressionParserTest {
                         Value(3.0),
                     ),
                 ),
-
-                // Implicit operators
                 arguments(
-                    "2π",
-                    InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.PI)),
+                    "1*2/3",
+                    InfixOperatorNode(
+                        InfixOperator.DIVIDE,
+                        InfixOperatorNode(InfixOperator.TIMES, Value(1.0), Value(2.0)),
+                        Value(3.0),
+                    ),
+                ),
+                arguments(
+                    "1/2*3",
+                    InfixOperatorNode(
+                        InfixOperator.TIMES,
+                        InfixOperatorNode(InfixOperator.DIVIDE, Value(1.0), Value(2.0)),
+                        Value(3.0),
+                    ),
+                ),
+                arguments(
+                    "6/2(3)",
+                    InfixOperatorNode(
+                        InfixOperator.DIVIDE,
+                        Value(6.0),
+                        InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), Parentheses(Value(3.0))),
+                    )
+                ),
+                arguments(
+                    "3*1(2)",
+                    InfixOperatorNode(
+                        InfixOperator.TIMES,
+                        Value(3.0),
+                        InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(1.0), Parentheses(Value(2.0))),
+                    )
                 ),
 
                 // Complex value simplification

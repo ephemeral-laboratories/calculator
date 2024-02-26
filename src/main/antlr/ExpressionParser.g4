@@ -13,11 +13,9 @@ expression
     : value
     | functionExpression
     | parenthesizedExpression
-    | plusExpression
-    | minusExpression
-    | timesExpression
+    | plusMinusExpression
+    | timesDivideExpression
     | implicitTimesExpression
-    | divideExpression
     | powerExpression
     | unaryMinusExpression
     ;
@@ -26,35 +24,22 @@ parenthesizedExpression
     : OPEN_PAREN expression CLOSE_PAREN
     ;
 
-plusExpression: plusChildExpression ( PLUS plusChildExpression )+;
-plusChildExpression
+plusMinusExpression: plusMinusChildExpression ( operator=( PLUS | MINUS ) plusMinusChildExpression )+;
+plusMinusChildExpression
     : value
     | functionExpression
-    | timesExpression
+    | timesDivideExpression
     | implicitTimesExpression
-    | divideExpression
     | powerExpression
     | unaryMinusExpression
     | parenthesizedExpression
     ;
 
-minusExpression: minusChildExpression MINUS minusChildExpression;
-minusChildExpression
+timesDivideExpression: timesDivideChildExpression ( operator=( TIMES | DIVIDE ) timesDivideChildExpression )+;
+timesDivideChildExpression
     : value
     | functionExpression
-    | plusExpression
-    | timesExpression
     | implicitTimesExpression
-    | divideExpression
-    | powerExpression
-    | unaryMinusExpression
-    | parenthesizedExpression
-    ;
-
-timesExpression: timesChildExpression ( TIMES timesChildExpression )+;
-timesChildExpression
-    : value
-    | functionExpression
     | powerExpression
     | unaryMinusExpression
     | parenthesizedExpression
@@ -73,15 +58,6 @@ implicitTimesChildExpression
     | functionExpression
     | powerExpression
     // Can't have unary minus - think about why
-    | parenthesizedExpression
-    ;
-
-divideExpression: divideChildExpression DIVIDE divideChildExpression;
-divideChildExpression
-    : value
-    | functionExpression
-    | powerExpression
-    | unaryMinusExpression
     | parenthesizedExpression
     ;
 
