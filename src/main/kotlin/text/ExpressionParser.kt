@@ -96,15 +96,10 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             }
 
             is ExpressionParser.ImplicitTimesExpressionContext -> {
-                val first = tree.implicitTimesFirstChildExpression()
-                val children = tree.implicitTimesChildExpression()
-                var node = InfixOperatorNode(
-                    InfixOperator.IMPLICIT_TIMES,
-                    transform(first),
-                    transform(children[0]),
-                )
-                children.asSequence().drop(1).forEach { expression ->
-                    node = InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, node, transform(expression))
+                var node = transform(tree.implicitTimesFirstChildExpression())
+                for (i in 1 until tree.childCount) {
+                    val nextChild = tree.getChild(i)
+                    node = InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, node, transform(nextChild))
                 }
                 node
             }
