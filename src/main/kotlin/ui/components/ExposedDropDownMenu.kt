@@ -4,12 +4,29 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.ZeroCornerSize
-import androidx.compose.material.*
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ProvideTextStyle
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +58,7 @@ fun <T : Localizable> ExposedDropDownMenu(
     label: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colors.onSurface.copy(alpha = TextFieldDefaults.BackgroundOpacity),
-    shape: Shape = MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize)
+    shape: Shape = MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
 ) {
     SimpleExposedDropDownMenuImpl(
         values = values,
@@ -61,13 +78,13 @@ fun <T : Localizable> ExposedDropDownMenu(
                             color,
                             Offset(0f, y),
                             Offset(size.width, y),
-                            strokeWidth
+                            strokeWidth,
                         )
-                    }
+                    },
             ) {
                 content()
             }
-        }
+        },
     )
 }
 
@@ -79,7 +96,7 @@ fun <T : Localizable> OutlinedExposedDropDownMenu(
     label: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colors.onSurface.copy(alpha = TextFieldDefaults.BackgroundOpacity),
-    shape: Shape = MaterialTheme.shapes.small
+    shape: Shape = MaterialTheme.shapes.small,
 ) {
     SimpleExposedDropDownMenuImpl(
         values = values,
@@ -90,13 +107,10 @@ fun <T : Localizable> OutlinedExposedDropDownMenu(
         backgroundColor = backgroundColor,
         shape = shape,
         decorator = { color, width, content ->
-            Box(
-                Modifier
-                    .border(width, color, shape)
-            ) {
+            Box(Modifier.border(width, color, shape)) {
                 content()
             }
-        }
+        },
     )
 }
 
@@ -109,18 +123,24 @@ private fun <T : Localizable> SimpleExposedDropDownMenuImpl(
     modifier: Modifier = Modifier,
     backgroundColor: Color,
     shape: Shape,
-    decorator: @Composable (Color, Dp, @Composable () -> Unit) -> Unit
+    decorator: @Composable (Color, Dp, @Composable () -> Unit) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var textfieldSize by remember { mutableStateOf(Size.Zero) }
+    var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
     val indicatorColor =
-        if (expanded) MaterialTheme.colors.primary.copy(alpha = ContentAlpha.high)
-        else MaterialTheme.colors.onSurface.copy(alpha = TextFieldDefaults.UnfocusedIndicatorLineOpacity)
+        if (expanded) {
+            MaterialTheme.colors.primary.copy(alpha = ContentAlpha.high)
+        } else {
+            MaterialTheme.colors.onSurface.copy(alpha = TextFieldDefaults.UnfocusedIndicatorLineOpacity)
+        }
     val indicatorWidth = (if (expanded) 2 else 1).dp
     val labelColor =
-        if (expanded) MaterialTheme.colors.primary.copy(alpha = ContentAlpha.high)
-        else MaterialTheme.colors.onSurface.copy(ContentAlpha.medium)
+        if (expanded) {
+            MaterialTheme.colors.primary.copy(alpha = ContentAlpha.high)
+        } else {
+            MaterialTheme.colors.onSurface.copy(ContentAlpha.medium)
+        }
     val trailingIconColor = MaterialTheme.colors.onSurface.copy(alpha = TextFieldDefaults.IconOpacity)
 
     val rotation: Float by animateFloatAsState(if (expanded) 180f else 0f)
@@ -133,13 +153,13 @@ private fun <T : Localizable> SimpleExposedDropDownMenuImpl(
                 Modifier
                     .fillMaxWidth()
                     .background(color = backgroundColor, shape = shape)
-                    .onGloballyPositioned { textfieldSize = it.size.toSize() }
+                    .onGloballyPositioned { textFieldSize = it.size.toSize() }
                     .clip(shape)
                     .clickable {
                         expanded = !expanded
                         focusManager.clearFocus()
                     }
-                    .padding(start = 16.dp, end = 12.dp, top = 7.dp, bottom = 10.dp)
+                    .padding(start = 16.dp, end = 12.dp, top = 7.dp, bottom = 10.dp),
             ) {
                 Column(Modifier.padding(end = 32.dp)) {
                     ProvideTextStyle(value = MaterialTheme.typography.caption.copy(color = labelColor)) {
@@ -147,7 +167,7 @@ private fun <T : Localizable> SimpleExposedDropDownMenuImpl(
                     }
                     Text(
                         text = selectedValue.localizedName,
-                        modifier = Modifier.padding(top = 1.dp)
+                        modifier = Modifier.padding(top = 1.dp),
                     )
                 }
                 Icon(
@@ -157,7 +177,7 @@ private fun <T : Localizable> SimpleExposedDropDownMenuImpl(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .padding(top = 4.dp)
-                        .rotate(rotation)
+                        .rotate(rotation),
                 )
             }
         }
@@ -166,7 +186,7 @@ private fun <T : Localizable> SimpleExposedDropDownMenuImpl(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .width(with(LocalDensity.current) { textfieldSize.width.toDp() })
+                .width(with(LocalDensity.current) { textFieldSize.width.toDp() }),
         ) {
             values.forEach { value ->
                 val scope = rememberCoroutineScope()
@@ -177,7 +197,7 @@ private fun <T : Localizable> SimpleExposedDropDownMenuImpl(
                             delay(150)
                             expanded = false
                         }
-                    }
+                    },
                 ) {
                     Text(value.localizedName)
                 }

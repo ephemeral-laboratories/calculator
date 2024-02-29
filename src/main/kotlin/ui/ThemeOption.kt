@@ -6,5 +6,4 @@ enum class ThemeOption(override val localizedName: String) : Localizable {
     SYSTEM_DEFAULT(AppStrings.SystemDefault),
     LIGHT(AppStrings.Light),
     DARK(AppStrings.Dark),
-    ;
 }

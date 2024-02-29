@@ -30,7 +30,7 @@ class DigitBuffer(private val radix: Int) {
     fun enforceLimits(
         minimumIntegerDigits: Int,
         minimumFractionDigits: Int,
-        maximumFractionDigits: Int
+        maximumFractionDigits: Int,
     ) {
         if (minimumIntegerDigits > 0 && integerDigitCount == 0) {
             prepend(0)

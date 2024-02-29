@@ -22,5 +22,4 @@ enum class NumberFormatOption(
         radix = 12,
         defaultSymbols = PositionalFormatSymbols(),
     ),
-    ;
 }

@@ -1,7 +1,19 @@
 package garden.ephemeral.calculator.nodes.functions
 
 import garden.ephemeral.math.complex.complexSqrt
-import kotlin.math.*
+import kotlin.math.acos
+import kotlin.math.acosh
+import kotlin.math.asin
+import kotlin.math.asinh
+import kotlin.math.atan
+import kotlin.math.atanh
+import kotlin.math.cos
+import kotlin.math.cosh
+import kotlin.math.sin
+import kotlin.math.sinh
+import kotlin.math.sqrt
+import kotlin.math.tan
+import kotlin.math.tanh
 
 internal fun sec(x: Double) = 1.0 / cos(x)
 internal fun csc(x: Double) = 1.0 / sin(x)

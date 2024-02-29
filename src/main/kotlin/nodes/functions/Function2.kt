@@ -27,7 +27,7 @@ enum class Function2(
     }
 
     companion object {
-        private val byName = values()
+        private val byName = entries
             .asSequence()
             .map { f -> f.printedName to f }
             .toMap()

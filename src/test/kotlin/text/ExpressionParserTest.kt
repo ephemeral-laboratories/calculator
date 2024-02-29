@@ -40,7 +40,7 @@ class ExpressionParserTest {
                 minimumIntegerDigits = 1
                 minimumFractionDigits = 0
                 maximumFractionDigits = 10
-            }
+            },
         )
     }
 
@@ -89,8 +89,8 @@ class ExpressionParserTest {
                     "-(3+5)",
                     PrefixOperatorNode(
                         PrefixOperator.UNARY_MINUS,
-                        Parentheses(InfixOperatorNode(InfixOperator.PLUS, Value(3.0), Value(5.0)))
-                    )
+                        Parentheses(InfixOperatorNode(InfixOperator.PLUS, Value(3.0), Value(5.0))),
+                    ),
                 ),
 
                 // Real value simplification
@@ -113,32 +113,32 @@ class ExpressionParserTest {
                     InfixOperatorNode(
                         InfixOperator.PLUS,
                         InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
-                        Value(3.0)
-                    )
+                        Value(3.0),
+                    ),
                 ),
                 arguments(
                     "1*2*3",
                     InfixOperatorNode(
                         InfixOperator.TIMES,
                         InfixOperatorNode(InfixOperator.TIMES, Value(1.0), Value(2.0)),
-                        Value(3.0)
-                    )
+                        Value(3.0),
+                    ),
                 ),
                 arguments(
                     "1×2×3",
                     InfixOperatorNode(
                         InfixOperator.TIMES,
                         InfixOperatorNode(InfixOperator.TIMES, Value(1.0), Value(2.0)),
-                        Value(3.0)
-                    )
+                        Value(3.0),
+                    ),
                 ),
                 arguments(
                     "2πe",
                     InfixOperatorNode(
                         InfixOperator.IMPLICIT_TIMES,
                         InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.PI)),
-                        ConstantNode(Constant.E)
-                    )
+                        ConstantNode(Constant.E),
+                    ),
                 ),
 
                 // Operator precedence
@@ -147,30 +147,30 @@ class ExpressionParserTest {
                     InfixOperatorNode(
                         InfixOperator.MINUS,
                         InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
-                        Value(3.0)
-                    )
+                        Value(3.0),
+                    ),
                 ),
                 arguments(
                     "1+2*3",
                     InfixOperatorNode(
                         InfixOperator.PLUS,
                         Value(1.0),
-                        InfixOperatorNode(InfixOperator.TIMES, Value(2.0), Value(3.0))
-                    )
+                        InfixOperatorNode(InfixOperator.TIMES, Value(2.0), Value(3.0)),
+                    ),
                 ),
                 arguments(
                     "(1+2)*3",
                     InfixOperatorNode(
                         InfixOperator.TIMES,
                         Parentheses(InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0))),
-                        Value(3.0)
-                    )
+                        Value(3.0),
+                    ),
                 ),
 
                 // Implicit operators
                 arguments(
                     "2π",
-                    InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.PI))
+                    InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), ConstantNode(Constant.PI)),
                 ),
 
                 // Complex value simplification
