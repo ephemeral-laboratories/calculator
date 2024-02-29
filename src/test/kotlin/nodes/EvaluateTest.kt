@@ -35,7 +35,7 @@ class EvaluateTest {
 
                 arguments(
                     InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.i)),
-                    Value(1 + 2.i)
+                    Value(1 + 2.i),
                 ),
 
                 arguments(ConstantNode(Constant.TAU), Value(6.283185307179586)),
@@ -51,17 +51,17 @@ class EvaluateTest {
                     InfixOperatorNode(
                         InfixOperator.PLUS,
                         Value(1.0),
-                        InfixOperatorNode(InfixOperator.TIMES, Value(2.0), Value(3.0))
+                        InfixOperatorNode(InfixOperator.TIMES, Value(2.0), Value(3.0)),
                     ),
-                    Value(7.0)
+                    Value(7.0),
                 ),
                 arguments(
                     InfixOperatorNode(
                         InfixOperator.TIMES,
                         InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
-                        Value(3.0)
+                        Value(3.0),
                     ),
-                    Value(9.0)
+                    Value(9.0),
                 ),
 
                 arguments(Function1Node(Function1.SIN, Value(1.0)), Value(0.8414709848078965)),
@@ -69,7 +69,7 @@ class EvaluateTest {
 
                 arguments(
                     Function1Node(Function1.SIN, Value(1 + 1.i)),
-                    Value(1.2984575814159773 + 0.6349639147847361.i)
+                    Value(1.2984575814159773 + 0.6349639147847361.i),
                 ),
                 arguments(Function2Node(Function2.POW, Value(1 + 1.i), Value(2.0)), Value(2.i)),
             )

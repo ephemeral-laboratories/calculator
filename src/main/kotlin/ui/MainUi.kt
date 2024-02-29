@@ -1,21 +1,41 @@
 package garden.ephemeral.calculator.ui
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ContextMenuArea
+import androidx.compose.foundation.ContextMenuItem
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -56,7 +76,7 @@ fun MainUi() {
             scaffoldState = scaffoldState,
             drawerContent = @Composable { DrawerContent(appState) },
             drawerShape = customDrawerShape,
-            bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) }
+            bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) },
         ) { padding ->
             MainContent(appState, scaffoldState, valueTextStyle, scope, padding)
         }
@@ -68,26 +88,26 @@ fun DrawerContent(appState: AppState) {
     Column {
         OptionDropDown(
             label = AppStrings.Theme,
-            values = ThemeOption.values(),
-            property = appState::themeOption
+            values = ThemeOption.entries,
+            property = appState::themeOption,
         )
         OptionDropDown(
             label = AppStrings.NumberFormat,
-            values = NumberFormatOption.values(),
-            property = appState::numberFormatOption
+            values = NumberFormatOption.entries,
+            property = appState::numberFormatOption,
         )
         OptionDropDown(
             label = AppStrings.RadixSeparator,
-            values = RadixSeparatorOption.values(),
+            values = RadixSeparatorOption.entries,
             property = when (appState.numberFormatOption) {
                 NumberFormatOption.DECIMAL -> appState::decimalRadixSeparatorOption
                 NumberFormatOption.DOZENAL -> appState::dozenalRadixSeparatorOption
-            }
+            },
         )
 
         Box(
             modifier = Modifier.fillMaxHeight().padding(16.dp),
-            contentAlignment = Alignment.BottomStart
+            contentAlignment = Alignment.BottomStart,
         ) {
             val version = System.getProperty("jpackage.app-version.unmangled") ?: "[DEV]"
             Text("Version $version")
@@ -98,7 +118,7 @@ fun DrawerContent(appState: AppState) {
 @Composable
 private fun <T : Localizable> OptionDropDown(
     label: String,
-    values: Array<T>,
+    values: List<T>,
     property: KMutableProperty0<T>,
 ) {
     ExposedDropDownMenu(
@@ -132,7 +152,7 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester)
-            .onKeyEvent @OptIn(ExperimentalComposeUiApi::class) { event ->
+            .onKeyEvent { event ->
                 var consumed = false
                 if (event.key == Key.Enter) {
                     appState.execute(colorScheme = colorScheme, scope = scope)
@@ -160,7 +180,7 @@ fun MainContent(
             .fillMaxSize()
             // Best effort to line the text up between the two views, but still off by 0.5 dp :(
             .padding(15.dp)
-            .padding(padding)
+            .padding(padding),
     ) {
         @OptIn(ExperimentalFoundationApi::class)
         ContextMenuArea(
@@ -168,9 +188,9 @@ fun MainContent(
                 listOf(
                     ContextMenuItem("Clear") {
                         appState.clearHistory()
-                    }
+                    },
                 )
-            }
+            },
         ) {
             SelectionContainer {
                 LazyColumn(

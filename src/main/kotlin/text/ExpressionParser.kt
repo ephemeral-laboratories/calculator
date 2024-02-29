@@ -16,7 +16,13 @@ import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.math.complex.Complex
-import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.BailErrorStrategy
+import org.antlr.v4.runtime.BaseErrorListener
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.RecognitionException
+import org.antlr.v4.runtime.Recognizer
+import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.misc.ParseCancellationException
 import org.antlr.v4.runtime.tree.ParseTree
 import java.text.ParseException
@@ -65,7 +71,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 var node = InfixOperatorNode(
                     InfixOperator.PLUS,
                     transform(children[0]),
-                    transform(children[1])
+                    transform(children[1]),
                 )
                 children.asSequence().drop(2).forEach { expression ->
                     node = InfixOperatorNode(InfixOperator.PLUS, node, transform(expression))
@@ -76,7 +82,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.MinusExpressionContext -> InfixOperatorNode(
                 InfixOperator.MINUS,
                 transform(tree.minusChildExpression(0)),
-                transform(tree.minusChildExpression(1))
+                transform(tree.minusChildExpression(1)),
             )
 
             is ExpressionParser.TimesExpressionContext -> {
@@ -84,7 +90,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 var node = InfixOperatorNode(
                     InfixOperator.TIMES,
                     transform(children[0]),
-                    transform(children[1])
+                    transform(children[1]),
                 )
                 children.asSequence().drop(2).forEach { expression ->
                     node = InfixOperatorNode(InfixOperator.TIMES, node, transform(expression))
@@ -98,7 +104,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 var node = InfixOperatorNode(
                     InfixOperator.IMPLICIT_TIMES,
                     transform(first),
-                    transform(children[0])
+                    transform(children[0]),
                 )
                 children.asSequence().drop(1).forEach { expression ->
                     node = InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, node, transform(expression))
@@ -109,13 +115,13 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.DivideExpressionContext -> InfixOperatorNode(
                 InfixOperator.DIVIDE,
                 transform(tree.divideChildExpression(0)),
-                transform(tree.divideChildExpression(1))
+                transform(tree.divideChildExpression(1)),
             )
 
             is ExpressionParser.PowerExpressionContext -> InfixOperatorNode(
                 InfixOperator.POWER,
                 transform(tree.powerChildExpression(0)),
-                transform(tree.powerChildExpression(1))
+                transform(tree.powerChildExpression(1)),
             )
 
             is ExpressionParser.UnaryMinusExpressionContext -> {
@@ -189,7 +195,8 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.PowerChildExpressionContext,
             is ExpressionParser.UnaryMinusChildExpressionContext,
             is ExpressionParser.FunctionExpressionContext,
-            is ExpressionParser.ValueContext ->
+            is ExpressionParser.ValueContext,
+            ->
                 transform(tree.getChild(0))
 
             else -> throw UnsupportedOperationException("Unknown tree node: $tree")
@@ -221,7 +228,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             line: Int,
             charPositionInLine: Int,
             msg: String?,
-            e: RecognitionException?
+            e: RecognitionException?,
         ) {
             if (message != null) {
                 return

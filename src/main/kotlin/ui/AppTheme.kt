@@ -18,10 +18,8 @@ fun AppTheme(option: ThemeOption, content: @Composable () -> Unit) {
     }
 
     MaterialTheme(
-        typography = Typography(
-            defaultFontFamily = FontFamily(Font("/RobotoCondensed-Regular.ttf"))
-        ),
-        colors = colors
+        typography = Typography(defaultFontFamily = FontFamily(Font("/RobotoCondensed-Regular.ttf"))),
+        colors = colors,
     ) {
         content()
     }
