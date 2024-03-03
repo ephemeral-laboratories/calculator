@@ -192,7 +192,7 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
                 Icon(
                     imageVector = Icons.Filled.Error,
                     contentDescription = stringResource(Res.string.input_error),
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.error,
                 )
             }
         },

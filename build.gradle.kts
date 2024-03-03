@@ -82,6 +82,7 @@ compose.desktop {
 
 spotless {
     kotlin {
+        targetExclude("build/generated/**")
         ktlint(libs.versions.ktlint.get())
     }
     kotlinGradle {
