@@ -1,5 +1,7 @@
 package garden.ephemeral.calculator.ui.common
 
+import androidx.compose.runtime.Composable
+
 /**
  * Interface for objects which have a localised name.
  *
@@ -8,5 +10,11 @@ package garden.ephemeral.calculator.ui.common
  * need to accept the locale somehow.
  */
 interface Localizable {
+
+    /**
+     * The localised name of this thing.
+     */
     val localizedName: String
+        @Composable
+        get
 }

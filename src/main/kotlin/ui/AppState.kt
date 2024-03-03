@@ -15,8 +15,10 @@ import garden.ephemeral.calculator.text.ExpressionParser
 import garden.ephemeral.calculator.text.ValueFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.text.ParseException
 
+@OptIn(ExperimentalResourceApi::class)
 class AppState {
     val outputState = LazyListState()
     var inputText by mutableStateOf(TextFieldValue(""))
@@ -34,7 +36,8 @@ class AppState {
         }
         val symbols = numberFormatOption.defaultSymbols.copy(
             radixSeparator = radixSeparatorOption.symbol,
-            notANumber = AppStrings.Undefined,
+            // XXX: Is there any way to sensibly load a resource string from here? :(
+            // notANumber = stringResource(Res.string.undefined),
         )
         ValueFormat(numberFormatOption.radix, symbols)
     }

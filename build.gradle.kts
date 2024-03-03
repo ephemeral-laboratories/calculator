@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -17,6 +16,7 @@ description = "Simple calculator application built in Compose Desktop"
 dependencies {
     antlr(libs.antlr4)
 
+    implementation(compose.components.resources)
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)

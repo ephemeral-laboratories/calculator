@@ -1,15 +1,28 @@
 package garden.ephemeral.calculator.ui
 
+import androidx.compose.runtime.Composable
+import garden.ephemeral.calculator.calculator.generated.resources.Res
+import garden.ephemeral.calculator.calculator.generated.resources.radix_separator_comma
+import garden.ephemeral.calculator.calculator.generated.resources.radix_separator_period
+import garden.ephemeral.calculator.calculator.generated.resources.radix_separator_semicolon
 import garden.ephemeral.calculator.ui.common.Localizable
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalResourceApi::class)
 enum class RadixSeparatorOption(
-    override val localizedName: String,
+    private val stringResourceKey: StringResource,
     val symbol: String,
 ) : Localizable {
-    PERIOD(AppStrings.Period, "."),
-    COMMA(AppStrings.Comma, ","),
-    SEMICOLON(AppStrings.Semicolon, ";"),
+    PERIOD(Res.string.radix_separator_period, "."),
+    COMMA(Res.string.radix_separator_comma, ","),
+    SEMICOLON(Res.string.radix_separator_semicolon, ";"),
     ;
+
+    override val localizedName: String
+        @Composable
+        get() = stringResource(stringResourceKey)
 
     companion object {
         fun forSymbol(symbol: String): RadixSeparatorOption {

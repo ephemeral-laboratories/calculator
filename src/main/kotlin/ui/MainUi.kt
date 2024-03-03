@@ -53,11 +53,19 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import garden.ephemeral.calculator.calculator.generated.resources.Res
+import garden.ephemeral.calculator.calculator.generated.resources.input_error
+import garden.ephemeral.calculator.calculator.generated.resources.number_format
+import garden.ephemeral.calculator.calculator.generated.resources.radix_separator
+import garden.ephemeral.calculator.calculator.generated.resources.settings
+import garden.ephemeral.calculator.calculator.generated.resources.theme
 import garden.ephemeral.calculator.ui.common.Localizable
 import garden.ephemeral.calculator.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 import kotlin.reflect.KMutableProperty0
 
 @Composable
@@ -82,6 +90,7 @@ fun MainUi() {
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun DrawerContent(appState: AppState) {
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -92,17 +101,17 @@ fun DrawerContent(appState: AppState) {
                 .padding(16.dp),
         ) {
             OptionDropDown(
-                label = AppStrings.Theme,
+                label = stringResource(Res.string.theme),
                 values = ThemeOption.entries,
                 property = appState::themeOption,
             )
             OptionDropDown(
-                label = AppStrings.NumberFormat,
+                label = stringResource(Res.string.number_format),
                 values = NumberFormatOption.entries,
                 property = appState::numberFormatOption,
             )
             OptionDropDown(
-                label = AppStrings.RadixSeparator,
+                label = stringResource(Res.string.radix_separator),
                 values = RadixSeparatorOption.entries,
                 property = when (appState.numberFormatOption) {
                     NumberFormatOption.DECIMAL -> appState::decimalRadixSeparatorOption
@@ -169,6 +178,7 @@ private fun <T : Localizable> OptionDropDown(
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: CoroutineScope) {
     val focusRequester = remember { FocusRequester() }
@@ -179,7 +189,11 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
         onValueChange = appState::updateInputText,
         trailingIcon = @Composable {
             if (appState.isInputError) {
-                Icon(Icons.Filled.Error, AppStrings.InputError, tint = MaterialTheme.colorScheme.error)
+                Icon(
+                    imageVector = Icons.Filled.Error,
+                    contentDescription = stringResource(Res.string.input_error),
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         },
         isError = appState.isInputError,
@@ -203,6 +217,7 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun MainContent(
     appState: AppState,
@@ -256,7 +271,7 @@ fun MainContent(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f), CircleShape),
         ) {
-            Icon(Icons.Outlined.Settings, AppStrings.Settings)
+            Icon(Icons.Outlined.Settings, stringResource(Res.string.settings))
         }
 
         VerticalScrollbar(
