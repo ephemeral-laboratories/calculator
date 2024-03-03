@@ -71,7 +71,7 @@ fun MainUi() {
 
         ModalNavigationDrawer(
             drawerContent = @Composable { DrawerContent(appState) },
-            drawerState = drawerState
+            drawerState = drawerState,
         ) {
             Scaffold(
                 bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) },
@@ -89,7 +89,7 @@ fun DrawerContent(appState: AppState) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.Start,
             modifier = Modifier
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             OptionDropDown(
                 label = AppStrings.Theme,

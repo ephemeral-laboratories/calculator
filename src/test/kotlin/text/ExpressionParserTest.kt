@@ -214,7 +214,7 @@ class ExpressionParserTest {
                         InfixOperator.DIVIDE,
                         Value(6.0),
                         InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(2.0), Parentheses(Value(3.0))),
-                    )
+                    ),
                 ),
                 arguments(
                     "3*1(2)",
@@ -222,7 +222,7 @@ class ExpressionParserTest {
                         InfixOperator.TIMES,
                         Value(3.0),
                         InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, Value(1.0), Parentheses(Value(2.0))),
-                    )
+                    ),
                 ),
 
                 // Complex value simplification
