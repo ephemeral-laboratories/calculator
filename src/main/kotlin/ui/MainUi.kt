@@ -2,7 +2,6 @@ package garden.ephemeral.calculator.ui
 
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -219,7 +218,6 @@ fun MainContent(
             .padding(15.dp)
             .padding(padding),
     ) {
-        @OptIn(ExperimentalFoundationApi::class)
         ContextMenuArea(
             items = {
                 listOf(
