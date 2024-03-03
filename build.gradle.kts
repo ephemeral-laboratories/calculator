@@ -18,6 +18,7 @@ dependencies {
     antlr(libs.antlr4)
 
     implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
     implementation(compose.materialIconsExtended)
     implementation(libs.komplex)
     implementation(libs.antlr4.runtime)

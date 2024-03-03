@@ -1,7 +1,7 @@
 package garden.ephemeral.calculator.ui
 
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.Colors
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -47,7 +47,7 @@ class AppState {
         }
     }
 
-    fun execute(colorScheme: Colors, scope: CoroutineScope) {
+    fun execute(colorScheme: ColorScheme, scope: CoroutineScope) {
         val text = inputText.text
         if (text.isNotEmpty()) {
             val expression = try {
