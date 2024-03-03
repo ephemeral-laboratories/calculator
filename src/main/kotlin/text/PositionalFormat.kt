@@ -1,6 +1,7 @@
 package garden.ephemeral.calculator.text
 
 import com.ibm.icu.text.NumberFormat
+import garden.ephemeral.calculator.creals.Real
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.FieldPosition
@@ -17,76 +18,65 @@ class PositionalFormat(
         require(radix == symbols.digits.length) { "Radix ($radix) and symbols ($symbols.digits) don't match!" }
     }
 
-    override fun format(number: Double, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer {
-        requireNotNull(toAppendTo)
+    private val realRadix = Real.valueOf(radix)
 
-        val positiveNumber = if (number < 0.0) {
-            toAppendTo.append(symbols.minus)
-            -number
+    @Suppress("WRONG_NULLABILITY_FOR_JAVA_OVERRIDE")
+    override fun format(number: Any?, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer {
+        if (number is Real) {
+            return format(number, toAppendTo, pos)
         } else {
-            number
+            throw IllegalArgumentException("Unexpected value $number (type ${number?.javaClass}")
         }
-
-        if (positiveNumber.isNaN()) {
-            toAppendTo.append(symbols.notANumber)
-            return toAppendTo
-        }
-        if (positiveNumber.isInfinite()) {
-            toAppendTo.append(symbols.infinity)
-            return toAppendTo
-        }
-
-        val buffer = DigitBuffer(radix)
-        fillDigits(positiveNumber, buffer)
-        appendDigits(buffer, toAppendTo)
-
-        return toAppendTo
     }
 
-    override fun format(number: Long, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer {
+    fun format(number: Real, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer {
         requireNotNull(toAppendTo)
         requireNotNull(pos)
 
-        val positiveNumber = if (number < 0.0) {
+        // We should only need 1 more precision, but it turns out that toStringFloatRep() doesn't do proper
+        // rounding, whereas our DigitBuffer does. So ask for 2 more instead and just let DigitBuffer
+        // round the last digit if it needs to.
+        // This behaviour still isn't 100% correct. If you have a number like "1.005000000000000005",
+        // it won't know to round up unless you generate all those digits.
+        val rep = number.toStringFloatRep(
+            pointsOfPrecision = maximumIntegerDigits + maximumFractionDigits + 2,
+            radix = radix,
+            msdPrecision = -maximumFractionDigits,
+        )
+
+        if (rep.sign < 0) {
             toAppendTo.append(symbols.minus)
-            -number
-        } else {
-            number
         }
 
-        val buffer = DigitBuffer(radix)
-        fillDigits(positiveNumber, buffer)
+        val radixPointLocation: Int
+        val exponent: Int
+        if (rep.exponent <= maximumIntegerDigits) {
+            radixPointLocation = rep.exponent
+            exponent = 0
+        } else {
+            radixPointLocation = 1
+            exponent = rep.exponent - 1
+        }
+
+        val buffer = DigitBuffer(rep.radix)
+        rep.mantissaDigits.forEachIndexed { index, digit ->
+            if (index == radixPointLocation) {
+                if (index == 0) buffer.append(0)
+                buffer.markRadixPoint()
+            }
+            buffer.append(digit)
+        }
+        buffer.enforceLimits(minimumIntegerDigits, minimumFractionDigits, maximumFractionDigits)
         appendDigits(buffer, toAppendTo)
 
+        if (exponent > 0) {
+            toAppendTo.append(symbols.exponent)
+            val exponentBuffer = DigitBuffer(rep.radix)
+            exponentBuffer.appendInt(exponent)
+            appendDigits(exponentBuffer, toAppendTo)
+        }
+
         return toAppendTo
-    }
-
-    private fun fillDigits(value: Double, buffer: DigitBuffer) {
-        val integerPart = value.toLong()
-
-        fillDigits(integerPart, buffer)
-
-        buffer.markRadixPoint()
-
-        var remainder = value - integerPart
-        repeat(maximumFractionDigits + 1) {
-            remainder *= radix
-            val digit = remainder.toInt()
-            buffer.append(digit)
-            remainder -= digit
-        }
-
-        buffer.enforceLimits(minimumIntegerDigits, minimumFractionDigits, maximumFractionDigits)
-    }
-
-    private fun fillDigits(value: Long, buffer: DigitBuffer) {
-        var remainingIntegerPart = value
-        while (remainingIntegerPart > 0) {
-            val digit = remainingIntegerPart % radix
-            val stillToProcess = remainingIntegerPart / radix
-            buffer.prepend(digit.toInt())
-            remainingIntegerPart = stillToProcess
-        }
     }
 
     private fun appendDigits(buffer: DigitBuffer, destination: Appendable) {
@@ -103,7 +93,11 @@ class PositionalFormat(
         }
     }
 
-    // BigInteger we could conceivably support, I guess.
+    override fun format(number: Double, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer =
+        willNotSupport("Formatting Double")
+
+    override fun format(number: Long, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer =
+        willNotSupport("Formatting Long")
 
     override fun format(number: BigInteger?, toAppendTo: StringBuffer?, pos: FieldPosition?): StringBuffer =
         willNotSupport("Formatting BigInteger")
@@ -116,7 +110,7 @@ class PositionalFormat(
 
     private fun willNotSupport(thing: String): Nothing = throw UnsupportedOperationException("$thing not supported")
 
-    override fun parse(text: String?, parsePosition: ParsePosition?): Number? {
+    override fun parse(text: String?, parsePosition: ParsePosition?): Number {
         requireNotNull(text)
         requireNotNull(parsePosition)
 
@@ -133,33 +127,25 @@ class PositionalFormat(
 
         val sign = if (integerPart.startsWith(symbols.minus)) {
             integerPart = integerPart.substring(1)
-            -1
+            Real.MINUS_ONE
         } else {
             if (integerPart.startsWith(symbols.plus)) {
                 integerPart = integerPart.substring(1)
             }
-            1
+            Real.ONE
         }
 
-        var bigInteger = BigInteger.ZERO
-        val bigRadix = radix.toBigInteger()
+        var integer = Real.ZERO
         for (ch in integerPart) {
-            bigInteger *= bigRadix
-            bigInteger += symbols.charToDigit(ch).toBigInteger()
-        }
-        val integer: Long
-        try {
-            integer = bigInteger.longValueExact()
-        } catch (e: ArithmeticException) {
-            // Indicates error by leaving the index unchanged
-            return null
+            integer *= realRadix
+            integer += Real.valueOf(symbols.charToDigit(ch))
         }
 
-        var fraction = 0.0
-        var multiplier = 1.0
+        var fraction = Real.ZERO
+        var multiplier = Real.ONE
         for (ch in fractionPart) {
-            multiplier /= radix
-            fraction += symbols.charToDigit(ch) * multiplier
+            multiplier /= realRadix
+            fraction += Real.valueOf(symbols.charToDigit(ch)) * multiplier
         }
 
         // XXX: Do we want to support partial parsing?

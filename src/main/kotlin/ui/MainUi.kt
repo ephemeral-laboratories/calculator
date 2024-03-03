@@ -134,7 +134,7 @@ fun DrawerContent(appState: AppState) {
 @Composable
 private fun <T : Localizable> OptionDropDown(
     label: String,
-    values: List<T>,
+    values: Iterable<T>,
     property: KMutableProperty0<T>,
 ) {
     var expanded by remember { mutableStateOf(false) }

@@ -1,5 +1,7 @@
 package garden.ephemeral.calculator.text
 
+import garden.ephemeral.calculator.complex.Complex
+import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.grammar.ExpressionLexer
 import garden.ephemeral.calculator.grammar.ExpressionParser
 import garden.ephemeral.calculator.nodes.Node
@@ -15,7 +17,6 @@ import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
-import garden.ephemeral.math.complex.Complex
 import org.antlr.v4.runtime.BailErrorStrategy
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStreams
@@ -143,14 +144,14 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 val real = signFromToken(tree.realSign) * if (tree.real != null) {
                     parseReal(tree.real)
                 } else {
-                    0.0
+                    Real.ZERO
                 }
                 val imag = signFromToken(tree.imagSign) * if (tree.imag != null) {
                     parseReal(tree.imag)
                 } else {
                     // Even if there's no imag token, there must have still been an i token,
                     // so we want 1 for the imaginary part, not 0.
-                    1.0
+                    Real.ONE
                 }
                 Value(Complex(real, imag))
             }
@@ -187,9 +188,9 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
         }
     }
 
-    private fun parseReal(token: Token): Double {
+    private fun parseReal(token: Token): Real {
         try {
-            return realFormat.parse(token.text) as Double
+            return realFormat.parse(token.text) as Real
         } catch (e: ParseException) {
             // Rethrowing with the right index for the full input string
             throw ParseException("Failure parsing number", token.startIndex).also {
@@ -198,7 +199,8 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
         }
     }
 
-    private fun signFromToken(token: Token?): Double = if (token?.type == ExpressionLexer.MINUS) -1.0 else 1.0
+    private fun signFromToken(token: Token?): Real =
+        if (token?.type == ExpressionLexer.MINUS) Real.MINUS_ONE else Real.ONE
 
     private class ErrorListener : BaseErrorListener() {
         var message: String? = null

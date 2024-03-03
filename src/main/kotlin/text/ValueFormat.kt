@@ -1,32 +1,26 @@
 package garden.ephemeral.calculator.text
 
-import garden.ephemeral.math.complex.Complex
-import java.text.FieldPosition
+import garden.ephemeral.calculator.complex.Complex
+import garden.ephemeral.calculator.creals.Real
 
 /**
  * Value format which chooses the right format based on the value type.
  */
-class ValueFormat(radix: Int, symbols: PositionalFormatSymbols) {
-    var realFormat = PositionalFormat(radix, symbols).apply {
+class ValueFormat(private val radix: Int, private val symbols: PositionalFormatSymbols) {
+    val realFormat = PositionalFormat(radix, symbols).apply {
         minimumIntegerDigits = 1
         minimumFractionDigits = 0
         maximumFractionDigits = 10
     }
-    private var complexFormat = ComplexFormat(realFormat, symbols)
+    private val complexFormat = ComplexFormat(realFormat, symbols)
 
-    fun format(value: Any?): String {
-        val builder = StringBuffer()
-        format(value, builder)
-        return builder.toString()
+    fun format(value: Any?): String = when (value) {
+        is Real -> formatReal(value)
+        is Complex -> formatComplex(value)
+        else -> value.toString()
     }
 
-    fun format(value: Any?, toAppendTo: StringBuffer) {
-        when (value) {
-            // XXX: Stuck with accepting a StringBuffer because NumberFormat wants it.
-            //      Can we just avoid using NumberFormat entirely?
-            is Double -> realFormat.format(value, toAppendTo, FieldPosition(0))
-            is Complex -> complexFormat.format(value, toAppendTo)
-            else -> toAppendTo.append(value.toString())
-        }
-    }
+    private fun formatReal(value: Real) = realFormat.format(value)
+
+    private fun formatComplex(value: Complex) = complexFormat.format(value)
 }

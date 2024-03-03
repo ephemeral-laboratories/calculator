@@ -2,13 +2,12 @@ package garden.ephemeral.calculator.nodes
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import garden.ephemeral.calculator.complex.i
+import garden.ephemeral.calculator.complex.minus
+import garden.ephemeral.calculator.complex.plus
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.text.ValueFormat
 import garden.ephemeral.calculator.ui.NumberFormatOption
-import garden.ephemeral.math.complex.Complex
-import garden.ephemeral.math.complex.i
-import garden.ephemeral.math.complex.minus
-import garden.ephemeral.math.complex.plus
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -47,12 +46,6 @@ class PrettyPrintTest {
                 arguments((-1).i, "-i"),
                 arguments(1 + 1.i, "1 + i"),
                 arguments(1 - 1.i, "1 - i"),
-
-                // Special values courtesy of IETF
-                arguments(Double.NaN, "NaN"),
-                arguments(Complex(Double.NaN, 1.0), "NaN"),
-                arguments(Double.POSITIVE_INFINITY, "∞"),
-                arguments(Double.NEGATIVE_INFINITY, "-∞"),
 
                 arguments(small, "0"),
                 arguments(small + 2.i, "2i"),

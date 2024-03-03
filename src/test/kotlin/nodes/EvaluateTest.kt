@@ -1,6 +1,8 @@
 package garden.ephemeral.calculator.nodes
 
 import assertk.assertThat
+import garden.ephemeral.calculator.complex.i
+import garden.ephemeral.calculator.complex.plus
 import garden.ephemeral.calculator.nodes.functions.Function1
 import garden.ephemeral.calculator.nodes.functions.Function1Node
 import garden.ephemeral.calculator.nodes.functions.Function2
@@ -12,8 +14,6 @@ import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
-import garden.ephemeral.math.complex.i
-import garden.ephemeral.math.complex.plus
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments

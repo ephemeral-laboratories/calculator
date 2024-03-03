@@ -9,7 +9,6 @@ ktlint = "0.48.0"
 kotlin = "1.9.22" # "2.0.0-Beta4"
 
 [libraries]
-komplex = {module = "garden.ephemeral.math:komplex", version.ref = "komplex"}
 antlr4 = {module = "org.antlr:antlr4", version.ref = "antlr4"}
 antlr4-runtime = {module = "org.antlr:antlr4-runtime", version.ref = "antlr4"}
 junit-jupiter-api = {module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit"}

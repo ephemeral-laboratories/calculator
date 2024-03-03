@@ -8,6 +8,7 @@ data class PositionalFormatSymbols(
     val infinity: String = "∞",
     val notANumber: String = "NaN",
     val i: String = "i",
+    val exponent: String = "E",
 ) {
     val digitZero: String = digits.substring(0, 1)
     val digitOne: String = digits.substring(1, 2)

@@ -20,7 +20,6 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
-    implementation(libs.komplex)
     implementation(libs.antlr4.runtime)
 
     testImplementation(libs.junit.jupiter.api)

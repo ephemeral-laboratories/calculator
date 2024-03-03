@@ -19,6 +19,20 @@ class DigitBuffer(private val radix: Int) {
         digits.add(digit)
     }
 
+    fun appendInt(value: Int) {
+        val insertPoint = digits.size
+        if (value == 0) {
+            digits.add(insertPoint, 0)
+            return
+        }
+        var remainder = value
+        while (remainder != 0) {
+            val digit = remainder % radix
+            remainder /= radix
+            digits.add(insertPoint, digit)
+        }
+    }
+
     private fun checkDigit(digit: Int) {
         require(digit in 0 until radix) { "Illegal digit: $digit" }
     }

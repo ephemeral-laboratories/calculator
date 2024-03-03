@@ -2,21 +2,22 @@ package garden.ephemeral.calculator.text
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import garden.ephemeral.math.complex.Complex
+import garden.ephemeral.calculator.complex.Complex
+import garden.ephemeral.calculator.creals.Real
 import org.junit.jupiter.api.Test
 
 class ValueFormatTest {
     @Test
     fun `format real`() {
         val format = ValueFormat(12, PositionalFormatSymbols())
-        val result = format.format(2.0)
+        val result = format.format(Real.TWO)
         assertThat(result).isEqualTo("2")
     }
 
     @Test
     fun `format complex`() {
         val format = ValueFormat(12, PositionalFormatSymbols())
-        val result = format.format(Complex(1.0, 2.0))
+        val result = format.format(Complex(Real.ONE, Real.TWO))
         assertThat(result).isEqualTo("1 + 2i")
     }
 
