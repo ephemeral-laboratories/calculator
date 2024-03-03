@@ -5,6 +5,8 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.prop
+import garden.ephemeral.calculator.complex.Complex
+import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.Parentheses
 import garden.ephemeral.calculator.nodes.functions.Function1
@@ -19,9 +21,6 @@ import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
-import garden.ephemeral.math.complex.i
-import garden.ephemeral.math.complex.minus
-import garden.ephemeral.math.complex.plus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -50,14 +49,6 @@ class ExpressionParserTest {
             parser.parse("2f")
         }.isFailure().isInstanceOf(ParseException::class)
             .prop(ParseException::getErrorOffset).isEqualTo(1)
-    }
-
-    @Test
-    fun `excessively long number input`() {
-        assertThat {
-            parser.parse("3 + 1000000000000000000000000")
-        }.isFailure().isInstanceOf(ParseException::class)
-            .prop(ParseException::getErrorOffset).isEqualTo(4)
     }
 
     @ParameterizedTest
@@ -226,11 +217,21 @@ class ExpressionParserTest {
                 ),
 
                 // Complex value simplification
-                arguments("i", Value(1.i)),
-                arguments("2i", Value(2.i)),
-                arguments("1 + 2i", Value(1 + 2.i)),
-                arguments("1 - 2i", Value(1 - 2.i)),
-                arguments("-2i", Value((-2).i)),
+                arguments("i", Value(Complex.I)),
+                arguments("2i", Value(Complex(Real.ZERO, Real.TWO))),
+                arguments("1 + 2i", Value(Complex(Real.ONE, Real.TWO))),
+                arguments("1 - 2i", Value(Complex(Real.ONE, Real.valueOf(-2)))),
+                arguments("-2i", Value(Complex(Real.ZERO, Real.valueOf(-2)))),
+
+                // Long values
+                arguments(
+                    "3 + 1000000000000000000000000",
+                    InfixOperatorNode(
+                        InfixOperator.PLUS,
+                        Value(Real.valueOf(3)),
+                        Value(Real.valueOf("79496847203390844133441536")),
+                    ),
+                ),
             )
         }
 
@@ -277,7 +278,7 @@ class ExpressionParserTest {
                 "Re" to Function1.RE,
                 "Im" to Function1.IM,
             ).map { (name, function) ->
-                arguments("$name(2 + 3i)", Function1Node(function, Value(2 + 3.i)))
+                arguments("$name(2 + 3i)", Function1Node(function, Value(Complex(Real.TWO, Real.valueOf(3)))))
             }
         }
 
@@ -286,7 +287,7 @@ class ExpressionParserTest {
             return mapOf(
                 "pow" to Function2.POW,
             ).map { (name, function) ->
-                arguments("$name(1, 2)", Function2Node(function, Value(1.0), Value(2.0)))
+                arguments("$name(1, 2)", Function2Node(function, Value(Real.ONE), Value(Real.TWO)))
             }
         }
     }

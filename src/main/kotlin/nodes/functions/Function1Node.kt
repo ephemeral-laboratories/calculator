@@ -13,7 +13,7 @@ class Function1Node(val function: Function1, val arg: Node) : BaseBranchNode() {
     }
 
     override fun evaluate(): Value {
-        return Value(function.apply(arg.evaluate().value))
+        return Value(function(arg.evaluate().value))
     }
 
     override fun isCloseTo(other: Node, delta: Double): Boolean {

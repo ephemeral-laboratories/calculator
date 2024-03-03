@@ -14,7 +14,7 @@ class Function2Node(val function: Function2, val arg1: Node, val arg2: Node) : B
     }
 
     override fun evaluate(): Value {
-        return Value(function.apply(arg1.evaluate().value, arg2.evaluate().value))
+        return Value(function(arg1.evaluate().value, arg2.evaluate().value))
     }
 
     override fun isCloseTo(other: Node, delta: Double): Boolean {

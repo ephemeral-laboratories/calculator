@@ -1,12 +1,31 @@
 package garden.ephemeral.calculator.nodes.values
 
+import garden.ephemeral.calculator.complex.Complex
+import garden.ephemeral.calculator.creals.Real
+import garden.ephemeral.calculator.creals.abs
 import garden.ephemeral.calculator.nodes.BaseLeafNode
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.text.ValueFormat
-import garden.ephemeral.math.complex.Complex
-import kotlin.math.abs
+import org.jetbrains.annotations.TestOnly
 
-class Value(val value: Any) : BaseLeafNode() {
+class Value(value: Any) : BaseLeafNode() {
+
+    @TestOnly
+    constructor(value: Double) : this(value as Any)
+
+    constructor(value: Real) : this(value as Any)
+    constructor(value: Complex) : this(value as Any)
+
+    /**
+     * The contained value.
+     */
+    val value = when (value) {
+        is Double -> Real.valueOf(value)
+        is Real -> value
+        is Complex -> value
+        else -> throw IllegalArgumentException("Unexpected value $value (${value.javaClass}")
+    }
+
     override fun evaluate(): Value {
         return this
     }
@@ -19,9 +38,9 @@ class Value(val value: Any) : BaseLeafNode() {
         if (other !is Value) return false
         val otherValue = other.value
         return when (value) {
-            is Double -> otherValue is Double && abs(value - otherValue) < delta
-            is Complex -> otherValue is Complex && (value - otherValue).norm < delta
-            else -> throw IllegalArgumentException("No way to compare $value with $otherValue")
+            is Real -> otherValue is Real && abs(value - otherValue).toDouble() < delta
+            is Complex -> otherValue is Complex && (value - otherValue).norm.toDouble() < delta
+            else -> throw IllegalArgumentException("No way to compare $value (${value.javaClass}) with $otherValue (${otherValue.javaClass})")
         }
     }
 
