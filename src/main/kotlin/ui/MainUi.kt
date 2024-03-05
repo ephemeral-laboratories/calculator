@@ -37,7 +37,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -54,6 +57,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.rememberCursorPositionProvider
 import garden.ephemeral.calculator.calculator.generated.resources.Res
 import garden.ephemeral.calculator.calculator.generated.resources.input_error
 import garden.ephemeral.calculator.calculator.generated.resources.number_format
@@ -225,7 +229,11 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
+@OptIn(
+    ExperimentalResourceApi::class,
+    ExperimentalMaterial3Api::class,
+    ExperimentalComposeUiApi::class,
+)
 @Composable
 fun MainContent(
     appState: AppState,
@@ -271,17 +279,25 @@ fun MainContent(
             }
         }
 
-        IconButton(
-            onClick = {
-                scope.launch {
-                    drawerState.open()
-                }
+        TooltipBox(
+            positionProvider = rememberCursorPositionProvider(),
+            tooltip = {
+                Text(stringResource(Res.string.settings))
             },
-            modifier = Modifier
-                .testTag("SettingsButton")
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f), CircleShape),
+            state = rememberTooltipState(),
         ) {
-            Icon(Icons.Outlined.Settings, stringResource(Res.string.settings))
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        drawerState.open()
+                    }
+                },
+                modifier = Modifier
+                    .testTag("SettingsButton")
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f), CircleShape),
+            ) {
+                Icon(Icons.Outlined.Settings, stringResource(Res.string.settings))
+            }
         }
 
         VerticalScrollbar(
