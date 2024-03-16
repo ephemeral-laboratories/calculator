@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.compose)
     alias(libs.plugins.spotless)
+    idea
     antlr
     id("utf8-workarounds")
 }
@@ -88,5 +89,11 @@ spotless {
     }
     kotlinGradle {
         ktlint(libs.versions.ktlint.get())
+    }
+}
+
+idea {
+    module {
+        isDownloadSources = true
     }
 }
