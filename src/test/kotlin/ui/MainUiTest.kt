@@ -10,8 +10,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
-import garden.ephemeral.calculator.ui.theme.md_theme_dark_surface
-import garden.ephemeral.calculator.ui.theme.md_theme_light_surface
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -21,10 +21,13 @@ class MainUiTest {
     @get:Rule
     val compose = createComposeRule()
 
+    private lateinit var appState: AppState
+
     @Before
     fun setUp() {
+        appState = AppState()
         compose.setContent {
-            MainUi()
+            MainUi(appState = appState)
         }
     }
 
@@ -44,7 +47,7 @@ class MainUiTest {
         compose.onNodeWithTag("SettingsButton").performClick()
         compose.onNodeWithTag("ThemeDropDown").performClick()
         compose.onNodeWithTag("ThemeDropDownMenuItem.LIGHT").performClick()
-        compose.onNodeWithTag("MainScaffold").assertBackgroundColor(md_theme_light_surface)
+        assertThat(appState.themeOption).isEqualTo(ThemeOption.LIGHT)
     }
 
     @Test
@@ -52,7 +55,7 @@ class MainUiTest {
         compose.onNodeWithTag("SettingsButton").performClick()
         compose.onNodeWithTag("ThemeDropDown").performClick()
         compose.onNodeWithTag("ThemeDropDownMenuItem.DARK").performClick()
-        compose.onNodeWithTag("MainScaffold").assertBackgroundColor(md_theme_dark_surface)
+        assertThat(appState.themeOption).isEqualTo(ThemeOption.DARK)
     }
 
     @Test

@@ -48,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -65,7 +64,6 @@ import garden.ephemeral.calculator.calculator.generated.resources.radix_separato
 import garden.ephemeral.calculator.calculator.generated.resources.settings
 import garden.ephemeral.calculator.calculator.generated.resources.theme
 import garden.ephemeral.calculator.ui.common.Localizable
-import garden.ephemeral.calculator.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -74,24 +72,20 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.reflect.KMutableProperty0
 
 @Composable
-fun MainUi() {
-    val appState = remember { AppState() }
+fun MainUi(appState: AppState) {
+    val valueTextStyle = LocalTextStyle.current.copy(fontSize = 32.sp)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    AppTheme(appState.themeOption) {
-        val valueTextStyle = LocalTextStyle.current.copy(fontSize = 32.sp)
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val scope = rememberCoroutineScope()
-
-        ModalNavigationDrawer(
-            drawerContent = @Composable { DrawerContent(appState) },
-            drawerState = drawerState,
-        ) {
-            Scaffold(
-                bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) },
-                modifier = Modifier.testTag("MainScaffold"),
-            ) { padding ->
-                MainContent(appState, drawerState, valueTextStyle, scope, padding)
-            }
+    ModalNavigationDrawer(
+        drawerContent = @Composable { DrawerContent(appState) },
+        drawerState = drawerState,
+    ) {
+        Scaffold(
+            bottomBar = @Composable { BottomBarContent(appState, valueTextStyle, scope) },
+            modifier = Modifier.testTag("MainScaffold"),
+        ) { padding ->
+            MainContent(appState, drawerState, valueTextStyle, scope, padding)
         }
     }
 }
@@ -232,7 +226,6 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
 @OptIn(
     ExperimentalResourceApi::class,
     ExperimentalMaterial3Api::class,
-    ExperimentalComposeUiApi::class,
 )
 @Composable
 fun MainContent(

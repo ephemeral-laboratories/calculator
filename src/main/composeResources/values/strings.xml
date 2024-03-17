@@ -18,6 +18,12 @@
     <string name="radix_separator_comma">Comma (,)</string>
     <string name="radix_separator_semicolon">Semicolon (;)</string>
 
+    <string name="error_dialog_title">Error</string>
+    <string name="error_dialog_content_action">An error occurred executing an action:</string>
+    <string name="error_dialog_content_view">An error occurred composing the view:</string>
+    <string name="error_dialog_icon">Error icon</string>
+    <string name="error_dialog_dismiss">Dismiss</string>
+
     <string-array name="blah">
         <item>A</item>
         <item>B</item>
