@@ -30,9 +30,9 @@ import garden.ephemeral.calculator.calculator.generated.resources.error_dialog_d
 import garden.ephemeral.calculator.calculator.generated.resources.error_dialog_icon
 import garden.ephemeral.calculator.ui.ThemeOption
 import garden.ephemeral.calculator.ui.theme.AppTheme
+import garden.ephemeral.calculator.ui.util.rememberIconPainter
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
-import rememberIconPainter
 import javax.swing.UIManager
 
 @Composable
