@@ -1,13 +1,12 @@
 package garden.ephemeral.calculator.nodes
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
 import garden.ephemeral.calculator.complex.i
 import garden.ephemeral.calculator.complex.minus
 import garden.ephemeral.calculator.complex.plus
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.text.ValueFormat
 import garden.ephemeral.calculator.ui.NumberFormatOption
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -18,7 +17,7 @@ class PrettyPrintTest {
     @MethodSource("examples")
     fun `unified test`(input: Any, expected: String) {
         val result = Value(input).prettyPrint(ValueFormat(10, NumberFormatOption.DECIMAL.defaultSymbols))
-        assertThat(result).isEqualTo(expected)
+        result shouldBe expected
     }
 
     companion object {

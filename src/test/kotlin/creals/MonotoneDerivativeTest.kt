@@ -1,16 +1,15 @@
 package garden.ephemeral.calculator.creals
 
-import assertk.assertAll
-import assertk.assertThat
+import io.kotest.assertions.assertSoftly
 import org.junit.jupiter.api.Test
 
 class MonotoneDerivativeTest {
     @Test
     fun testMonotoneDerivative() {
         val cosine = monotoneDerivative(::sin, ZERO, Real.PI)
-        assertAll {
-            assertThat(cosine(ONE)).isCloseTo("0.54030230586813971740")
-            assertThat(cosine(THREE)).isCloseTo("-0.98999249660044545727")
+        assertSoftly {
+            cosine(ONE) shouldBeCloseTo "0.54030230586813971740"
+            cosine(THREE) shouldBeCloseTo "-0.98999249660044545727"
         }
     }
 

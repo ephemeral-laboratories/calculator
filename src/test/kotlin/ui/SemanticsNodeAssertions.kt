@@ -7,8 +7,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.text.TextRange
-import assertk.assertThat
-import assertk.assertions.isEqualTo
+import io.kotest.matchers.shouldBe
 
 /**
  * Asserts that the given node has the expected background colour.
@@ -19,7 +18,7 @@ fun SemanticsNodeInteraction.assertBackgroundColor(expectedBackground: Color) {
     val array = IntArray(20)
     captureToImage().readPixels(array, startY = 500, startX = 200, width = 5, height = 4)
     array.forEach { pixel ->
-        assertThat(Color(pixel)).isEqualTo(expectedBackground)
+        Color(pixel) shouldBe expectedBackground
     }
 }
 

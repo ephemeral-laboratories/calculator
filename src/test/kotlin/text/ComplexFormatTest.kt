@@ -1,9 +1,8 @@
 package garden.ephemeral.calculator.text
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
 import garden.ephemeral.calculator.complex.Complex
 import garden.ephemeral.calculator.creals.Real
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -17,7 +16,7 @@ class ComplexFormatTest {
         val realFormat = PositionalFormat(12, formatSymbols)
         val complexFormat = ComplexFormat(realFormat, formatSymbols)
         val result = complexFormat.format(value)
-        assertThat(result).isEqualTo(expected)
+        result shouldBe expected
     }
 
     companion object {

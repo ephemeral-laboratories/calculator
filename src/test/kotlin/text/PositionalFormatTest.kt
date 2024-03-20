@@ -1,11 +1,11 @@
 package garden.ephemeral.calculator.text
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isInstanceOf
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.isCloseTo
+import garden.ephemeral.calculator.creals.shouldBeCloseTo
 import garden.ephemeral.calculator.ui.NumberFormatOption
+import io.kotest.matchers.should
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.beInstanceOf
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -17,7 +17,8 @@ class PositionalFormatTest {
     fun parse(example: String, expected: String) {
         val format = newPositionalFormat()
         val number = format.parse(example)
-        assertThat(number).isInstanceOf(Real::class).isCloseTo(expected)
+        number should beInstanceOf<Real>()
+        (number as Real) shouldBeCloseTo expected
     }
 
     @ParameterizedTest
@@ -25,7 +26,7 @@ class PositionalFormatTest {
     fun format(example: String, expected: String) {
         val format = newPositionalFormat()
         val result = format.format(Real.valueOf(example))
-        assertThat(result).isEqualTo(expected)
+        result shouldBe expected
     }
 
     private fun newPositionalFormat() =

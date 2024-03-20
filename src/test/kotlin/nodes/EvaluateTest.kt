@@ -1,6 +1,5 @@
 package garden.ephemeral.calculator.nodes
 
-import assertk.assertThat
 import garden.ephemeral.calculator.complex.i
 import garden.ephemeral.calculator.complex.plus
 import garden.ephemeral.calculator.nodes.functions.Function1
@@ -24,7 +23,7 @@ class EvaluateTest {
     @MethodSource("examples")
     fun `unified test`(input: Node, expected: Value) {
         val result = input.evaluate()
-        assertThat(result).isCloseTo(expected)
+        result shouldBeCloseTo expected
     }
 
     companion object {

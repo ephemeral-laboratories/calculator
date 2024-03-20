@@ -10,8 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
-import assertk.assertThat
-import assertk.assertions.isEqualTo
+import io.kotest.matchers.shouldBe
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,7 +46,7 @@ class MainUiTest {
         compose.onNodeWithTag("SettingsButton").performClick()
         compose.onNodeWithTag("ThemeDropDown").performClick()
         compose.onNodeWithTag("ThemeDropDownMenuItem.LIGHT").performClick()
-        assertThat(appState.themeOption).isEqualTo(ThemeOption.LIGHT)
+        appState.themeOption shouldBe ThemeOption.LIGHT
     }
 
     @Test
@@ -55,7 +54,7 @@ class MainUiTest {
         compose.onNodeWithTag("SettingsButton").performClick()
         compose.onNodeWithTag("ThemeDropDown").performClick()
         compose.onNodeWithTag("ThemeDropDownMenuItem.DARK").performClick()
-        assertThat(appState.themeOption).isEqualTo(ThemeOption.DARK)
+        appState.themeOption shouldBe ThemeOption.DARK
     }
 
     @Test

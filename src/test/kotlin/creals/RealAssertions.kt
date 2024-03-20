@@ -1,16 +1,19 @@
 package garden.ephemeral.calculator.creals
 
-import assertk.Assert
-import assertk.assertions.support.expected
-import assertk.assertions.support.show
+import io.kotest.matchers.Matcher
+import io.kotest.matchers.MatcherResult
+import io.kotest.matchers.shouldBe
 
-/**
- * Convenience method to assert a real value to a given number of decimal places.
- *
- * @param expected the expected value, as a string.
- */
-fun Assert<Real>.isCloseTo(expected: String) = given { actual ->
-    val result = actual.toString(pointsOfPrecision = 20, radix = 10)
-    if (result == expected) return
-    expected("to be ${show(expected)} but was:${show(result)}", expected, result)
+fun closeTo(expectedString: String) = object : Matcher<Real> {
+    override fun test(value: Real): MatcherResult {
+        val actualString = value.toString(pointsOfPrecision = 20, radix = 10)
+
+        return MatcherResult(
+            passed = actualString == expectedString,
+            failureMessageFn = { "Expected $value to be close to $expectedString but it's not." },
+            negatedFailureMessageFn = { "$value is not close to $expectedString" },
+        )
+    }
 }
+
+infix fun Real.shouldBeCloseTo(expectedString: String) = this shouldBe closeTo(expectedString)

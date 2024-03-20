@@ -1,10 +1,5 @@
 package garden.ephemeral.calculator.text
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
-import assertk.assertions.isInstanceOf
-import assertk.assertions.prop
 import garden.ephemeral.calculator.complex.Complex
 import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.nodes.Node
@@ -13,14 +8,16 @@ import garden.ephemeral.calculator.nodes.functions.Function1
 import garden.ephemeral.calculator.nodes.functions.Function1Node
 import garden.ephemeral.calculator.nodes.functions.Function2
 import garden.ephemeral.calculator.nodes.functions.Function2Node
-import garden.ephemeral.calculator.nodes.isCloseTo
 import garden.ephemeral.calculator.nodes.operators.InfixOperator
 import garden.ephemeral.calculator.nodes.operators.InfixOperatorNode
 import garden.ephemeral.calculator.nodes.operators.PrefixOperator
 import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
+import garden.ephemeral.calculator.nodes.shouldBeCloseTo
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -45,17 +42,16 @@ class ExpressionParserTest {
 
     @Test
     fun `invalid input`() {
-        assertThat {
+        shouldThrow<ParseException> {
             parser.parse("2f")
-        }.isFailure().isInstanceOf(ParseException::class)
-            .prop(ParseException::getErrorOffset).isEqualTo(1)
+        }.errorOffset shouldBe 1
     }
 
     @ParameterizedTest
     @MethodSource("examples", "function1Examples", "function1ComplexExamples", "function2Examples")
     fun `unified test`(input: String, expected: Node) {
         val result = parser.parse(input)
-        assertThat(result).isCloseTo(expected)
+        result shouldBeCloseTo expected
     }
 
     companion object {
