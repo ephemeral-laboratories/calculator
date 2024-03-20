@@ -27,6 +27,7 @@ dependencies {
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.jupiter.params)
     testImplementation(libs.assertk)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.junit.vintage.engine)
 }
@@ -35,10 +36,10 @@ tasks.withType<AntlrTask> {
     arguments = arguments + listOf("-package", "garden.ephemeral.calculator.grammar")
 }
 tasks.generateGrammarSource {
-    outputDirectory = file("$buildDir/generated-src/antlr/main/garden/ephemeral/calculator/grammar")
+    outputDirectory = layout.buildDirectory.dir("generated-src/antlr/main/garden/ephemeral/calculator/grammar").get().asFile
 }
 tasks.generateTestGrammarSource {
-    outputDirectory = file("$buildDir/generated-src/antlr/test/garden/ephemeral/calculator/grammar")
+    outputDirectory = layout.buildDirectory.dir("generated-src/antlr/test/garden/ephemeral/calculator/grammar").get().asFile
 }
 
 java {
