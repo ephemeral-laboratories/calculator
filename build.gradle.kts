@@ -33,7 +33,12 @@ dependencies {
 
 tasks.withType<AntlrTask> {
     arguments = arguments + listOf("-package", "garden.ephemeral.calculator.grammar")
+}
+tasks.generateGrammarSource {
     outputDirectory = file("$buildDir/generated-src/antlr/main/garden/ephemeral/calculator/grammar")
+}
+tasks.generateTestGrammarSource {
+    outputDirectory = file("$buildDir/generated-src/antlr/test/garden/ephemeral/calculator/grammar")
 }
 
 java {
@@ -53,6 +58,9 @@ tasks.withType<Test> {
 // but not `compileKotlin`, which causes a warning.
 tasks.compileKotlin {
     dependsOn(tasks.generateGrammarSource)
+}
+tasks.compileTestKotlin {
+    dependsOn(tasks.generateTestGrammarSource)
 }
 
 compose.desktop {
