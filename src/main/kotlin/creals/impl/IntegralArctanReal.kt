@@ -1,12 +1,13 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.creals.util.scale
 import java.math.BigInteger
 
 /**
  * The constructive real atan(1/n), where n is a small integer > base.
  * This gives a simple and moderately fast way to compute PI.
  */
-internal class IntegralArctanReal(var op: Int) : SlowReal() {
+internal class IntegralArctanReal(private val op: Int) : SlowReal() {
     override fun approximate(precision: Int): BigInteger {
         if (precision >= 1) return BIG0
         // conservative estimate > 0
@@ -38,6 +39,6 @@ internal class IntegralArctanReal(var op: Int) : SlowReal() {
             currentTerm = currentPower / (currentSign * n).toBigInteger()
             currentSum += currentTerm
         }
-        return scale(currentSum, calcPrecision - precision)
+        return currentSum.scale(calcPrecision - precision)
     }
 }

@@ -1,13 +1,14 @@
 package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
+import garden.ephemeral.calculator.creals.util.scale
 import java.math.BigInteger
 
 /**
  * Representation of the cosine of a constructive real.
  * Uses a Taylor series expansion.  Assumes |x| < 1.
  */
-internal class PrescaledCosineReal(var op: Real) : SlowReal() {
+internal class PrescaledCosineReal(private val op: Real) : SlowReal() {
     override fun approximate(precision: Int): BigInteger {
         if (precision >= 1) return BIG0
         val iterationsNeeded = -precision / 2 + 4 // conservative estimate > 0.
@@ -32,12 +33,12 @@ internal class PrescaledCosineReal(var op: Real) : SlowReal() {
             checkForAbort()
             n += 2
             // current_term = - current_term * op * op / n * (n - 1)
-            currentTerm = scale(currentTerm * opApproximation, opPrecision)
-            currentTerm = scale(currentTerm * opApproximation, opPrecision)
+            currentTerm = (currentTerm * opApproximation).scale(opPrecision)
+            currentTerm = (currentTerm * opApproximation).scale(opPrecision)
             val divisor = (-n).toBigInteger() * (n - 1).toBigInteger()
             currentTerm /= divisor
             currentSum += currentTerm
         }
-        return scale(currentSum, calcPrecision - precision)
+        return currentSum.scale(calcPrecision - precision)
     }
 }

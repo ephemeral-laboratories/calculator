@@ -1,12 +1,14 @@
 package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
+import garden.ephemeral.calculator.creals.util.scale
+import garden.ephemeral.calculator.creals.util.shift
 import java.math.BigInteger
 
 /**
  * Representation of sqrt(x).
  */
-internal class SquareRootReal(private var op: Real) : Real() {
+internal class SquareRootReal(private val op: Real) : Real() {
     private val fpPrecision: Int = 50 // Conservative estimate of number of
 
     // significant bits in double precision
@@ -31,7 +33,7 @@ internal class SquareRootReal(private var op: Real) : Real() {
             // Compute (lastApproximation * lastApproximation + opApproximation)/(lastApproximation/2)
             // while adjusting the scaling to make everything work
             val producedPrecisionScaledNumerator = (lastApproximation * lastApproximation) + opApproximation
-            val scaledNumerator = scale(producedPrecisionScaledNumerator, approximationPrecision - precision)
+            val scaledNumerator = producedPrecisionScaledNumerator.scale(approximationPrecision - precision)
             val shiftedResult = scaledNumerator / lastApproximation
             return (shiftedResult + BIG1).shiftRight(1)
         } else {
@@ -45,7 +47,7 @@ internal class SquareRootReal(private var op: Real) : Real() {
             val scaledFpSqrt = kotlin.math.sqrt(scaledApproximation)
             val scaledSqrt = (scaledFpSqrt.toLong()).toBigInteger()
             val shiftCount = workingPrecision / 2 - precision
-            return shift(scaledSqrt, shiftCount)
+            return scaledSqrt.shift(shiftCount)
         }
     }
 }

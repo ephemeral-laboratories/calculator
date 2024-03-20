@@ -2,6 +2,7 @@ package garden.ephemeral.calculator.creals
 
 import garden.ephemeral.calculator.creals.util.minus
 import garden.ephemeral.calculator.creals.util.plus
+import garden.ephemeral.calculator.creals.util.scale
 import garden.ephemeral.calculator.creals.util.times
 import java.math.BigInteger
 
@@ -17,10 +18,11 @@ fun inverseMonotone(func: (Real) -> Real, low: Real, high: Real): (Real) -> Real
 }
 
 internal class InverseMonotoneUnaryRealFunction(
-    private var func: (Real) -> Real,
+    func: (Real) -> Real,
     private val low: Real,
     private val high: Real,
 ) : (Real) -> Real {
+    private val func: (Real) -> Real
     private val fNegated: Boolean
     private val fLow: Real
     private val fHigh: Real
@@ -38,11 +40,12 @@ internal class InverseMonotoneUnaryRealFunction(
         val tmpFHigh = func(high)
         // Since func is monotone and low < high, the following test converges.
         if (tmpFLow > tmpFHigh) {
-            func = { x -> func(-x) }
+            this.func = { x -> func(-x) }
             fNegated = true
             fLow = -tmpFLow
             fHigh = -tmpFHigh
         } else {
+            this.func = func
             fNegated = false
             fLow = tmpFLow
             fHigh = tmpFHigh
@@ -172,7 +175,7 @@ internal class InverseMonotoneUnaryRealFunction(
                 }
                 if (difference < BIG6) {
                     // Answer is less than 1/2 ulp away from h.
-                    return scale(h, -extraArgPrecision)
+                    return h.scale(-extraArgPrecision)
                 }
                 val fDifference = fH.subtract(fL)
                 // Narrow the interval by dividing at a cleverly

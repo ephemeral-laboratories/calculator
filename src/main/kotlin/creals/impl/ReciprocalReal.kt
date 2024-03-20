@@ -8,7 +8,7 @@ import java.math.BigInteger
  * Representation of the multiplicative inverse of a constructive real.
  * Should use Newton iteration to refine estimates.
  */
-internal class ReciprocalReal(var op: Real) : Real() {
+internal class ReciprocalReal(private val op: Real) : Real() {
     override fun approximate(precision: Int): BigInteger {
         val msd = op.msd()
         val invMsd = 1 - msd

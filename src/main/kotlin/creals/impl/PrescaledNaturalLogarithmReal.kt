@@ -1,12 +1,13 @@
 package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
+import garden.ephemeral.calculator.creals.util.scale
 import java.math.BigInteger
 
 /**
  * Representation for ln(1 + op).
  */
-internal class PrescaledNaturalLogarithmReal(var op: Real) : SlowReal() {
+internal class PrescaledNaturalLogarithmReal(private val op: Real) : SlowReal() {
     // Compute an approximation of ln(1+x) to precision
     // prec. This assumes |x| < 1/2.
     // It uses a Taylor series expansion.
@@ -26,7 +27,7 @@ internal class PrescaledNaturalLogarithmReal(var op: Real) : SlowReal() {
         val opPrecision = precision - 3
         val opApproximation = op.getApproximation(opPrecision)
         // Error analysis as for exponential.
-        var xNth = scale(opApproximation, opPrecision - calcPrecision)
+        var xNth = opApproximation.scale(opPrecision - calcPrecision)
         var currentTerm = xNth // x**n
         var currentSum = currentTerm
         var n = 1
@@ -37,11 +38,11 @@ internal class PrescaledNaturalLogarithmReal(var op: Real) : SlowReal() {
             checkForAbort()
             n += 1
             currentSign = -currentSign
-            xNth = scale(xNth * opApproximation, opPrecision)
+            xNth = (xNth * opApproximation).scale(opPrecision)
             currentTerm = xNth / (n * currentSign).toBigInteger()
             // x**n / (n * (-1)**(n-1))
             currentSum += currentTerm
         }
-        return scale(currentSum, calcPrecision - precision)
+        return currentSum.scale(calcPrecision - precision)
     }
 }

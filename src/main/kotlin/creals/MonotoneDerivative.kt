@@ -1,5 +1,6 @@
 package garden.ephemeral.calculator.creals
 
+import garden.ephemeral.calculator.creals.util.scale
 import java.math.BigInteger
 
 /**
@@ -45,9 +46,9 @@ internal class MonotoneDerivativeUnaryRealFunction(
         derivative2MSD = approximateDifference2.msd() - differenceMSD + 4
     }
 
-    internal inner class MonotoneDerivativeReal(var arg: Real) : Real() {
-        private var fArg: Real = func(arg)
-        private var maxDeltaMSD: Int
+    internal inner class MonotoneDerivativeReal(val arg: Real) : Real() {
+        private val fArg: Real = func(arg)
+        private val maxDeltaMSD: Int
 
         init {
             // The following must converge, since arg must be in the open interval.
@@ -58,15 +59,13 @@ internal class MonotoneDerivativeUnaryRealFunction(
             if (leftDiff.signum() < 0 || rightDiff.signum() < 0) {
                 throw ArithmeticException()
             }
-            maxDeltaMSD = (if (maxDeltaLeftMsd < maxDeltaRightMsd) maxDeltaLeftMsd else maxDeltaRightMsd)
+            maxDeltaMSD = if (maxDeltaLeftMsd < maxDeltaRightMsd) maxDeltaLeftMsd else maxDeltaRightMsd
         }
 
         override fun approximate(precision: Int): BigInteger {
             val extraPrecision = 4
-            var logDelta = precision - derivative2MSD
             // Ensure that we stay within the interval.
-            if (logDelta > maxDeltaMSD) logDelta = maxDeltaMSD
-            logDelta -= extraPrecision
+            val logDelta = (precision - derivative2MSD).coerceAtMost(maxDeltaMSD) - extraPrecision
             val delta = ONE.shiftLeft(logDelta)
 
             val left = arg - delta
@@ -80,7 +79,7 @@ internal class MonotoneDerivativeUnaryRealFunction(
             val approximateRightDerivative = rightDerivative.getApproximation(evalPrecision)
             val derivativeDifference = approximateRightDerivative.subtract(approximateLeftDerivative).abs()
             if (derivativeDifference < BIG8) {
-                return scale(approximateLeftDerivative, -extraPrecision)
+                return approximateLeftDerivative.scale(-extraPrecision)
             } else {
                 checkForAbort()
                 derivative2MSD = evalPrecision + derivativeDifference.bitLength() + 4 /*slop*/

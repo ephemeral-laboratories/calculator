@@ -1,8 +1,8 @@
 package garden.ephemeral.calculator.text
 
 class DigitBuffer(private val radix: Int) {
-    var radixPointPlace: Int? = null
-    var digits = mutableListOf<Int>()
+    private var radixPointPlace: Int? = null
+    private val digits = mutableListOf<Int>()
 
     val integerDigitCount get() = radixPointPlace ?: digits.size
     val integerDigits get() = radixPointPlace?.let { digits.subList(0, it) } ?: digits

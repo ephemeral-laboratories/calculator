@@ -10,6 +10,7 @@ import garden.ephemeral.calculator.creals.impl.ReciprocalReal
 import garden.ephemeral.calculator.creals.impl.ShiftedReal
 import garden.ephemeral.calculator.creals.util.StringFloatRep
 import garden.ephemeral.calculator.creals.util.minus
+import garden.ephemeral.calculator.creals.util.scale
 import java.math.BigInteger
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -119,7 +120,7 @@ abstract class Real : Number() {
     fun getApproximation(precision: Int): BigInteger {
         checkPrecision(precision)
         return if (isMaxApproximationValid && precision >= minPrecision) {
-            scale(maxApproximation!!, minPrecision - precision)
+            maxApproximation!!.scale(minPrecision - precision)
         } else {
             calcApproximation(precision)
         }
@@ -355,7 +356,7 @@ abstract class Real : Number() {
      */
     fun toStringFloatRep(pointsOfPrecision: Int, radix: Int, msdPrecision: Int): StringFloatRep {
         if (pointsOfPrecision <= 0) throw ArithmeticException()
-        val log2Radix = ln(radix.toDouble()) / doubleLog2
+        val log2Radix = ln(radix.toDouble()) / LN2_DOUBLE
         val bigRadix = radix.toBigInteger()
         val longMSDPrecisionBits = (log2Radix * msdPrecision.toDouble()).toLong()
         if (longMSDPrecisionBits > Int.MAX_VALUE.toLong() || longMSDPrecisionBits < Int.MIN_VALUE.toLong()) throw PrecisionOverflowError()
@@ -583,15 +584,15 @@ abstract class Real : Number() {
         // pi/4 = 4*atan(1/5) - atan(1/239)
         val HALF_PI: Real = PI.shiftRight(1)
 
-        private val doubleLog2: Double = ln(2.0)
+        private val LN2_DOUBLE: Double = ln(2.0)
 
-        private var tenNinths: Real = valueOf(10) / valueOf(9)
-        private var twentyFiveTwentyFourths: Real = valueOf(25) / valueOf(24)
-        private var eightyOneEightyeths: Real = valueOf(81) / valueOf(80)
-        private var ln2_1: Real = valueOf(7) * simpleLn(tenNinths)
-        private var ln2_2: Real = valueOf(2) * simpleLn(twentyFiveTwentyFourths)
-        private var ln2_3: Real = valueOf(3) * simpleLn(eightyOneEightyeths)
-        internal var ln2: Real = ln2_1 - ln2_2 + ln2_3
+        private val TEN_NINTHS: Real = valueOf(10) / valueOf(9)
+        private val TWENTY_FIVE_TWENTY_FOURTHS: Real = valueOf(25) / valueOf(24)
+        private val EIGHTY_ONE_EIGHTIETHS: Real = valueOf(81) / valueOf(80)
+        private val LN2_1: Real = valueOf(7) * simpleLn(TEN_NINTHS)
+        private val LN2_2: Real = valueOf(2) * simpleLn(TWENTY_FIVE_TWENTY_FOURTHS)
+        private val LN2_3: Real = valueOf(3) * simpleLn(EIGHTY_ONE_EIGHTIETHS)
+        internal val LN2: Real = LN2_1 - LN2_2 + LN2_3
 
         /**
          * Setting this to true requests that  all computations be aborted by
@@ -616,8 +617,8 @@ abstract class Real : Number() {
         // min_prec and max_val are valid.
         // Helper functions
         fun boundLog2(n: Int): Int {
-            val abs_n = abs(n.toDouble()).toInt()
-            return ceil(ln((abs_n + 1).toDouble()) / ln(2.0)).toInt()
+            val absN = abs(n.toDouble()).toInt()
+            return ceil(ln((absN + 1).toDouble()) / ln(2.0)).toInt()
         }
 
         // Check that a precision is at least a factor of 8 away from
@@ -682,23 +683,6 @@ abstract class Real : Number() {
          */
         fun valueOf(n: Float): Real {
             return valueOf(n.toDouble())
-        }
-
-        // Multiply k by 2**n.
-        fun shift(k: BigInteger, n: Int): BigInteger {
-            if (n == 0) return k
-            if (n < 0) return k.shiftRight(-n)
-            return k.shiftLeft(n)
-        }
-
-        // Multiply by 2**n, rounding result
-        fun scale(k: BigInteger, n: Int): BigInteger {
-            if (n >= 0) {
-                return k.shiftLeft(n)
-            } else {
-                val adjK = shift(k, n + 1) + BIG1
-                return adjK.shiftRight(1)
-            }
         }
 
         // A helper function for toString.

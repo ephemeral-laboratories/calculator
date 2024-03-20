@@ -84,7 +84,7 @@ fun ln(x: Real): Real {
         } else {
             val extraBits = roughApprox.bitLength() - 3
             val scaledResult = ln(x.shiftRight(extraBits))
-            return scaledResult + Real.valueOf(extraBits) * Real.ln2
+            return scaledResult + Real.valueOf(extraBits) * Real.LN2
         }
     }
     return simpleLn(x)

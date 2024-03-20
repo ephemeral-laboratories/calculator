@@ -3,7 +3,7 @@ package garden.ephemeral.calculator.text
 import garden.ephemeral.calculator.complex.Complex
 import garden.ephemeral.calculator.creals.Real
 
-class ComplexFormat(private var realFormat: PositionalFormat, private var symbols: PositionalFormatSymbols) {
+class ComplexFormat(private val realFormat: PositionalFormat, private val symbols: PositionalFormatSymbols) {
     /**
      * Formats a complex value.
      *

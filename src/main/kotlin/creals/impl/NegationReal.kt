@@ -6,7 +6,7 @@ import java.math.BigInteger
 /**
  * Representation of the negation of a constructive real.
  */
-internal class NegationReal(private var op: Real) : Real() {
+internal class NegationReal(private val op: Real) : Real() {
     override fun approximate(precision: Int): BigInteger {
         return -op.getApproximation(precision)
     }

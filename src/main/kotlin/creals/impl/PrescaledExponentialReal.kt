@@ -1,6 +1,7 @@
 package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
+import garden.ephemeral.calculator.creals.util.scale
 import java.math.BigInteger
 
 /**
@@ -9,7 +10,7 @@ import java.math.BigInteger
  * Note: this is known to be a bad algorithm for floating point.
  * Unfortunately, other alternatives appear to require precomputed information.
  */
-internal class PrescaledExponentialReal(var op: Real) : Real() {
+internal class PrescaledExponentialReal(private val op: Real) : Real() {
     override fun approximate(precision: Int): BigInteger {
         if (precision >= 1) return BIG0
         val iterationsNeeded = -precision / 2 + 2 // conservative estimate > 0.
@@ -37,10 +38,10 @@ internal class PrescaledExponentialReal(var op: Real) : Real() {
             checkForAbort()
             n += 1
             // current_term = current_term * op / n
-            currentTerm = scale(currentTerm * opApproximation, opPrecision)
+            currentTerm = (currentTerm * opApproximation).scale(opPrecision)
             currentTerm /= n.toBigInteger()
             currentSum += currentTerm
         }
-        return scale(currentSum, calcPrecision - precision)
+        return currentSum.scale(calcPrecision - precision)
     }
 }
