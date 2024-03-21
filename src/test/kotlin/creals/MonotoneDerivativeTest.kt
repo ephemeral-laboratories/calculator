@@ -1,21 +1,18 @@
 package garden.ephemeral.calculator.creals
 
 import io.kotest.assertions.assertSoftly
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.FreeSpec
 
-class MonotoneDerivativeTest {
-    @Test
-    fun testMonotoneDerivative() {
-        val cosine = monotoneDerivative(::sin, ZERO, Real.PI)
+class MonotoneDerivativeTest : FreeSpec({
+    val zero = Real.valueOf(0)
+    val one = Real.valueOf(1)
+    val three = Real.valueOf(3)
+
+    "cosine computed as monotone derivative of sine should return known expected values" {
+        val cosine = monotoneDerivative(::sin, zero, Real.PI)
         assertSoftly {
-            cosine(ONE) shouldBeCloseTo "0.54030230586813971740"
-            cosine(THREE) shouldBeCloseTo "-0.98999249660044545727"
+            cosine(one) shouldBeCloseTo "0.54030230586813971740"
+            cosine(three) shouldBeCloseTo "-0.98999249660044545727"
         }
     }
-
-    companion object {
-        private val ZERO = Real.valueOf(0)
-        private val ONE = Real.valueOf(1)
-        private val THREE = Real.valueOf(3)
-    }
-}
+})

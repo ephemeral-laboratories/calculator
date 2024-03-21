@@ -13,65 +13,57 @@ import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.Arguments.arguments
-import org.junit.jupiter.params.provider.MethodSource
+import garden.ephemeral.calculator.util.row
+import io.kotest.core.spec.style.FreeSpec
+import io.kotest.datatest.withData
 
-class EvaluateTest {
-    @ParameterizedTest
-    @MethodSource("examples")
-    fun `unified test`(input: Node, expected: Value) {
-        val result = input.evaluate()
-        result shouldBeCloseTo expected
-    }
+class EvaluateTest : FreeSpec({
+    "evaluate" - {
+        withData(
+            row(Value(42.0), Value(42.0)),
 
-    companion object {
-        @JvmStatic
-        fun examples(): List<Arguments> {
-            return listOf(
-                arguments(Value(42.0), Value(42.0)),
+            row(
+                InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.i)),
+                Value(1 + 2.i),
+            ),
 
-                arguments(
-                    InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.i)),
-                    Value(1 + 2.i),
+            row(ConstantNode(Constant.TAU), Value(6.283185307179586)),
+
+            row(PrefixOperatorNode(PrefixOperator.UNARY_MINUS, Value(2.0)), Value(-2.0)),
+
+            row(InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)), Value(3.0)),
+            row(InfixOperatorNode(InfixOperator.MINUS, Value(1.0), Value(2.0)), Value(-1.0)),
+            row(InfixOperatorNode(InfixOperator.TIMES, Value(1.0), Value(2.0)), Value(2.0)),
+            row(InfixOperatorNode(InfixOperator.DIVIDE, Value(1.0), Value(2.0)), Value(0.5)),
+
+            row(
+                InfixOperatorNode(
+                    InfixOperator.PLUS,
+                    Value(1.0),
+                    InfixOperatorNode(InfixOperator.TIMES, Value(2.0), Value(3.0)),
                 ),
-
-                arguments(ConstantNode(Constant.TAU), Value(6.283185307179586)),
-
-                arguments(PrefixOperatorNode(PrefixOperator.UNARY_MINUS, Value(2.0)), Value(-2.0)),
-
-                arguments(InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)), Value(3.0)),
-                arguments(InfixOperatorNode(InfixOperator.MINUS, Value(1.0), Value(2.0)), Value(-1.0)),
-                arguments(InfixOperatorNode(InfixOperator.TIMES, Value(1.0), Value(2.0)), Value(2.0)),
-                arguments(InfixOperatorNode(InfixOperator.DIVIDE, Value(1.0), Value(2.0)), Value(0.5)),
-
-                arguments(
-                    InfixOperatorNode(
-                        InfixOperator.PLUS,
-                        Value(1.0),
-                        InfixOperatorNode(InfixOperator.TIMES, Value(2.0), Value(3.0)),
-                    ),
-                    Value(7.0),
+                Value(7.0),
+            ),
+            row(
+                InfixOperatorNode(
+                    InfixOperator.TIMES,
+                    InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
+                    Value(3.0),
                 ),
-                arguments(
-                    InfixOperatorNode(
-                        InfixOperator.TIMES,
-                        InfixOperatorNode(InfixOperator.PLUS, Value(1.0), Value(2.0)),
-                        Value(3.0),
-                    ),
-                    Value(9.0),
-                ),
+                Value(9.0),
+            ),
 
-                arguments(Function1Node(Function1.SIN, Value(1.0)), Value(0.8414709848078965)),
-                arguments(Function2Node(Function2.POW, Value(2.0), Value(3.0)), Value(8.0)),
+            row(Function1Node(Function1.SIN, Value(1.0)), Value(0.8414709848078965)),
+            row(Function2Node(Function2.POW, Value(2.0), Value(3.0)), Value(8.0)),
 
-                arguments(
-                    Function1Node(Function1.SIN, Value(1 + 1.i)),
-                    Value(1.2984575814159773 + 0.6349639147847361.i),
-                ),
-                arguments(Function2Node(Function2.POW, Value(1 + 1.i), Value(2.0)), Value(2.i)),
-            )
+            row(
+                Function1Node(Function1.SIN, Value(1 + 1.i)),
+                Value(1.2984575814159773 + 0.6349639147847361.i),
+            ),
+            row(Function2Node(Function2.POW, Value(1 + 1.i), Value(2.0)), Value(2.i)),
+        ) { (input, expected) ->
+            val result = input.evaluate()
+            result shouldBeCloseTo expected
         }
     }
-}
+})

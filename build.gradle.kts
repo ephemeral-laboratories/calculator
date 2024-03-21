@@ -24,11 +24,10 @@ dependencies {
     implementation(libs.antlr4.runtime)
 
     testImplementation(compose.desktop.uiTestJUnit4)
-    testImplementation(libs.junit.jupiter.api)
-    testImplementation(libs.junit.jupiter.params)
+    testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.kotest.framework.datatest)
     testRuntimeOnly(libs.junit.platform.launcher)
-    testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.junit.vintage.engine)
 }
 
