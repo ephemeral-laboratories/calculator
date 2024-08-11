@@ -1,3 +1,4 @@
+import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -8,7 +9,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.spotless)
     idea
-    antlr
+    alias(libs.plugins.antlr.kotlin)
     id("utf8-workarounds")
 }
 
@@ -17,13 +18,12 @@ version = "1.0.0-SNAPSHOT"
 description = "Simple calculator application built in Compose Desktop"
 
 dependencies {
-    antlr(libs.antlr4)
-
     implementation(compose.components.resources)
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
-    implementation(libs.antlr4.runtime)
+    implementation(libs.antlr.kotlin.runtime)
+    implementation(libs.icu4j)
 
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.kotest.runner.junit5)
@@ -33,14 +33,35 @@ dependencies {
     testRuntimeOnly(libs.junit.vintage.engine)
 }
 
-tasks.withType<AntlrTask> {
-    arguments = arguments + listOf("-package", "garden.ephemeral.calculator.grammar")
+val generatedAntlrDir = layout.buildDirectory.dir("generated/antlr")
+
+val generateKotlinGrammarSource by tasks.registering(AntlrKotlinTask::class) {
+    // XXX: Suspicious. This seems to be working around some problem with the antlr-kotlin plugin.
+    dependsOn("cleanGenerateKotlinGrammarSource")
+
+    source = fileTree(layout.projectDirectory.dir("src/main/antlr")) {
+        include("**/*.g4")
+    }
+
+    packageName = "garden.ephemeral.calculator.grammar"
+
+    arguments = listOf("-visitor")
+
+    outputDirectory = generatedAntlrDir.get().dir(packageName!!.replace(".", "/")).asFile
 }
-tasks.generateGrammarSource {
-    outputDirectory = layout.buildDirectory.dir("generated-src/antlr/main/garden/ephemeral/calculator/grammar").get().asFile
+
+kotlin {
+    sourceSets {
+        main {
+            kotlin {
+                srcDir(generatedAntlrDir)
+            }
+        }
+    }
 }
-tasks.generateTestGrammarSource {
-    outputDirectory = layout.buildDirectory.dir("generated-src/antlr/test/garden/ephemeral/calculator/grammar").get().asFile
+
+tasks.withType<KotlinCompile> {
+    dependsOn(generateKotlinGrammarSource)
 }
 
 java {
@@ -56,15 +77,6 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-// ANTLR plugin sets `compileJava` to depend on `generateGrammarSource`,
-// but not `compileKotlin`, which causes a warning.
-tasks.compileKotlin {
-    dependsOn(tasks.generateGrammarSource)
-}
-tasks.compileTestKotlin {
-    dependsOn(tasks.generateTestGrammarSource)
 }
 
 compose.desktop {

@@ -17,16 +17,16 @@ import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
 import garden.ephemeral.calculator.nodes.values.Value
-import org.antlr.v4.runtime.BailErrorStrategy
-import org.antlr.v4.runtime.BaseErrorListener
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.RecognitionException
-import org.antlr.v4.runtime.Recognizer
-import org.antlr.v4.runtime.Token
-import org.antlr.v4.runtime.misc.ParseCancellationException
-import org.antlr.v4.runtime.tree.ParseTree
-import org.antlr.v4.runtime.tree.TerminalNodeImpl
+import org.antlr.v4.kotlinruntime.BailErrorStrategy
+import org.antlr.v4.kotlinruntime.BaseErrorListener
+import org.antlr.v4.kotlinruntime.CharStreams
+import org.antlr.v4.kotlinruntime.CommonTokenStream
+import org.antlr.v4.kotlinruntime.RecognitionException
+import org.antlr.v4.kotlinruntime.Recognizer
+import org.antlr.v4.kotlinruntime.Token
+import org.antlr.v4.kotlinruntime.misc.ParseCancellationException
+import org.antlr.v4.kotlinruntime.tree.ParseTree
+import org.antlr.v4.kotlinruntime.tree.TerminalNodeImpl
 import java.text.ParseException
 
 class ExpressionParser(private val realFormat: PositionalFormat) {
@@ -69,12 +69,12 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 Parentheses(transform(tree.expression()))
 
             is ExpressionParser.PlusMinusExpressionContext -> {
-                var node = transform(tree.getChild(0))
+                var node = transform(tree.getChild(0)!!)
                 for (i in 1 until tree.childCount step 2) {
                     val operator = (tree.getChild(i) as TerminalNodeImpl).symbol
-                    val nextChild = tree.getChild(i + 1)
+                    val nextChild = tree.getChild(i + 1)!!
                     node = InfixOperatorNode(
-                        if (operator.type == ExpressionLexer.PLUS) InfixOperator.PLUS else InfixOperator.MINUS,
+                        if (operator.type == ExpressionLexer.Tokens.PLUS) InfixOperator.PLUS else InfixOperator.MINUS,
                         node,
                         transform(nextChild),
                     )
@@ -83,12 +83,12 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             }
 
             is ExpressionParser.TimesDivideExpressionContext -> {
-                var node = transform(tree.getChild(0))
+                var node = transform(tree.getChild(0)!!)
                 for (i in 1 until tree.childCount step 2) {
                     val operator = (tree.getChild(i) as TerminalNodeImpl).symbol
-                    val nextChild = tree.getChild(i + 1)
+                    val nextChild = tree.getChild(i + 1)!!
                     node = InfixOperatorNode(
-                        if (operator.type == ExpressionLexer.TIMES) InfixOperator.TIMES else InfixOperator.DIVIDE,
+                        if (operator.type == ExpressionLexer.Tokens.TIMES) InfixOperator.TIMES else InfixOperator.DIVIDE,
                         node,
                         transform(nextChild),
                     )
@@ -99,7 +99,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.ImplicitTimesExpressionContext -> {
                 var node = transform(tree.implicitTimesFirstChildExpression())
                 for (i in 1 until tree.childCount) {
-                    val nextChild = tree.getChild(i)
+                    val nextChild = tree.getChild(i)!!
                     node = InfixOperatorNode(InfixOperator.IMPLICIT_TIMES, node, transform(nextChild))
                 }
                 node
@@ -107,8 +107,8 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
 
             is ExpressionParser.PowerExpressionContext -> InfixOperatorNode(
                 InfixOperator.POWER,
-                transform(tree.powerChildExpression(0)),
-                transform(tree.powerChildExpression(1)),
+                transform(tree.powerChildExpression(0)!!),
+                transform(tree.powerChildExpression(1)!!),
             )
 
             is ExpressionParser.UnaryMinusExpressionContext -> {
@@ -122,32 +122,34 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             }
 
             is ExpressionParser.Function1ExpressionContext -> {
-                val name = tree.func.text
+                val func = tree.func!!
+                val name = func.text!!
                 val function = Function1.findByName(name)
-                    ?: throw ParseException("Function not found: $name", tree.func.startIndex)
-                Function1Node(function, transform(tree.arg))
+                    ?: throw ParseException("Function not found: $name", func.startIndex)
+                Function1Node(function, transform(tree.arg!!))
             }
 
             is ExpressionParser.Function2ExpressionContext -> {
-                val name = tree.func.text
+                val func = tree.func!!
+                val name = func.text!!
                 val function = Function2.findByName(name)
-                    ?: throw ParseException("Function not found: $name", tree.func.startIndex)
-                Function2Node(function, transform(tree.arg1), transform(tree.arg2))
+                    ?: throw ParseException("Function not found: $name", func.startIndex)
+                Function2Node(function, transform(tree.arg1!!), transform(tree.arg2!!))
             }
 
             is ExpressionParser.RealNumberContext -> {
-                val real = parseReal(tree.magnitude)
+                val real = parseReal(tree.magnitude!!)
                 Value(real)
             }
 
             is ExpressionParser.ComplexNumberContext -> {
                 val real = signFromToken(tree.realSign) * if (tree.real != null) {
-                    parseReal(tree.real)
+                    parseReal(tree.real!!)
                 } else {
                     Real.ZERO
                 }
                 val imag = signFromToken(tree.imagSign) * if (tree.imag != null) {
-                    parseReal(tree.imag)
+                    parseReal(tree.imag!!)
                 } else {
                     // Even if there's no imag token, there must have still been an i token,
                     // so we want 1 for the imaginary part, not 0.
@@ -182,7 +184,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.FunctionExpressionContext,
             is ExpressionParser.ValueContext,
             ->
-                transform(tree.getChild(0))
+                transform(tree.getChild(0)!!)
 
             else -> throw UnsupportedOperationException("Unknown tree node: $tree")
         }
@@ -200,7 +202,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
     }
 
     private fun signFromToken(token: Token?): Real =
-        if (token?.type == ExpressionLexer.MINUS) Real.MINUS_ONE else Real.ONE
+        if (token?.type == ExpressionLexer.Tokens.MINUS) Real.MINUS_ONE else Real.ONE
 
     private class ErrorListener : BaseErrorListener() {
         var message: String? = null
@@ -213,7 +215,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             offendingSymbol: Any?,
             line: Int,
             charPositionInLine: Int,
-            msg: String?,
+            msg: String,
             e: RecognitionException?,
         ) {
             if (message != null) {
@@ -224,7 +226,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 stop = offendingSymbol.stopIndex
             } else if (recognizer is ExpressionLexer) {
                 start = recognizer._tokenStartCharIndex
-                stop = recognizer._input.index()
+                stop = recognizer.inputStream.index()
             }
             this.line = line
             message = msg

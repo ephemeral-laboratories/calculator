@@ -7,10 +7,13 @@ compose = "1.6.11"
 spotless = "6.22.0"
 ktlint = "0.48.0"
 kotlin = "2.0.0"
+antlr-kotlin = "1.0.0-RC4"
+icu4j = "75.1"
 
 [libraries]
 antlr4 = {module = "org.antlr:antlr4", version.ref = "antlr4"}
-antlr4-runtime = {module = "org.antlr:antlr4-runtime", version.ref = "antlr4"}
+antlr-kotlin-runtime = {module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin"}
+icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
 kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
 kotest-assertions-core = {module = "io.kotest:kotest-assertions-core", version.ref = "kotest"}
 kotest-framework-datatest = {module = "io.kotest:kotest-framework-datatest", version.ref = "kotest"}
@@ -21,5 +24,6 @@ junit-platform-launcher = {module = "org.junit.platform:junit-platform-launcher"
 [plugins]
 kotlin-jvm = {id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}
 compose = {id = "org.jetbrains.compose", version.ref = "compose"}
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-compiler = {id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin"}
 spotless = {id = "com.diffplug.spotless", version.ref = "spotless"}
+antlr-kotlin = {id  = "com.strumenta.antlr-kotlin", version.ref = "antlr-kotlin"}
