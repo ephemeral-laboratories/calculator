@@ -1,13 +1,12 @@
 [versions]
-komplex = "1.0.0"
 antlr4 = "4.9.3"
 junit = "5.10.2"
 junit-platform-launcher = "1.10.2"
-kotest = "5.8.1"
-compose = "1.6.1"
+kotest = "5.9.1"
+compose = "1.6.11"
 spotless = "6.22.0"
 ktlint = "0.48.0"
-kotlin = "1.9.22" # "2.0.0-Beta4"
+kotlin = "2.0.0"
 
 [libraries]
 antlr4 = {module = "org.antlr:antlr4", version.ref = "antlr4"}
@@ -22,4 +21,5 @@ junit-platform-launcher = {module = "org.junit.platform:junit-platform-launcher"
 [plugins]
 kotlin-jvm = {id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}
 compose = {id = "org.jetbrains.compose", version.ref = "compose"}
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 spotless = {id = "com.diffplug.spotless", version.ref = "spotless"}
