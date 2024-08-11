@@ -1,5 +1,4 @@
 [versions]
-antlr4 = "4.9.3"
 junit = "5.10.2"
 junit-platform-launcher = "1.10.2"
 kotest = "5.9.1"
@@ -11,7 +10,6 @@ antlr-kotlin = "1.0.0-RC4"
 icu4j = "75.1"
 
 [libraries]
-antlr4 = {module = "org.antlr:antlr4", version.ref = "antlr4"}
 antlr-kotlin-runtime = {module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin"}
 icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
 kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
@@ -22,7 +20,7 @@ junit-vintage-engine = {module = "org.junit.vintage:junit-vintage-engine", versi
 junit-platform-launcher = {module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform-launcher"}
 
 [plugins]
-kotlin-jvm = {id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}
+kotlin-multiplatform = {id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin"}
 compose = {id = "org.jetbrains.compose", version.ref = "compose"}
 compose-compiler = {id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin"}
 spotless = {id = "com.diffplug.spotless", version.ref = "spotless"}

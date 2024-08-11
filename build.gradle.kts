@@ -1,10 +1,11 @@
+
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.spotless)
@@ -17,29 +18,43 @@ group = "garden.ephemeral.calculator"
 version = "1.0.0-SNAPSHOT"
 description = "Simple calculator application built in Compose Desktop"
 
-dependencies {
-    implementation(compose.components.resources)
-    implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
-    implementation(compose.materialIconsExtended)
-    implementation(libs.antlr.kotlin.runtime)
-    implementation(libs.icu4j)
+val generatedAntlrDir: Provider<Directory> = layout.buildDirectory.dir("generated/antlr")
 
-    testImplementation(compose.desktop.uiTestJUnit4)
-    testImplementation(libs.kotest.runner.junit5)
-    testImplementation(libs.kotest.assertions.core)
-    testImplementation(libs.kotest.framework.datatest)
-    testRuntimeOnly(libs.junit.platform.launcher)
-    testRuntimeOnly(libs.junit.vintage.engine)
+kotlin {
+    jvmToolchain(17)
+    jvm()
+    sourceSets {
+        commonMain {
+            kotlin {
+                srcDir(generatedAntlrDir)
+            }
+            dependencies {
+                implementation(compose.components.resources)
+            }
+        }
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
+            implementation(libs.antlr.kotlin.runtime)
+            implementation(libs.icu4j)
+        }
+        jvmTest.dependencies {
+            implementation(compose.desktop.uiTestJUnit4)
+            implementation(libs.kotest.runner.junit5)
+            implementation(libs.kotest.assertions.core)
+            implementation(libs.kotest.framework.datatest)
+            runtimeOnly(libs.junit.platform.launcher)
+            runtimeOnly(libs.junit.vintage.engine)
+        }
+    }
 }
-
-val generatedAntlrDir = layout.buildDirectory.dir("generated/antlr")
 
 val generateKotlinGrammarSource by tasks.registering(AntlrKotlinTask::class) {
     // XXX: Suspicious. This seems to be working around some problem with the antlr-kotlin plugin.
     dependsOn("cleanGenerateKotlinGrammarSource")
 
-    source = fileTree(layout.projectDirectory.dir("src/main/antlr")) {
+    source = fileTree(layout.projectDirectory.dir("src/commonMain/antlr")) {
         include("**/*.g4")
     }
 
@@ -50,25 +65,8 @@ val generateKotlinGrammarSource by tasks.registering(AntlrKotlinTask::class) {
     outputDirectory = generatedAntlrDir.get().dir(packageName!!.replace(".", "/")).asFile
 }
 
-kotlin {
-    sourceSets {
-        main {
-            kotlin {
-                srcDir(generatedAntlrDir)
-            }
-        }
-    }
-}
-
 tasks.withType<KotlinCompile> {
     dependsOn(generateKotlinGrammarSource)
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-}
-
-tasks.withType<KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
