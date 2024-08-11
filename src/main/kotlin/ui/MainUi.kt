@@ -1,7 +1,9 @@
 package garden.ephemeral.calculator.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -226,6 +228,7 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
 @OptIn(
     ExperimentalResourceApi::class,
     ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
 )
 @Composable
 fun MainContent(
@@ -259,13 +262,15 @@ fun MainContent(
                         .wrapContentHeight(Alignment.Bottom),
                     state = appState.outputState,
                 ) {
-                    items(appState.history) { item ->
-                        Column {
-                            // Newlines added here purely for people who copy the text
-                            val input = item.input.prettyPrint(appState.valueFormat)
-                            Text(text = "$input =\n", maxLines = 1)
-                            val output = item.output.prettyPrint(appState.valueFormat)
-                            Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
+                    items(items = appState.history, key = HistoryEntry::id) { item ->
+                        AnimatedContent(targetState = item) {
+                            Column(modifier = Modifier.animateItemPlacement()) {
+                                // Newlines added here purely for people who copy the text
+                                val input = item.input.prettyPrint(appState.valueFormat)
+                                Text(text = "$input =\n", maxLines = 1)
+                                val output = item.output.prettyPrint(appState.valueFormat)
+                                Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
+                            }
                         }
                     }
                 }

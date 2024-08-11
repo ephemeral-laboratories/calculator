@@ -28,7 +28,7 @@ class AppState {
     var numberFormatOption by mutableStateOf(NumberFormatOption.DECIMAL)
     var decimalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.defaultFor(NumberFormatOption.DECIMAL))
     var dozenalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.defaultFor(NumberFormatOption.DOZENAL))
-    val history: MutableList<HistoryEntry> = mutableStateListOf()
+    val history = mutableStateListOf<HistoryEntry>()
 
     val valueFormat by derivedStateOf {
         val radixSeparatorOption = when (numberFormatOption) {
@@ -78,7 +78,7 @@ class AppState {
                 return
             }
 
-            history.add(HistoryEntry(expression, expression.evaluate()))
+            history.add(HistoryEntry(input = expression, output = expression.evaluate()))
 
             scope.launch {
                 outputState.animateScrollToItem(history.lastIndex)
