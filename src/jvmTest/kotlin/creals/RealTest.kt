@@ -1,8 +1,9 @@
 package garden.ephemeral.calculator.creals
 
-import io.kotest.assertions.assertSoftly
+import garden.ephemeral.calculator.util.row
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.datatest.withData
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
@@ -10,85 +11,148 @@ import io.kotest.matchers.shouldBe
 class RealTest : FreeSpec({
     val zero = Real.valueOf(0)
     val one = Real.valueOf(1)
-    val minusOne = Real.valueOf(-1)
     val two = Real.valueOf(2)
     val four = Real.valueOf(4)
     val thirteen = Real.valueOf(13)
+    val minusOne = Real.valueOf(-1)
+    val minusTwo = Real.valueOf(-2)
+    val minusFour = Real.valueOf(-4)
+    val oneHalf = Real.valueOf(0.5)
 
     "signum" - {
-        "for positive value" {
-            one.signum() shouldBe 1
+        withData(
+            row(one, 1, "positive value 1"),
+            row(two, 1, "positive value 2"),
+            row(minusOne, -1, "negative value 1"),
+            row(minusTwo, -1, "negative value 2"),
+        ) { (value, expected, _) ->
+            value.signum() shouldBe expected
         }
-
-        "for negative value" {
-            minusOne.signum() shouldBe -1
-        }
-
-        "for zero" {
+        "for zero when tolerance is specified" {
             zero.signum(-100) shouldBe 0
+        }
+        "for zero when tolerance is not specified" {
+            shouldThrow<PrecisionOverflowError> {
+                zero.signum()
+            }
         }
     }
 
-    "compareTo" {
-        one.compareTo(two, -10) shouldBe -1
+    "compareTo" - {
+        withData(
+            row(two, one, 1, "lesser value"),
+            row(one, two, -1, "greater value"),
+            row(one, one, 0, "equal value"),
+        ) { (a, b, expected, _) ->
+            a.compareTo(b, -10) shouldBe expected
+        }
     }
 
     "toString" - {
-        "0" {
-            zero.toString(4) shouldBe "0.0000"
-        }
-        "positive" {
-            two.toString(4) shouldBe "2.0000"
-        }
-        "negative" {
-            minusOne.toString(4) shouldBe "-1.0000"
-        }
-    }
-
-    "shiftLeft" {
-        one.shiftLeft(1) shouldBeCloseTo "2.00000000000000000000"
-    }
-
-    "shiftRight" {
-        two.shiftRight(1) shouldBeCloseTo "1.00000000000000000000"
-    }
-
-    "plus" {
-        (one + one) shouldBeCloseTo "2.00000000000000000000"
-    }
-
-    "valueOf" {
-        assertSoftly {
-            Real.valueOf(4) shouldBeCloseTo "4.00000000000000000000"
-            Real.valueOf(3) shouldBeCloseTo "3.00000000000000000000"
+        withData(
+            row(one, "1.0000", "positive value 1"),
+            row(two, "2.0000", "positive value 2"),
+            row(zero, "0.0000", "0 equal value"),
+            row(minusOne, "-1.0000", "negative value 1"),
+            row(minusTwo, "-2.0000", "negative value 2"),
+        ) { (value, expected, _) ->
+            value.toString(pointsOfPrecision = 4) shouldBe expected
         }
     }
 
-    "unary minus" {
-        (-one + two) shouldBeCloseTo "1.00000000000000000000"
+    "valueOf" - {
+        withData(
+            row("4", "4.00000000000000000000"),
+            row("3", "3.00000000000000000000"),
+            row("0", "0.00000000000000000000"),
+            row("-1", "-1.00000000000000000000"),
+        ) { (intValue, expected) ->
+            Real.valueOf(intValue) shouldBeCloseTo expected
+        }
     }
 
-    "unary plus" {
-        (+one + two) shouldBeCloseTo "3.00000000000000000000"
+    "shiftLeft" - {
+        withData(
+            row(zero, "0.00000000000000000000"),
+            row(oneHalf, "1.00000000000000000000"),
+            row(one, "2.00000000000000000000"),
+        ) { (value, expected) ->
+            value.shiftLeft(1) shouldBeCloseTo expected
+        }
     }
 
-    "times" {
-        (two * two) shouldBeCloseTo "4.00000000000000000000"
+    "shiftRight" - {
+        withData(
+            row(zero, "0.00000000000000000000"),
+            row(one, "0.50000000000000000000"),
+            row(two, "1.00000000000000000000"),
+        ) { (value, expected) ->
+            value.shiftRight(1) shouldBeCloseTo expected
+        }
+    }
+
+    "plus" - {
+        withData(
+            row(one, one, "2.00000000000000000000"),
+            row(minusOne, two, "1.00000000000000000000"),
+            row(minusOne, one, "0.00000000000000000000"),
+            row(minusTwo, one, "-1.00000000000000000000"),
+        ) { (a, b, expected) ->
+            (a + b) shouldBeCloseTo expected
+        }
+    }
+
+    "minus" - {
+        withData(
+            row(two, one, "1.00000000000000000000"),
+            row(one, one, "0.00000000000000000000"),
+            row(one, two, "-1.00000000000000000000"),
+        ) { (a, b, expected) ->
+            (a - b) shouldBeCloseTo expected
+        }
+    }
+
+    "unary minus" - {
+        withData(
+            row(one, "-1.00000000000000000000"),
+            row(zero, "0.00000000000000000000"),
+            row(minusOne, "1.00000000000000000000"),
+        ) { (value, expected) ->
+            (-value) shouldBeCloseTo expected
+        }
+    }
+
+    "unary plus" - {
+        withData(
+            row(one, "1.00000000000000000000"),
+            row(zero, "0.00000000000000000000"),
+            row(minusOne, "-1.00000000000000000000"),
+        ) { (value, expected) ->
+            (+value) shouldBeCloseTo expected
+        }
+    }
+
+    "times" - {
+        withData(
+            row(two, two, "4.00000000000000000000"),
+            row(two, minusTwo, "-4.00000000000000000000"),
+            row(minusTwo, two, "-4.00000000000000000000"),
+            row(minusTwo, minusTwo, "4.00000000000000000000"),
+        ) { (a, b, expected) ->
+            (a * b) shouldBeCloseTo expected
+        }
     }
 
     "div" - {
-        "by positive value" {
-            ((one / four).shiftLeft(4)) shouldBeCloseTo "4.00000000000000000000"
+        withData(
+            row(one, four, "0.25000000000000000000"),
+            row(four, minusTwo, "-2.00000000000000000000"),
+            row(minusFour, two, "-2.00000000000000000000"),
+            row(minusFour, minusTwo, "2.00000000000000000000"),
+            row(one, thirteen, "0.07692307692307692308"),
+        ) { (a, b, expected) ->
+            (a / b) shouldBeCloseTo expected
         }
-
-        "by negative value" {
-            (two / -one) shouldBeCloseTo "-2.00000000000000000000"
-        }
-
-        "by thirteen" {
-            ((one / thirteen) * thirteen) shouldBeCloseTo "1.00000000000000000000"
-        }
-
         "by zero" {
             // XXX: I would prefer (one / zero) to immediately throw some kind of divide by zero error.
             //      Problem is, comparing to zero is surprisingly difficult.
