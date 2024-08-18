@@ -1,7 +1,10 @@
 # Gradle
 .gradle/
 build/
+
+# Kotlin compiler
 .kotlin/
+kotlin-js-store/
 
 # IDEA
 .idea/
