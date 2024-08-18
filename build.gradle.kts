@@ -2,6 +2,7 @@
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -23,6 +24,39 @@ val generatedAntlrDir: Provider<Directory> = layout.buildDirectory.dir("generate
 kotlin {
     jvmToolchain(17)
     jvm()
+    js(IR) {
+        moduleName = "composeApp"
+        browser {
+            val projectDirPath = project.projectDir.path
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static = (static ?: mutableListOf()).apply {
+                        // Serve sources to debug inside browser
+                        add(projectDirPath)
+                    }
+                }
+            }
+        }
+        binaries.executable()
+    }
+//    @OptIn(ExperimentalWasmDsl::class)
+//    wasmJs {
+//        moduleName = "composeApp"
+//        browser {
+//            val projectDirPath = project.projectDir.path
+//            commonWebpackConfig {
+//                outputFileName = "composeApp.js"
+//                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+//                    static = (static ?: mutableListOf()).apply {
+//                        // Serve sources to debug inside browser
+//                        add(projectDirPath)
+//                    }
+//                }
+//            }
+//        }
+//        binaries.executable()
+//    }
     sourceSets {
         commonMain {
             kotlin {
@@ -30,13 +64,14 @@ kotlin {
             }
             dependencies {
                 implementation(compose.components.resources)
+                implementation(compose.material3)
+                implementation(compose.materialIconsExtended)
+                implementation(libs.antlr.kotlin.runtime)
+                implementation(libs.ktMath)
             }
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(libs.antlr.kotlin.runtime)
             implementation(libs.icu4j)
         }
         jvmTest.dependencies {
@@ -63,10 +98,11 @@ val generateKotlinGrammarSource by tasks.registering(AntlrKotlinTask::class) {
     arguments = listOf("-visitor")
 
     outputDirectory = generatedAntlrDir.get().dir(packageName!!.replace(".", "/")).asFile
+    outputs.dir(outputDirectory!!)
 }
 
 tasks.withType<KotlinCompile> {
-    dependsOn(generateKotlinGrammarSource)
+//    dependsOn(generateKotlinGrammarSource)
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")

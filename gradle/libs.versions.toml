@@ -8,10 +8,12 @@ ktlint = "0.48.0"
 kotlin = "2.0.0"
 antlr-kotlin = "1.0.0-RC4"
 icu4j = "75.1"
+ktMath = "0.10.0"
 
 [libraries]
 antlr-kotlin-runtime = {module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin"}
 icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
+ktMath = {module = "io.github.gciatto:kt-math", version.ref = "ktMath"}
 kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
 kotest-assertions-core = {module = "io.kotest:kotest-assertions-core", version.ref = "kotest"}
 kotest-framework-datatest = {module = "io.kotest:kotest-framework-datatest", version.ref = "kotest"}

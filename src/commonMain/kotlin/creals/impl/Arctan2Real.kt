@@ -4,7 +4,7 @@ import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.creals.abs
 import garden.ephemeral.calculator.creals.asin
 import garden.ephemeral.calculator.creals.sqrt
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 /**
  * Real representation of `atan2(y, x)`.

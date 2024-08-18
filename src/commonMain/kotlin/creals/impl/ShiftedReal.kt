@@ -1,7 +1,7 @@
 package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 /**
  * Representation of a constructive real multiplied by `2**n`.

@@ -2,7 +2,7 @@ package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 /**
  * Representation of the sum of 2 constructive reals.

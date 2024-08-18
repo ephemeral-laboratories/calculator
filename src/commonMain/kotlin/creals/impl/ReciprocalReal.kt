@@ -1,8 +1,7 @@
 package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.util.plus
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 /**
  * Representation of the multiplicative inverse of a constructive real.
@@ -29,14 +28,14 @@ internal class ReciprocalReal(private val op: Real) : Real() {
         val precNeeded = msd - digitsNeeded
         val logScaleFactor = -precision - precNeeded
         if (logScaleFactor < 0) return BIG0
-        val dividend = BIG1.shiftLeft(logScaleFactor)
+        val dividend = BIG1.shl(logScaleFactor)
         val scaledDivisor = op.getApproximation(precNeeded)
-        val absScaledDivisor = scaledDivisor.abs()
-        val adjDividend = dividend + absScaledDivisor.shiftRight(1)
+        val absScaledDivisor = scaledDivisor.absoluteValue
+        val adjDividend = dividend + absScaledDivisor.shr(1)
         // Adjustment so that final result is rounded.
         val result = adjDividend / absScaledDivisor
-        return if (scaledDivisor.signum() < 0) {
-            result.negate()
+        return if (scaledDivisor.signum < 0) {
+            -result
         } else {
             result
         }

@@ -2,7 +2,7 @@ package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 /**
  * Representation for ln(1 + op).
@@ -33,13 +33,12 @@ internal class PrescaledNaturalLogarithmReal(private val op: Real) : SlowReal() 
         var n = 1
         // (-1)^(n-1)
         var currentSign = 1
-        val maxTruncError = BIG1.shiftLeft(precision - 4 - calcPrecision)
-        while (currentTerm.abs() >= maxTruncError) {
-            checkForAbort()
+        val maxTruncError = BIG1.shl(precision - 4 - calcPrecision)
+        while (currentTerm.absoluteValue >= maxTruncError) {
             n += 1
             currentSign = -currentSign
             xNth = (xNth * opApproximation).scale(opPrecision)
-            currentTerm = xNth / (n * currentSign).toBigInteger()
+            currentTerm = xNth / (n * currentSign)
             // x**n / (n * (-1)**(n-1))
             currentSum += currentTerm
         }

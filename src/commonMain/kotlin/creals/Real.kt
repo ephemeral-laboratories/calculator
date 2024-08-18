@@ -9,9 +9,8 @@ import garden.ephemeral.calculator.creals.impl.NegationReal
 import garden.ephemeral.calculator.creals.impl.ReciprocalReal
 import garden.ephemeral.calculator.creals.impl.ShiftedReal
 import garden.ephemeral.calculator.creals.util.StringFloatRep
-import garden.ephemeral.calculator.creals.util.minus
 import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.ln
@@ -46,7 +45,7 @@ import kotlin.math.ln
  * implementation, and the member functions [approximate]
  * and [getApproximation].  Such applications will treat [Real] as
  * a conventional numerical type, with an interface modelled on
- * `java.math.BigInteger`.  No subclasses of `Real`
+ * `org.gciatto.kt.math.BigInteger`.  No subclasses of `Real`
  * will be explicitly mentioned by such a program.
  *
  * All standard arithmetic operations, as well as a few algebraic
@@ -151,10 +150,10 @@ abstract class Real : Number() {
      */
     fun knownMSD(): Int {
         val firstDigit: Int
-        val length = if (maxApproximation!!.signum() >= 0) {
-            maxApproximation!!.bitLength()
+        val length = if (maxApproximation!!.signum >= 0) {
+            maxApproximation!!.bitLength
         } else {
-            maxApproximation!!.negate().bitLength()
+            (-maxApproximation!!).bitLength
         }
         firstDigit = minPrecision + length - 1
         return firstDigit
@@ -166,7 +165,7 @@ abstract class Real : Number() {
     fun msd(n: Int): Int {
         if (!isMaxApproximationValid || maxApproximation!! in BIG_MINUS1..BIG1) {
             getApproximation(n - 1)
-            if (maxApproximation!!.abs() <= BIG1) {
+            if (maxApproximation!!.absoluteValue <= BIG1) {
                 // msd could still be arbitrarily far to the right.
                 return Int.MIN_VALUE
             }
@@ -184,7 +183,6 @@ abstract class Real : Number() {
             val msd = msd(prec)
             if (msd != Int.MIN_VALUE) return msd
             checkPrecision(prec)
-            checkForAbort()
             prec = (prec * 3) / 2 - 16
         }
         return msd(n)
@@ -268,12 +266,12 @@ abstract class Real : Number() {
      */
     fun signum(absoluteTolerance: Int): Int {
         if (isMaxApproximationValid) {
-            val quickTry = maxApproximation!!.signum()
+            val quickTry = maxApproximation!!.signum
             if (quickTry != 0) return quickTry
         }
         val neededPrecision = absoluteTolerance - 1
         val thisApproximation = getApproximation(neededPrecision)
-        return thisApproximation.signum()
+        return thisApproximation.signum
     }
 
     /**
@@ -307,26 +305,25 @@ abstract class Real : Number() {
         val scaledCR = if (16 == radix) {
             shiftLeft(4 * pointsOfPrecision)
         } else {
-            val scaleFactor = radix.toBigInteger().pow(pointsOfPrecision)
+            val scaleFactor = BigInteger.of(radix).pow(pointsOfPrecision)
             this * IntegerConstantReal(scaleFactor)
         }
         val scaledInt = scaledCR.getApproximation(0)
-        var scaledString = scaledInt.abs().toString(radix)
+        var scaledString = scaledInt.absoluteValue.toString(radix)
         var result = if (0 == pointsOfPrecision) {
             scaledString
         } else {
             var len = scaledString.length
             if (len <= pointsOfPrecision) {
                 // Add sufficient leading zeroes
-                val z = zeroes(pointsOfPrecision + 1 - len)
-                scaledString = z + scaledString
+                scaledString = scaledString.padStart(pointsOfPrecision + 1, '0')
                 len = pointsOfPrecision + 1
             }
             val whole = scaledString.substring(0, len - pointsOfPrecision)
             val fraction = scaledString.substring(len - pointsOfPrecision)
             "$whole.$fraction"
         }
-        if (scaledInt.signum() < 0) {
+        if (scaledInt.signum < 0) {
             result = "-$result"
         }
         return result
@@ -357,7 +354,7 @@ abstract class Real : Number() {
     fun toStringFloatRep(pointsOfPrecision: Int, radix: Int, msdPrecision: Int): StringFloatRep {
         if (pointsOfPrecision <= 0) throw ArithmeticException()
         val log2Radix = ln(radix.toDouble()) / LN2_DOUBLE
-        val bigRadix = radix.toBigInteger()
+        val bigRadix = BigInteger.of(radix)
         val longMSDPrecisionBits = (log2Radix * msdPrecision.toDouble()).toLong()
         if (longMSDPrecisionBits > Int.MAX_VALUE.toLong() || longMSDPrecisionBits < Int.MIN_VALUE.toLong()) throw PrecisionOverflowError()
         val msdPrecisionBits = longMSDPrecisionBits.toInt()
@@ -374,15 +371,15 @@ abstract class Real : Number() {
         }
         var scaledRes = times(scale)
         var scaledInt = scaledRes.getApproximation(0)
-        var sign = scaledInt.signum()
+        var sign = scaledInt.signum
 
-        var scaledMantissa = intToDigits(scaledInt.abs(), radix)
+        var scaledMantissa = intToDigits(scaledInt.absoluteValue, radix)
         while (scaledMantissa.size < pointsOfPrecision) {
             // exponent was too large.  Adjust.
             scaledRes *= valueOf(bigRadix)
             exponent -= 1
             scaledInt = scaledRes.getApproximation(0)
-            sign = scaledInt.signum()
+            sign = scaledInt.signum
             scaledMantissa = intToDigits(scaledInt, radix)
         }
         if (scaledMantissa.size > pointsOfPrecision) {
@@ -396,7 +393,7 @@ abstract class Real : Number() {
     private fun intToDigits(value: BigInteger, radix: Int): List<Int> = buildList {
         if (value == BigInteger.ZERO) return listOf(0)
         var remaining = value
-        val bigRadix = radix.toBigInteger()
+        val bigRadix = BigInteger.of(radix)
         while (remaining > BigInteger.ZERO) {
             val (newRemaining, digit) = remaining.divideAndRemainder(bigRadix)
             remaining = newRemaining
@@ -439,7 +436,7 @@ abstract class Real : Number() {
         val neededPrecision = myMSD - 60
         val scaledInt = getApproximation(neededPrecision).toDouble()
         val mayUnderflow = (neededPrecision < -1000)
-        var scaledIntRep = java.lang.Double.doubleToLongBits(scaledInt)
+        var scaledIntRep = scaledInt.toBits()
         val expAdj = (if (mayUnderflow) neededPrecision + 96 else neededPrecision).toLong()
         val origExp = (scaledIntRep shr 52) and 0x7ffL
         if (((origExp + expAdj) and 0x7ffL.inv()) != 0L) {
@@ -451,7 +448,7 @@ abstract class Real : Number() {
             }
         }
         scaledIntRep += expAdj shl 52
-        val result = java.lang.Double.longBitsToDouble(scaledIntRep)
+        val result = Double.fromBits(scaledIntRep)
         if (mayUnderflow) {
             val two48 = (1 shl 48).toDouble()
             return result / two48 / two48
@@ -557,11 +554,11 @@ abstract class Real : Number() {
 
         val BIG0: BigInteger = BigInteger.ZERO
         val BIG1: BigInteger = BigInteger.ONE
-        val BIG_MINUS1 = (-1).toBigInteger()
+        val BIG_MINUS1 = BigInteger.of(-1)
         val BIG2: BigInteger = BigInteger.TWO
-        val BIG3 = 3.toBigInteger()
-        val BIG6 = 6.toBigInteger()
-        val BIG8 = 8.toBigInteger()
+        val BIG3 = BigInteger.of(3)
+        val BIG6 = BigInteger.of(6)
+        val BIG8 = BigInteger.of(8)
         val BIG10: BigInteger = BigInteger.TEN
 
         val ZERO = valueOf(0)
@@ -593,26 +590,6 @@ abstract class Real : Number() {
         private val LN2_2: Real = valueOf(2) * simpleLn(TWENTY_FIVE_TWENTY_FOURTHS)
         private val LN2_3: Real = valueOf(3) * simpleLn(EIGHTY_ONE_EIGHTIETHS)
         internal val LN2: Real = LN2_1 - LN2_2 + LN2_3
-
-        /**
-         * Setting this to true requests that  all computations be aborted by
-         * throwing AbortedError.  Must be rest to false before any further
-         * computation.  Ideally Thread.interrupt() should be used instead, but
-         * that doesn't appear to be consistently supported by browser VMs.
-         */
-        @JvmField
-        @Volatile
-        var pleaseStop: Boolean = false
-
-        /**
-         * Convenience method for subclasses to call to check for an abort of the calculation.
-         * Tight calculation loops don't check for the thread being interrupted automatically.
-         */
-        @Throws(AbortedError::class)
-        @JvmStatic
-        protected fun checkForAbort() {
-            if (Thread.interrupted() || pleaseStop) throw AbortedError()
-        }
 
         // min_prec and max_val are valid.
         // Helper functions
@@ -646,12 +623,12 @@ abstract class Real : Number() {
         /**
          * The constructive real number corresponding to an `Int`.
          */
-        fun valueOf(n: Int) = valueOf(n.toBigInteger())
+        fun valueOf(n: Int) = valueOf(BigInteger.of(n))
 
         /**
          * The constructive real number corresponding to a `Long`.
          */
-        fun valueOf(n: Long) = valueOf(n.toBigInteger())
+        fun valueOf(n: Long) = valueOf(BigInteger.of(n))
 
         /**
          * The constructive real number corresponding to a
@@ -659,10 +636,10 @@ abstract class Real : Number() {
          * The result is undefined if argument is infinite or NaN.
          */
         fun valueOf(n: Double): Real {
-            if (java.lang.Double.isNaN(n)) throw ArithmeticException()
-            if (java.lang.Double.isInfinite(n)) throw ArithmeticException()
+            if (n.isNaN()) throw ArithmeticException()
+            if (n.isInfinite()) throw ArithmeticException()
             val negative = (n < 0.0)
-            val bits = java.lang.Double.doubleToLongBits(abs(n))
+            val bits = abs(n).toBits()
             var mantissa = (bits and 0xfffffffffffffL)
             val biasedExponent = (bits shr 52).toInt()
             val exponent = biasedExponent - 1075
@@ -683,16 +660,6 @@ abstract class Real : Number() {
          */
         fun valueOf(n: Float): Real {
             return valueOf(n.toDouble())
-        }
-
-        // A helper function for toString.
-        // Generate a String containing n zeroes.
-        private fun zeroes(n: Int): String {
-            val a = CharArray(n)
-            for (i in 0 until n) {
-                a[i] = '0'
-            }
-            return String(a)
         }
 
         // Atan of integer reciprocal.  Used for PI.  Could perhaps
@@ -723,8 +690,8 @@ abstract class Real : Number() {
                 fraction = s.substring(pointPos + 1, len)
             }
             val whole = s.substring(startPos, pointPos)
-            val scaledResult = (whole + fraction).toBigInteger(radix)
-            val divisor = radix.toBigInteger().pow(fraction.length)
+            val scaledResult = BigInteger.of(value = whole + fraction, radix = radix)
+            val divisor = BigInteger.of(radix).pow(fraction.length)
             return valueOf(scaledResult) / valueOf(divisor)
         }
 
@@ -732,8 +699,8 @@ abstract class Real : Number() {
         val lowLnLimit: BigInteger = BIG8
 
         // 1.5
-        val highLnLimit: BigInteger = (16 + 8).toBigInteger()
+        val highLnLimit: BigInteger = BigInteger.of(16 + 8)
 
-        val scaled4: BigInteger = (4 * 16).toBigInteger()
+        val scaled4: BigInteger = BigInteger.of(4 * 16)
     }
 }

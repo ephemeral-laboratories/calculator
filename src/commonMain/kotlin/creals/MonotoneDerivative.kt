@@ -1,7 +1,7 @@
 package garden.ephemeral.calculator.creals
 
 import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 private class MonotoneDerivativeReal(
     private val func: (Real) -> Real,
@@ -40,12 +40,11 @@ private class MonotoneDerivativeReal(
         val evalPrecision = precision - extraPrecision
         val approximateLeftDerivative = leftDerivative.getApproximation(evalPrecision)
         val approximateRightDerivative = rightDerivative.getApproximation(evalPrecision)
-        val derivativeDifference = approximateRightDerivative.subtract(approximateLeftDerivative).abs()
+        val derivativeDifference = (approximateRightDerivative - approximateLeftDerivative).absoluteValue
         if (derivativeDifference < BIG8) {
             return approximateLeftDerivative.scale(-extraPrecision)
         } else {
-            checkForAbort()
-            derivative2MSD = evalPrecision + derivativeDifference.bitLength() + 4 /*slop*/
+            derivative2MSD = evalPrecision + derivativeDifference.bitLength + 4 /*slop*/
             derivative2MSD -= logDelta
             return approximate(precision)
         }
