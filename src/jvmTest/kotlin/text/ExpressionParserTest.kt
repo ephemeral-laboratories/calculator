@@ -20,18 +20,13 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
-import java.text.ParseException
 
 class ExpressionParserTest : FreeSpec({
     lateinit var parser: ExpressionParser
 
     beforeEach {
         parser = ExpressionParser(
-            PositionalFormat(12, PositionalFormatSymbols()).apply {
-                minimumIntegerDigits = 1
-                minimumFractionDigits = 0
-                maximumFractionDigits = 10
-            },
+            PositionalFormat(radix = 12, maximumFractionDigits = 10),
         )
     }
 

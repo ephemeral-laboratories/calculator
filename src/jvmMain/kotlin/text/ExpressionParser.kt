@@ -27,7 +27,6 @@ import org.antlr.v4.kotlinruntime.Token
 import org.antlr.v4.kotlinruntime.misc.ParseCancellationException
 import org.antlr.v4.kotlinruntime.tree.ParseTree
 import org.antlr.v4.kotlinruntime.tree.TerminalNodeImpl
-import java.text.ParseException
 
 class ExpressionParser(private val realFormat: PositionalFormat) {
     fun parse(input: String): Node {
@@ -45,13 +44,15 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
         try {
             expression = parser.start()
             if (errorListener.message != null) {
-                throw ParseException("Parsed, but $errorListener", errorListener.start)
+                throw ParseException(message = "Parsed, but $errorListener", errorOffset = errorListener.start)
             }
         } catch (e: ParseCancellationException) {
             throw if (errorListener.message != null) {
-                ParseException("Failed, because $errorListener", errorListener.start).also {
-                    it.initCause(e)
-                }
+                ParseException(
+                    message = "Failed, because $errorListener",
+                    errorOffset = errorListener.start,
+                    cause = e,
+                )
             } else {
                 e
             }
@@ -125,7 +126,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 val func = tree.func!!
                 val name = func.text!!
                 val function = Function1.findByName(name)
-                    ?: throw ParseException("Function not found: $name", func.startIndex)
+                    ?: throw ParseException(message = "Function not found: $name", errorOffset = func.startIndex)
                 Function1Node(function, transform(tree.arg!!))
             }
 
@@ -133,7 +134,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 val func = tree.func!!
                 val name = func.text!!
                 val function = Function2.findByName(name)
-                    ?: throw ParseException("Function not found: $name", func.startIndex)
+                    ?: throw ParseException(message = "Function not found: $name", errorOffset = func.startIndex)
                 Function2Node(function, transform(tree.arg1!!), transform(tree.arg2!!))
             }
 
@@ -192,12 +193,14 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
 
     private fun parseReal(token: Token): Real {
         try {
-            return realFormat.parse(token.text) as Real
+            return realFormat.parse(token.text ?: "") as Real
         } catch (e: ParseException) {
             // Rethrowing with the right index for the full input string
-            throw ParseException("Failure parsing number", token.startIndex).also {
-                it.initCause(e)
-            }
+            throw ParseException(
+                message = "Failure parsing number",
+                errorOffset = token.startIndex,
+                cause = e,
+            )
         }
     }
 

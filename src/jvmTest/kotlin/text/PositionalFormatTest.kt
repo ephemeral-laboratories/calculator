@@ -6,14 +6,14 @@ import garden.ephemeral.calculator.ui.NumberFormatOption
 import garden.ephemeral.calculator.util.row
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.datatest.withData
-import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.beInstanceOf
+import io.kotest.matchers.types.instanceOf
+import org.junit.jupiter.api.assertThrows
 
 class PositionalFormatTest : FreeSpec({
     fun newPositionalFormat() = PositionalFormat(10, NumberFormatOption.DECIMAL.defaultSymbols)
 
-    "parse" - {
+    "parse valid examples" - {
         withData(
             row("0", "0.00000000000000000000"),
             row("0.0", "0.00000000000000000000"),
@@ -45,8 +45,41 @@ class PositionalFormatTest : FreeSpec({
         ) { (example, expected) ->
             val format = newPositionalFormat()
             val number = format.parse(example)
-            number should beInstanceOf<Real>()
-            (number as Real) shouldBeCloseTo expected
+            number shouldBeCloseTo expected
+        }
+
+        "returning result object" {
+            val format = newPositionalFormat()
+            val result = format.parseSafely("1.2")
+            result shouldBe instanceOf<RealParseResult.Success>()
+            result as RealParseResult.Success
+            result.index shouldBe 3
+            result.parsedValue shouldBeCloseTo "1.20000000000000000000"
+        }
+    }
+
+    "parse invalid examples" - {
+        val parseInvalidExamples = listOf(
+            row("barf", 0, 0),
+            row("1barf", 0, 1),
+            row("1.barf", 0, 2),
+        )
+
+        "throwing exception" - {
+            withData(parseInvalidExamples) { (text, _, expectedErrorIndex) ->
+                val format = newPositionalFormat()
+                assertThrows<ParseException> {
+                    format.parse(text)
+                }.errorOffset shouldBe expectedErrorIndex
+            }
+        }
+
+        "returning result object" - {
+            withData(parseInvalidExamples) { (text, expectedIndex, expectedErrorIndex) ->
+                val format = newPositionalFormat()
+                val result = format.parseSafely(text)
+                result shouldBe RealParseResult.Failure(index = expectedIndex, errorIndex = expectedErrorIndex)
+            }
         }
     }
 

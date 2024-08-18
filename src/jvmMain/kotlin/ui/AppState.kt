@@ -13,11 +13,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import garden.ephemeral.calculator.text.ExpressionParser
+import garden.ephemeral.calculator.text.ParseException
 import garden.ephemeral.calculator.text.ValueFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import java.text.ParseException
 
 @OptIn(ExperimentalResourceApi::class)
 class AppState {
