@@ -33,8 +33,16 @@ class RealTest : FreeSpec({
         one.compareTo(two, -10) shouldBe -1
     }
 
-    "toString" {
-        two.toString(4) shouldBe "2.0000"
+    "toString" - {
+        "0" {
+            zero.toString(4) shouldBe "0.0000"
+        }
+        "positive" {
+            two.toString(4) shouldBe "2.0000"
+        }
+        "negative" {
+            minusOne.toString(4) shouldBe "-1.0000"
+        }
     }
 
     "shiftLeft" {
