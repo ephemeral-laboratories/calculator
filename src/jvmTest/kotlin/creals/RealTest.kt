@@ -1,5 +1,6 @@
 package garden.ephemeral.calculator.creals
 
+import garden.ephemeral.calculator.creals.util.StringFloatRep
 import garden.ephemeral.calculator.util.row
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
@@ -7,6 +8,7 @@ import io.kotest.datatest.withData
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.assertThrows
 
 class RealTest : FreeSpec({
     val zero = Real.valueOf(0)
@@ -45,6 +47,56 @@ class RealTest : FreeSpec({
             row(one, one, 0, "equal value"),
         ) { (a, b, expected, _) ->
             a.compareTo(b, -10) shouldBe expected
+        }
+    }
+
+    "toStringFloatRep" - {
+        withData(
+            row(
+                zero,
+                StringFloatRep(sign = 0, mantissaDigits = listOf(0), radix = 10, exponent = 0),
+                "0 equal value",
+            ),
+            row(
+                one,
+                StringFloatRep(sign = 1, mantissaDigits = listOf(1, 0, 0, 0, 0), radix = 10, exponent = 1),
+                "positive value 1",
+            ),
+            row(
+                two,
+                StringFloatRep(sign = 1, mantissaDigits = listOf(2, 0, 0, 0, 0), radix = 10, exponent = 1),
+                "positive value 2",
+            ),
+            row(
+                minusOne,
+                StringFloatRep(sign = -1, mantissaDigits = listOf(1, 0, 0, 0, 0), radix = 10, exponent = 1),
+                "negative value 1",
+            ),
+            row(
+                minusTwo,
+                StringFloatRep(sign = -1, mantissaDigits = listOf(2, 0, 0, 0, 0), radix = 10, exponent = 1),
+                "negative value 2",
+            ),
+            row(
+                Real.valueOf(12),
+                StringFloatRep(sign = 1, mantissaDigits = listOf(1, 2, 0, 0, 0), radix = 10, exponent = 2),
+                "positive value with 2 digits to left of decimal point",
+            )
+        ) { (value, expected, _) ->
+            value.toStringFloatRep(pointsOfPrecision = 5, radix = 10, msdPrecision = 5) shouldBe expected
+        }
+        "passing invalid pointsOfPrecision" {
+            assertThrows<ArithmeticException> {
+                one.toStringFloatRep(pointsOfPrecision = 0, radix = 10, msdPrecision = 5)
+            }
+            assertThrows<ArithmeticException> {
+                one.toStringFloatRep(pointsOfPrecision = -1, radix = 10, msdPrecision = 5)
+            }
+        }
+        "passing an msdPrecision which overflows" {
+            assertThrows<PrecisionOverflowError> {
+                one.toStringFloatRep(pointsOfPrecision = 5, radix = 10, msdPrecision = 1_000_000_000)
+            }
         }
     }
 
