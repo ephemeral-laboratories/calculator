@@ -1,10 +1,10 @@
 package garden.ephemeral.calculator.creals
 
-import garden.ephemeral.calculator.creals.util.times
 import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
+import org.gciatto.kt.math.BigInteger
 import kotlin.math.exp
 
 class RealFunctionsTest : FreeSpec({
@@ -39,10 +39,10 @@ class RealFunctionsTest : FreeSpec({
 
     "exp" - {
         "0" {
-            exp(zero) shouldBeCloseTo "1.00000000000000000000"
+            garden.ephemeral.calculator.creals.exp(zero) shouldBeCloseTo "1.00000000000000000000"
         }
         "1" {
-            exp(one) shouldBeCloseTo "2.71828182845904523536"
+            garden.ephemeral.calculator.creals.exp(one) shouldBeCloseTo "2.71828182845904523536"
         }
     }
 
@@ -51,7 +51,7 @@ class RealFunctionsTest : FreeSpec({
             ln(one) shouldBeCloseTo "0.00000000000000000000"
         }
         "e" {
-            ln(exp(one)) shouldBeCloseTo "1.00000000000000000000"
+            ln(garden.ephemeral.calculator.creals.exp(one)) shouldBeCloseTo "1.00000000000000000000"
         }
     }
 
@@ -126,8 +126,8 @@ class RealFunctionsTest : FreeSpec({
     }
 
     "tan for huge atan" {
-        val million = 1000_000.toBigInteger()
-        val thousand = 1000.toBigInteger()
+        val million = BigInteger.of(1000_000)
+        val thousand = BigInteger.of(1000)
         val huge = Real.valueOf(million * million * thousand)
         tan(atan(huge)) shouldBeCloseTo "1000000000000000.00000000000000000000"
     }
@@ -138,9 +138,9 @@ class RealFunctionsTest : FreeSpec({
         while (n < 10.0) {
             kotlin.math.sin(n) shouldBe (sin(Real.valueOf(n)).toDouble() plusOrMinus epsilon)
             kotlin.math.cos(n) shouldBe (cos(Real.valueOf(n)).toDouble() plusOrMinus epsilon)
-            exp(n) shouldBe (exp(Real.valueOf(n)).toDouble() plusOrMinus epsilon)
+            exp(n) shouldBe (garden.ephemeral.calculator.creals.exp(Real.valueOf(n)).toDouble() plusOrMinus epsilon)
             if (n > 0.0) {
-                exp(n) shouldBe (exp(Real.valueOf(n)).toDouble() plusOrMinus epsilon)
+                exp(n) shouldBe (garden.ephemeral.calculator.creals.exp(Real.valueOf(n)).toDouble() plusOrMinus epsilon)
             }
             n += 2.0
         }

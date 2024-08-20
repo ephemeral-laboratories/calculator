@@ -16,6 +16,7 @@ icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
 ktMath = {module = "io.github.gciatto:kt-math", version.ref = "ktMath"}
 kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
 kotest-assertions-core = {module = "io.kotest:kotest-assertions-core", version.ref = "kotest"}
+kotest-framework-engine = {module = "io.kotest:kotest-framework-engine", version.ref = "kotest"}
 kotest-framework-datatest = {module = "io.kotest:kotest-framework-datatest", version.ref = "kotest"}
 kotest-property = {module = "io.kotest:kotest-property", version.ref = "kotest"}
 junit-vintage-engine = {module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit"}
@@ -23,6 +24,7 @@ junit-platform-launcher = {module = "org.junit.platform:junit-platform-launcher"
 
 [plugins]
 kotlin-multiplatform = {id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin"}
+kotest-multiplatform = {id = "io.kotest.multiplatform", version.ref = "kotest"}
 compose = {id = "org.jetbrains.compose", version.ref = "compose"}
 compose-compiler = {id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin"}
 spotless = {id = "com.diffplug.spotless", version.ref = "spotless"}

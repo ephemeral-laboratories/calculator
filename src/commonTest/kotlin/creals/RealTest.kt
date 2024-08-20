@@ -8,7 +8,6 @@ import io.kotest.datatest.withData
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.assertThrows
 
 class RealTest : FreeSpec({
     val zero = Real.valueOf(0)
@@ -86,15 +85,15 @@ class RealTest : FreeSpec({
             value.toStringFloatRep(pointsOfPrecision = 5, radix = 10, msdPrecision = 5) shouldBe expected
         }
         "passing invalid pointsOfPrecision" {
-            assertThrows<ArithmeticException> {
+            shouldThrow<ArithmeticException> {
                 one.toStringFloatRep(pointsOfPrecision = 0, radix = 10, msdPrecision = 5)
             }
-            assertThrows<ArithmeticException> {
+            shouldThrow<ArithmeticException> {
                 one.toStringFloatRep(pointsOfPrecision = -1, radix = 10, msdPrecision = 5)
             }
         }
         "passing an msdPrecision which overflows" {
-            assertThrows<PrecisionOverflowError> {
+            shouldThrow<PrecisionOverflowError> {
                 one.toStringFloatRep(pointsOfPrecision = 5, radix = 10, msdPrecision = 1_000_000_000)
             }
         }

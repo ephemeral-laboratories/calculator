@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotest.multiplatform)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.spotless)
@@ -37,12 +38,18 @@ kotlin {
                     }
                 }
             }
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                    useFirefox()
+                }
+            }
         }
         binaries.executable()
     }
+    // No WASM build of kt-math yet
 //    @OptIn(ExperimentalWasmDsl::class)
 //    wasmJs {
-//        moduleName = "composeApp"
 //        browser {
 //            val projectDirPath = project.projectDir.path
 //            commonWebpackConfig {
@@ -54,6 +61,12 @@ kotlin {
 //                    }
 //                }
 //            }
+//            testTask {
+//                useKarma {
+//                    useChromeHeadless()
+//                    useFirefox()
+//                }
+//            }
 //        }
 //        binaries.executable()
 //    }
@@ -63,12 +76,18 @@ kotlin {
                 srcDir(generatedAntlrDir)
             }
             dependencies {
+                implementation(kotlin("test"))
                 implementation(compose.components.resources)
                 implementation(compose.material3)
                 implementation(compose.materialIconsExtended)
                 implementation(libs.antlr.kotlin.runtime)
                 implementation(libs.ktMath)
             }
+        }
+        commonTest.dependencies {
+            implementation(libs.kotest.framework.engine)
+            implementation(libs.kotest.assertions.core)
+            implementation(libs.kotest.framework.datatest)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -77,10 +96,12 @@ kotlin {
         jvmTest.dependencies {
             implementation(compose.desktop.uiTestJUnit4)
             implementation(libs.kotest.runner.junit5)
-            implementation(libs.kotest.assertions.core)
-            implementation(libs.kotest.framework.datatest)
             runtimeOnly(libs.junit.platform.launcher)
             runtimeOnly(libs.junit.vintage.engine)
+        }
+        jsMain.dependencies {
+        }
+        jsTest.dependencies {
         }
     }
 }
