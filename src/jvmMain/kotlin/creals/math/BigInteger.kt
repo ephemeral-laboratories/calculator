@@ -1,70 +1,71 @@
 package garden.ephemeral.calculator.creals.math
 
+import kotlin.math.abs
+
 /**
  * Arbitrarily big integer.
  *
+ * @property sign the sign of the number.
  * @property digits the "digits" of the number. Stored in raw binary, essentially base 2**32.
  *           Most significant digits first.
- * @property sign the sign of the number.
  */
 @OptIn(ExperimentalUnsignedTypes::class)
-class BigInteger private constructor(private val sign: Sign, private val digits: UIntArray) : Comparable<BigInteger> {
-    init {
-        if (digits.isNotEmpty()) {
-            require(digits[0] != 0U) { "digits array contains leading zeroes: ${digits.contentToString()}" }
-        }
-    }
-
+class BigInteger private constructor(private val sign: Sign, private val magnitude: UnsignedBigInteger) : Comparable<BigInteger> {
     // Arithmetic operators
 
     operator fun plus(other: BigInteger): BigInteger {
         return if (sign == other.sign) {
-            BigInteger(
-                sign = sign,
-                digits = BigIntegerArrayHelpers.add(digits, other.digits),
-            )
+            BigInteger(sign = sign, magnitude = magnitude + other.magnitude)
         } else {
-            return minus(other.unaryMinus())
+            return minus(-other)
         }
     }
 
     operator fun minus(other: BigInteger): BigInteger {
         return if (sign == other.sign) {
-            val digitComparison = BigIntegerArrayHelpers.compareDigits(digits, other.digits)
+            val comparison = magnitude.compareTo(other.magnitude)
             when {
-                (digitComparison > 0) -> BigInteger(
-                    sign = sign,
-                    digits = BigIntegerArrayHelpers.subtract(digits, other.digits),
-                )
-                (digitComparison < 0) -> BigInteger(
-                    sign = sign.flip(),
-                    digits = BigIntegerArrayHelpers.subtract(other.digits, digits),
-                )
+                (comparison > 0) -> BigInteger(sign = sign, magnitude = magnitude - other.magnitude)
+                (comparison < 0) -> BigInteger(sign = sign.flip(), magnitude = other.magnitude - magnitude)
                 else -> ZERO
             }
         } else {
-            return plus(other.unaryMinus())
+            return plus(-other)
         }
     }
 
     operator fun times(other: BigInteger): BigInteger {
         return BigInteger(
             sign = if (sign == other.sign) Sign.POSITIVE else Sign.NEGATIVE,
-            digits = BigIntegerArrayHelpers.multiply(digits, other.digits),
+            magnitude = magnitude * other.magnitude,
         )
     }
 
     operator fun div(other: BigInteger): BigInteger {
         return BigInteger(
             sign = if (sign == other.sign) Sign.POSITIVE else Sign.NEGATIVE,
-            digits = BigIntegerArrayHelpers.divide(digits, other.digits).first,
+            magnitude = magnitude / other.magnitude,
         )
     }
 
     operator fun rem(other: BigInteger): BigInteger {
         return BigInteger(
             sign = sign,
-            digits = BigIntegerArrayHelpers.divide(digits, other.digits).second,
+            magnitude = magnitude % other.magnitude,
+        )
+    }
+
+    fun divRem(other: BigInteger): QuotientWithRemainder {
+        val magnitudeResult = magnitude.divRem(other.magnitude)
+        return QuotientWithRemainder(
+            BigInteger(
+                sign = if (sign == other.sign) Sign.POSITIVE else Sign.NEGATIVE,
+                magnitude = magnitudeResult.quotient,
+            ),
+            BigInteger(
+                sign = sign,
+                magnitude = magnitudeResult.remainder,
+            ),
         )
     }
 
@@ -72,10 +73,7 @@ class BigInteger private constructor(private val sign: Sign, private val digits:
 
     operator fun unaryPlus() = this
 
-    operator fun unaryMinus() = BigInteger(
-        sign = sign.flip(),
-        digits = digits,
-    )
+    operator fun unaryMinus() = BigInteger(sign = sign.flip(), magnitude = magnitude)
 
     operator fun inc() = this + ONE
 
@@ -83,49 +81,87 @@ class BigInteger private constructor(private val sign: Sign, private val digits:
 
     // Shifts and boolean operations
 
-    infix fun shl(n: Int): BigInteger = TODO()
-    infix fun shr(n: Int): BigInteger = TODO()
+    /**
+     * Shifts left the given number of bits.
+     *
+     * This parameter is considered signed - if a negative value is provided, it will shift right instead.
+     *
+     * @param n the number of bits to shift left.
+     * @return the result.
+     */
+    infix fun shl(n: Int): BigInteger = when {
+        n == 0 -> this
+        n < 0 -> shr(-n)
+        else -> BigInteger(sign = sign, magnitude = magnitude shl n)
+    }
 
-    infix fun and(other: BigInteger): BigInteger = TODO()
-    infix fun or(other: BigInteger): BigInteger = TODO()
-    infix fun xor(other: BigInteger): BigInteger = TODO()
-    infix fun andNot(other: BigInteger): BigInteger = TODO()
-    fun not(): BigInteger = TODO()
+    /**
+     * Shifts right the given number of bits.
+     *
+     * This parameter is considered signed - if a negative value is provided, it will shift left instead.
+     *
+     * @param n the number of bits to shift right.
+     * @return the result.
+     */
+    infix fun shr(n: Int): BigInteger = when {
+        n == 0 -> this
+        n < 0 -> shl(-n)
+        else -> BigInteger(sign = sign, magnitude = magnitude shr n)
+    }
 
-    fun testBit(n: Int): Boolean = TODO()
-    fun setBit(n: Int): BigInteger = TODO()
-    fun clearBit(n: Int): BigInteger = TODO()
-    fun flipBit(n: Int): BigInteger = TODO()
-    fun getLowestSetBit(): Int = TODO()
-    fun bitLength(): Int = TODO()
-    fun bitCount(): Int = TODO()
+    /**
+     * Multiplies by `2**n`, rounding result.
+     *
+     * @param n the scale to apply.
+     * @return a new [BigInteger] with that scale.
+     */
+    fun scale(n: Int): BigInteger = when {
+        n == 0 -> this
+        n > 0 -> shl(n)
+        else -> {
+            val adjK = shl(n + 1) + ONE
+            adjK.shr(1)
+        }
+    }
+
+    // TODO: Are these methods even sensible when talking about signed values?
+    // infix fun and(other: BigInteger): BigInteger = TODO()
+    // infix fun or(other: BigInteger): BigInteger = TODO()
+    // infix fun xor(other: BigInteger): BigInteger = TODO()
+    // infix fun andNot(other: BigInteger): BigInteger = TODO()
+    // fun not(): BigInteger = TODO()
+
+    // fun testBit(n: Int): Boolean = TODO()
+    // fun setBit(n: Int): BigInteger = TODO()
+    // fun clearBit(n: Int): BigInteger = TODO()
+    // fun flipBit(n: Int): BigInteger = TODO()
+    // fun getLowestSetBit(): Int = TODO()
+    // fun bitLength(): Int = TODO()
+    // fun bitCount(): Int = TODO()
 
     // Comparisons
 
     override operator fun compareTo(other: BigInteger) = when (this.sign) {
         Sign.POSITIVE -> when (other.sign) {
-            Sign.POSITIVE -> BigIntegerArrayHelpers.compareDigits(digits, other.digits)
+            Sign.POSITIVE -> magnitude.compareTo(other.magnitude)
             Sign.NEGATIVE -> 1
         }
         Sign.NEGATIVE -> when (other.sign) {
             Sign.POSITIVE -> -1
-            Sign.NEGATIVE -> BigIntegerArrayHelpers.compareDigits(other.digits, digits)
+            Sign.NEGATIVE -> other.magnitude.compareTo(magnitude)
         }
     }
 
     override fun equals(other: Any?) =
-        (other is BigInteger) && digits.contentEquals(other.digits) && sign == other.sign
+        (other is BigInteger) && sign == other.sign && magnitude == other.magnitude
 
-    override fun hashCode() = digits.contentHashCode() * 31 + sign.hashCode()
+    override fun hashCode() = sign.hashCode() * 31 + magnitude.hashCode()
 
     // Misc
 
-    override fun toString() = "BigInteger[sign=$sign, digits=${digits.contentToString()}]"
+    override fun toString() = "BigInteger[sign=$sign, words=$magnitude]"
 
     companion object {
-        internal const val STORAGE_BASE_LOG2 = 32
-        internal val STORAGE_BASE = 1UL shl STORAGE_BASE_LOG2
-
         fun of(value: String, radix: Int = 10): BigInteger {
             require(value.isNotEmpty()) { "value must not be empty" }
             require(value.matches(Regex("^[+-]?[0-9_]+$"))) { "value must be a number" }
@@ -142,58 +178,22 @@ class BigInteger private constructor(private val sign: Sign, private val digits:
                 }
             }
 
-            // Simple approach of reusing the existing * and + operations to build up the value as we parse it.
-            // The rest BigInteger's equivalent method has some smarts which make it run faster, by processing
-            // multiple digits in a single pass.
-            var accumulator = ZERO
-            val bigRadix = of(radix)
-            while (charIndex < value.length) {
-                val ch = value[charIndex]
-                if (ch != '_') {
-                    val digit = Character.digit(ch, radix)
-                    accumulator = accumulator * bigRadix + of(digit)
-                }
-                charIndex++
-            }
-
-            return BigInteger(sign = sign, digits = accumulator.digits)
+            return BigInteger(
+                sign = sign,
+                magnitude = UnsignedBigInteger.of(value.substring(charIndex), radix),
+            )
         }
 
         fun of(value: Int): BigInteger {
-            val sign = Sign.ofInt(value)
-            val digits = if (value == 0) {
-                uintArrayOf()
-            } else {
-                when (sign) {
-                    Sign.NEGATIVE -> uintArrayOf((-value).toUInt())
-                    Sign.POSITIVE -> uintArrayOf(value.toUInt())
-                }
-            }
-            return BigInteger(sign = sign, digits = digits)
+            return BigInteger(sign = Sign.ofInt(value), magnitude = UnsignedBigInteger.of(abs(value).toUInt()))
         }
 
         fun of(value: Long): BigInteger {
-            val sign = Sign.ofLong(value)
-            val absValue = when (sign) {
-                Sign.NEGATIVE -> (-value).toULong()
-                Sign.POSITIVE -> value.toULong()
-            }
-            val digits = if (value == 0L) {
-                uintArrayOf()
-            } else {
-                val highWord = (absValue shr 32).toUInt()
-                val lowWord = absValue.toUInt()
-                when {
-                    highWord == 0U -> uintArrayOf(lowWord)
-                    else -> uintArrayOf(highWord, lowWord)
-                }
-            }
-            return BigInteger(sign = sign, digits = digits)
+            return BigInteger(sign = Sign.ofLong(value), magnitude = UnsignedBigInteger.of(abs(value).toULong()))
         }
 
         val ZERO = of(0)
         val ONE = of(1)
-        val TEN = of(10)
     }
 
     /**
@@ -213,4 +213,9 @@ class BigInteger private constructor(private val sign: Sign, private val digits:
             fun ofLong(value: Long) = if (value < 0) NEGATIVE else POSITIVE
         }
     }
+
+    data class QuotientWithRemainder(
+        val quotient: BigInteger,
+        val remainder: BigInteger,
+    )
 }

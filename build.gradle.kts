@@ -44,6 +44,7 @@ kotlin {
             implementation(libs.kotest.runner.junit5)
             implementation(libs.kotest.assertions.core)
             implementation(libs.kotest.framework.datatest)
+            implementation(libs.kotest.property)
             runtimeOnly(libs.junit.platform.launcher)
             runtimeOnly(libs.junit.vintage.engine)
         }
