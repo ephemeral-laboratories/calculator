@@ -220,8 +220,27 @@ class BigIntegerTest : FreeSpec({
         }
     }
 
+    val shiftRightTruncatingExamples = listOf(
+        row(674L, 2, 168L),
+        row(674L, 3, 84L),
+        row(674L, 4, 42L),
+        row(674L, 5, 21L),
+        row(674L, 6, 10L),
+        row(674L, 7, 5L),
+        row(674L, 8, 2L),
+        row(674L, 9, 1L),
+        row(674L, 10, 0L),
+        row(674L, 11, 0L),
+        row(674L, 31337, 0L),
+    )
+
     "shr" - {
         withData(shiftLeftExamples) { (expectedResultLong, n, aLong) ->
+            val a = BigInteger.of(aLong)
+            val expectedResult = BigInteger.of(expectedResultLong)
+            (a shr n) shouldBe expectedResult
+        }
+        withData(shiftRightTruncatingExamples) { (aLong, n, expectedResultLong) ->
             val a = BigInteger.of(aLong)
             val expectedResult = BigInteger.of(expectedResultLong)
             (a shr n) shouldBe expectedResult
@@ -269,6 +288,6 @@ class BigIntegerTest : FreeSpec({
 
     "toString" {
         val a = BigInteger.of(123)
-        a.toString() shouldBe "BigInteger[sign=POSITIVE, words=[123]]"
+        a.toString() shouldBe "BigInteger[sign=Positive, words=[123]]"
     }
 })

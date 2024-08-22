@@ -1,9 +1,11 @@
 package garden.ephemeral.calculator.creals.math
 
+import kotlin.math.sign
+
 /**
  * Arbitrarily big integer.
  *
- * @property sign the sign of the number.
+ * @property oldSign the sign of the number.
  * @property words multiple words making up the number. Most significant words come first.
  */
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -20,11 +22,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      *
      * @return `-1`, `0` or `1` if this value is negative, zero or positive.
      */
-    fun signum(): Int = when {
-        bitLength == 0 -> 0
-        sign == Sign.NEGATIVE -> -1
-        else -> 1
-    }
+    fun signum() = sign.value
 
     /**
      * Gets the absolute value of this [BigInteger].
@@ -32,7 +30,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      * @return the absolute value.
      */
     fun abs(): BigInteger = when {
-        sign == Sign.NEGATIVE -> -this
+        sign == Sign.Negative -> -this
         else -> this
     }
 
@@ -45,7 +43,13 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      * @return the sum of the two values.
      */
     operator fun plus(other: BigInteger): BigInteger {
-        return if (sign == other.sign) {
+        return if (sign == Sign.Zero) {
+            // 0 + b simplifies to b
+            other
+        } else if (other.sign == Sign.Zero) {
+            // a + 0 simplifies to a
+            this
+        } else if (sign == other.sign) {
             BigInteger(sign = sign, words = addWordArrays(words, other.words))
         } else {
             // a + (-b) simplifies to a - b
@@ -60,7 +64,13 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      * @return the difference of the two values.
      */
     operator fun minus(other: BigInteger): BigInteger {
-        return if (sign == other.sign) {
+        return if (sign == Sign.Zero) {
+            // 0 - b simplifies to -b
+            -other
+        } else if (other.sign == Sign.Zero) {
+            // a - 0 simplifies to a
+            this
+        } else if (sign == other.sign) {
             val absComparison = compareWordArrays(words, other.words)
             when {
                 (absComparison > 0) -> BigInteger(sign = sign, words = subtractWordArrays(words, other.words))
@@ -80,6 +90,11 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      * @return the product of the two values.
      */
     operator fun times(other: BigInteger): BigInteger {
+        if (sign == Sign.Zero || other.sign == Sign.Zero) {
+            // a * 0 and 0 * b both simplify to 0
+            return ZERO
+        }
+
         val leftFactorWords = words
         val rightFactorWords = other.words
 
@@ -112,7 +127,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
         }
 
         return BigInteger(
-            sign = if (sign == other.sign) Sign.POSITIVE else Sign.NEGATIVE,
+            sign = if (sign == other.sign) Sign.Positive else Sign.Negative,
             words = results.fold(uintArrayOf()) { acc, words -> addWordArrays(acc, words) },
         )
     }
@@ -149,13 +164,17 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      * @return the quotient and remainder.
      */
     fun divRem(other: BigInteger): QuotientWithRemainder {
-        val dividendWords = words
-        val divisorWords = other.words
-        if (divisorWords.isEmpty()) {
+        if (other.sign == Sign.Zero) {
             throw ArithmeticException("Division by zero")
+        } else if (sign == Sign.Zero) {
+            // 0 / b simplifies to 0
+            return QuotientWithRemainder(ZERO, ZERO)
         }
 
-        val quotientSign = if (sign == other.sign) Sign.POSITIVE else Sign.NEGATIVE
+        val dividendWords = words
+        val divisorWords = other.words
+
+        val quotientSign = if (sign == other.sign) Sign.Positive else Sign.Negative
         val remainderSign = sign
 
         val absComparison = compareWordArrays(dividendWords, divisorWords)
@@ -261,7 +280,14 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
     infix fun shr(n: Int): BigInteger = when {
         n == 0 -> this
         n < 0 -> shl(-n)
-        else -> BigInteger(sign = sign, words = shiftWordArrayRight(words, n))
+        else -> {
+            val newWords = shiftWordArrayRight(words, n)
+            if (newWords.isEmpty()) {
+                ZERO
+            } else {
+                BigInteger(sign = sign, words = shiftWordArrayRight(words, n))
+            }
+        }
     }
 
     /**
@@ -304,13 +330,11 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      * @return number of bits in the minimal two's-complement representation of this [BigInteger], _excluding_ sign.
      */
     val bitLength: Int by lazy {
-        val wordCount = words.size
-        var bitLength = if (wordCount == 0) {
-            0
-        } else {
-            STORAGE_BASE_LOG2 * wordCount - words[0].countLeadingZeroBits()
+        if (sign == Sign.Zero) {
+            return@lazy 0
         }
-        if (bitLength > 0 && sign == Sign.NEGATIVE) {
+        var bitLength = STORAGE_BASE_LOG2 * words.size - words[0].countLeadingZeroBits()
+        if (sign == Sign.Negative) {
             val magnitudeIsPowerOf2 = bitCount == 1
             if (magnitudeIsPowerOf2) {
                 bitLength -= 1
@@ -328,8 +352,11 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      *         that differ from its sign\.
      */
     val bitCount: Int by lazy {
+        if (sign == Sign.Zero) {
+            return@lazy 0
+        }
         var bitCount = words.sumOf { word -> word.countOneBits() }
-        if (sign == Sign.NEGATIVE) {
+        if (sign == Sign.Negative) {
             bitCount += trailingZeroCount() - 1
         }
         bitCount
@@ -362,15 +389,15 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
      *         `0` if the two are equal.
      */
     override operator fun compareTo(other: BigInteger): Int {
-        val signComparison = this.sign.compareTo(other.sign)
-        if (signComparison != 0) {
+        val signComparison = sign.compareTo(other.sign)
+        if (signComparison != 0 || sign == Sign.Zero) {
             return signComparison
         }
 
         var wordsComparison = compareWordArrays(words, other.words)
         if (wordsComparison != 0) {
             // Sort small negative values above large negative values
-            if (sign == Sign.NEGATIVE) {
+            if (sign == Sign.Negative) {
                 wordsComparison = -wordsComparison
             }
             return wordsComparison
@@ -396,10 +423,10 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
             require(value.matches(Regex("^[+-]?[0-9_]+$"))) { "value must be a number" }
 
             var charIndex = 0
-            var sign = Sign.POSITIVE
+            var sign = Sign.Positive
             when {
                 value.startsWith("-") -> {
-                    sign = Sign.NEGATIVE
+                    sign = Sign.Negative
                     charIndex++
                 }
                 value.startsWith("+") -> {
@@ -421,7 +448,11 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
                 charIndex++
             }
 
-            return BigInteger(sign = sign, words = accumulator.words)
+            return if (accumulator == ZERO) {
+                accumulator
+            } else {
+                BigInteger(sign = sign, words = accumulator.words)
+            }
         }
 
         fun of(value: Int): BigInteger {
@@ -430,7 +461,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
                 value < 0 -> return -of(-value)
                 else -> uintArrayOf(value.toUInt())
             }
-            return BigInteger(sign = Sign.POSITIVE, words = words)
+            return BigInteger(sign = Sign.ofInt(value), words = words)
         }
 
         fun of(value: UInt): BigInteger {
@@ -438,7 +469,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
                 0U -> uintArrayOf()
                 else -> uintArrayOf(value)
             }
-            return BigInteger(sign = Sign.POSITIVE, words = words)
+            return BigInteger(sign = Sign.Positive, words = words)
         }
 
         fun of(value: Long): BigInteger {
@@ -448,7 +479,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
                 value <= UInt.MAX_VALUE.toLong() -> uintArrayOf(value.toUInt())
                 else -> uintArrayOf((value shr 32).toUInt(), value.toUInt())
             }
-            return BigInteger(sign = Sign.POSITIVE, words = words)
+            return BigInteger(Sign.ofLong(value), words = words)
         }
 
         fun of(value: ULong): BigInteger {
@@ -457,11 +488,11 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
                 value <= UInt.MAX_VALUE.toULong() -> uintArrayOf(value.toUInt())
                 else -> uintArrayOf((value shr 32).toUInt(), value.toUInt())
             }
-            return BigInteger(sign = Sign.POSITIVE, words = words)
+            return BigInteger(sign = Sign.Positive, words = words)
         }
 
-        val ZERO = BigInteger(sign = Sign.POSITIVE, words = uintArrayOf())
-        val ONE = BigInteger(sign = Sign.POSITIVE, words = uintArrayOf(1U))
+        val ZERO = BigInteger(sign = Sign.Zero, words = uintArrayOf())
+        val ONE = BigInteger(sign = Sign.Positive, words = uintArrayOf(1U))
 
         private const val STORAGE_BASE_LOG2 = 32
         private val STORAGE_BASE = 1UL shl STORAGE_BASE_LOG2
@@ -634,24 +665,64 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
     }
 
     /**
-     * Enumeration of signs for a number.
-     * Usually you would also see a zero sign for the 0 case - this class treats zero
-     * as positive.
+     * Enumeration of sign values.
+     *
+     * @property value the corresponding sign value.
      */
-    enum class Sign {
-        // Negative comes first so that `compareTo` works sensibly.
-        NEGATIVE,
-        POSITIVE,
+    enum class Sign(val value: Int) {
+        // Negative comes first so that compareTo works sensibly.
+        Negative(-1),
+        Zero(0),
+        Positive(1),
         ;
 
-        fun flip() = if (this == POSITIVE) NEGATIVE else POSITIVE
+        /**
+         * Flips the sign.
+         *
+         * @return the negated sign.
+         */
+        fun flip() = when (this) {
+            Negative -> Positive
+            Zero -> Zero
+            Positive -> Negative
+        }
 
         companion object {
-            fun ofInt(value: Int) = if (value < 0) NEGATIVE else POSITIVE
-            fun ofLong(value: Long) = if (value < 0) NEGATIVE else POSITIVE
+            /**
+             * Gets the enum value which has its `value` set to the provided value.
+             *
+             * @param value the sign value.
+             * @return the enum value.
+             * @throws IllegalArgumentException if the value is not a valid sign.
+             */
+            fun ofValue(value: Int) = when (value) {
+                -1 -> Negative
+                0 -> Zero
+                1 -> Positive
+                else -> throw IllegalArgumentException("Invalid sign value: $value")
+            }
+
+            /**
+             * Gets the enum value corresponding to the sign of the given `int` value.
+             *
+             * @param value the `int` value.
+             * @return the sign.
+             */
+            fun ofInt(value: Int) = ofValue(value.sign)
+
+            /**
+             * Gets the enum value corresponding to the sign of the given `long` value.
+             *
+             * @param value the `long` value.
+             * @return the sign.
+             */
+            fun ofLong(value: Long) = ofValue(value.sign)
         }
     }
 
+    /**
+     * Result class containing a quotient and remainder for a single division operation.
+     */
     data class QuotientWithRemainder(
         val quotient: BigInteger,
         val remainder: BigInteger,
