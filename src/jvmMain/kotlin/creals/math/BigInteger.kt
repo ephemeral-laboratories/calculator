@@ -437,62 +437,60 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
             // Simple approach of reusing the existing * and + operations to build up the value as we parse it.
             // The rest BigInteger's equivalent method has some smarts which make it run faster, by processing
             // multiple digits in a single pass.
-            var accumulator = ZERO
+            var unsignedValue = ZERO
             val bigRadix = of(radix)
             while (charIndex < value.length) {
                 val ch = value[charIndex]
                 if (ch != '_') {
                     val digit = Character.digit(ch, radix)
-                    accumulator = accumulator * bigRadix + of(digit)
+                    unsignedValue = unsignedValue * bigRadix + of(digit)
                 }
                 charIndex++
             }
 
-            return if (accumulator == ZERO) {
-                accumulator
+            return if (unsignedValue == ZERO) {
+                unsignedValue
             } else {
-                BigInteger(sign = sign, words = accumulator.words)
+                BigInteger(sign = sign, words = unsignedValue.words)
             }
         }
 
         fun of(value: Int): BigInteger {
+            ConstantCache.getCached(value)?.let { return it }
             val words = when {
-                value == 0 -> uintArrayOf()
-                value < 0 -> return -of(-value)
+                value < 0 -> uintArrayOf((-value).toUInt())
                 else -> uintArrayOf(value.toUInt())
             }
             return BigInteger(sign = Sign.ofInt(value), words = words)
         }
 
         fun of(value: UInt): BigInteger {
-            val words = when (value) {
-                0U -> uintArrayOf()
-                else -> uintArrayOf(value)
-            }
+            ConstantCache.getCached(value)?.let { return it }
+            val words = uintArrayOf(value)
             return BigInteger(sign = Sign.Positive, words = words)
         }
 
         fun of(value: Long): BigInteger {
+            ConstantCache.getCached(value)?.let { return it }
+            val absValue = if (value < 0L) -value else value
             val words = when {
-                value == 0L -> uintArrayOf()
-                value < 0L -> return -of(-value)
-                value <= UInt.MAX_VALUE.toLong() -> uintArrayOf(value.toUInt())
-                else -> uintArrayOf((value shr 32).toUInt(), value.toUInt())
+                absValue <= UInt.MAX_VALUE.toLong() -> uintArrayOf(absValue.toUInt())
+                else -> uintArrayOf((absValue shr 32).toUInt(), absValue.toUInt())
             }
-            return BigInteger(Sign.ofLong(value), words = words)
+            return BigInteger(sign = Sign.ofLong(value), words = words)
         }
 
         fun of(value: ULong): BigInteger {
+            ConstantCache.getCached(value)?.let { return it }
             val words = when {
-                value == 0UL -> uintArrayOf()
                 value <= UInt.MAX_VALUE.toULong() -> uintArrayOf(value.toUInt())
                 else -> uintArrayOf((value shr 32).toUInt(), value.toUInt())
             }
             return BigInteger(sign = Sign.Positive, words = words)
         }
 
-        val ZERO = BigInteger(sign = Sign.Zero, words = uintArrayOf())
-        val ONE = BigInteger(sign = Sign.Positive, words = uintArrayOf(1U))
+        val ZERO = ConstantCache.getCached(0)!!
+        val ONE = ConstantCache.getCached(1)!!
 
         private const val STORAGE_BASE_LOG2 = 32
         private val STORAGE_BASE = 1UL shl STORAGE_BASE_LOG2
@@ -727,4 +725,48 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
         val quotient: BigInteger,
         val remainder: BigInteger,
     )
+
+    /**
+     * Cache of a fixed number of small constant values, for performance.
+     */
+    internal object ConstantCache {
+        private const val MAX_CONSTANT = 16
+        private val positiveConstants: Array<BigInteger>
+        private val negativeConstants: Array<BigInteger>
+        init {
+            // We share the constant arrays, but the word arrays inside each object are the same for
+            // both the positive and the negative cases, so we share those as well.
+            val sharedWordArrays = (0..MAX_CONSTANT)
+                .map { n -> if (n == 0) uintArrayOf() else uintArrayOf(n.toUInt()) }
+            positiveConstants = sharedWordArrays
+                .map { words -> BigInteger(sign = if (words.isEmpty()) Sign.Zero else Sign.Positive, words = words) }
+                .toTypedArray()
+            negativeConstants = sharedWordArrays
+                .map { words -> BigInteger(sign = if (words.isEmpty()) Sign.Zero else Sign.Negative, words = words) }
+                .toTypedArray()
+        }
+
+        internal fun getCached(value: Int) = when (value) {
+            in 0..MAX_CONSTANT -> positiveConstants[value]
+            in -MAX_CONSTANT..0 -> negativeConstants[-value]
+            else -> null
+        }
+
+        internal fun getCached(value: UInt) = when (value) {
+            in 0U..MAX_CONSTANT.toUInt() -> positiveConstants[value.toInt()]
+            else -> null
+        }
+
+        internal fun getCached(value: Long) = when (value) {
+            in 0L..MAX_CONSTANT.toLong() -> positiveConstants[value.toInt()]
+            in -MAX_CONSTANT..0 -> negativeConstants[-value.toInt()]
+            else -> null
+        }
+
+        internal fun getCached(value: ULong) = when (value) {
+            in 0UL..MAX_CONSTANT.toULong() -> positiveConstants[value.toInt()]
+            else -> null
+        }
+
+    }
 }
