@@ -2,40 +2,76 @@ package garden.ephemeral.calculator.creals.math
 
 import garden.ephemeral.calculator.util.row
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldHaveSameHashCodeAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.long
 import io.kotest.property.arbitrary.positiveInt
+import io.kotest.property.arbitrary.uInt
+import io.kotest.property.arbitrary.uLong
 import io.kotest.property.checkAll
-import org.junit.jupiter.api.assertThrows
+import io.kotest.property.withAssumptions
 
 class BigIntegerTest : FreeSpec({
 
     "creating from int" {
-        BigInteger.of(1) shouldBe BigInteger.ONE
+        checkAll(Arb.int()) { value ->
+            val expectedValue = BigInteger.of(value.toString())
+            BigInteger.of(value) shouldBe expectedValue
+        }
+    }
+
+    "creating from unsigned int" {
+        checkAll(Arb.uInt()) { value ->
+            val expectedValue = BigInteger.of(value.toString())
+            BigInteger.of(value) shouldBe expectedValue
+        }
     }
 
     "creating from long" {
-        BigInteger.of(1L) shouldBe BigInteger.ONE
+        checkAll(Arb.long()) { value ->
+            val expectedValue = BigInteger.of(value.toString())
+            BigInteger.of(value) shouldBe expectedValue
+        }
     }
 
-    "creating from string" {
-        BigInteger.of("1") shouldBe BigInteger.ONE
-        BigInteger.of("123") shouldBe BigInteger.of(123)
-        BigInteger.of("-456") shouldBe BigInteger.of(-456)
-        BigInteger.of("1_234") shouldBe BigInteger.of(1234)
-        BigInteger.of("+5_678") shouldBe BigInteger.of(5678)
-        assertThrows<IllegalArgumentException> {
-            BigInteger.of("")
+    "creating from unsigned long" {
+        checkAll(Arb.uLong()) { value ->
+            val expectedValue = BigInteger.of(value.toString())
+            BigInteger.of(value) shouldBe expectedValue
         }
-        assertThrows<IllegalArgumentException> {
-            BigInteger.of("@#$%#$%")
+    }
+
+    "creating from string" - {
+        "valid examples" - {
+            withData(
+                row("1", 1),
+                row("123", 123),
+                row("-456", -456),
+                row("1_234", 1234),
+                row("+5_678", 5678),
+            ) { (string, expectedInt) ->
+                BigInteger.of(string) shouldBe BigInteger.of(expectedInt)
+            }
+        }
+        "invalid examples" - {
+            withData(
+                row(""),
+                row(" "),
+                row("@#$%#$%"),
+            ) { (string) ->
+                shouldThrow<IllegalArgumentException> {
+                    BigInteger.of(string)
+                }
+            }
         }
     }
 
@@ -96,19 +132,48 @@ class BigIntegerTest : FreeSpec({
     )
 
     "times" - {
-        withData(multiplicationByZeroExamples + multiplicationExamples) { (aLong, bLong, cLong) ->
-            val factor1 = BigInteger.of(aLong)
-            val factor2 = BigInteger.of(bLong)
-            val expectedProduct = BigInteger.of(cLong)
-            (factor1 * factor2) shouldBe expectedProduct
-            (factor2 * factor1) shouldBe expectedProduct
+        "smaller examples" - {
+            withData(multiplicationByZeroExamples + multiplicationExamples) { (aLong, bLong, cLong) ->
+                val factor1 = BigInteger.of(aLong)
+                val factor2 = BigInteger.of(bLong)
+                val expectedProduct = BigInteger.of(cLong)
+                (factor1 * factor2) shouldBe expectedProduct
+                (factor2 * factor1) shouldBe expectedProduct
+            }
         }
-        withData(largeMultiplicationExamples) { (aString, bString, cString) ->
-            val factor1 = BigInteger.of(aString)
-            val factor2 = BigInteger.of(bString)
-            val expectedProduct = BigInteger.of(cString)
-            (factor1 * factor2) shouldBe expectedProduct
-            (factor2 * factor1) shouldBe expectedProduct
+        "large examples" - {
+            withData(largeMultiplicationExamples) { (aString, bString, cString) ->
+                val factor1 = BigInteger.of(aString)
+                val factor2 = BigInteger.of(bString)
+                val expectedProduct = BigInteger.of(cString)
+                (factor1 * factor2) shouldBe expectedProduct
+                (factor2 * factor1) shouldBe expectedProduct
+            }
+        }
+        "commutative property" {
+            checkAll(Arb.bigInt(), Arb.bigInt()) { a, b ->
+                a * b shouldBe b * a
+            }
+        }
+        "associative property" {
+            checkAll(Arb.bigInt(), Arb.bigInt(), Arb.bigInt()) { a, b, c ->
+                (a * b) * c shouldBe a * (b * c)
+            }
+        }
+        "distributive property" {
+            checkAll(Arb.bigInt(), Arb.bigInt(), Arb.bigInt()) { a, b, c ->
+                a * (b + c) shouldBe (a * b) + (a * c)
+            }
+        }
+        "identity property" {
+            checkAll(Arb.bigInt()) { a ->
+                a * BigInteger.ONE shouldBe a
+            }
+        }
+        "zero property" {
+            checkAll(Arb.bigInt()) { a ->
+                a * BigInteger.ZERO shouldBe BigInteger.ZERO
+            }
         }
     }
 
@@ -147,7 +212,7 @@ class BigIntegerTest : FreeSpec({
         }
         withData(divisionByZeroExamples) { (aLong) ->
             val dividend = BigInteger.of(aLong)
-            assertThrows<ArithmeticException> {
+            shouldThrow<ArithmeticException> {
                 dividend / BigInteger.ZERO
             }
         }
@@ -162,37 +227,82 @@ class BigIntegerTest : FreeSpec({
         }
         withData(divisionByZeroExamples) { (aLong) ->
             val dividend = BigInteger.of(aLong)
-            assertThrows<ArithmeticException> {
+            shouldThrow<ArithmeticException> {
                 dividend / BigInteger.ZERO
             }
         }
     }
 
-    "unaryPlus" {
-        val a = BigInteger.of(123)
-        +a shouldBe a
+    "divRem" - {
+        withData(divisionWithRemainderExamples) { (aLong, bLong, cLong, dLong) ->
+            val dividend = BigInteger.of(aLong)
+            val divisor = BigInteger.of(bLong)
+            val expectedQuotient = BigInteger.of(cLong)
+            val expectedRemainder = BigInteger.of(dLong)
+            dividend.divRem(divisor) shouldBe BigInteger.QuotientWithRemainder(
+                quotient = expectedQuotient,
+                remainder = expectedRemainder,
+            )
+        }
+        withData(divisionByZeroExamples) { (aLong) ->
+            val dividend = BigInteger.of(aLong)
+            shouldThrow<ArithmeticException> {
+                dividend.divRem(BigInteger.ZERO)
+            }
+        }
     }
 
-    "unaryMinus" {
-        val a = BigInteger.of(123)
-        val minusA = BigInteger.of(-123)
-        -a shouldBe minusA
+    "unaryPlus" - {
+        withData(
+            row(0),
+            row(123),
+            row(-456),
+        ) { (aInt) ->
+            val a = BigInteger.of(aInt)
+            +a shouldBe a
+        }
     }
 
-    "inc" {
-        val a = BigInteger.of(123)
-        val b = BigInteger.of(124)
-        var v = a
-        v++
-        v shouldBe b
+    "unaryMinus" - {
+        withData(
+            row(0, 0),
+            row(123, -123),
+            row(-456, 456),
+        ) { (aInt, expectedInt) ->
+            val a = BigInteger.of(aInt)
+            val expected = BigInteger.of(expectedInt)
+            -a shouldBe expected
+        }
     }
 
-    "dec" {
-        val a = BigInteger.of(123)
-        val b = BigInteger.of(122)
-        var v = a
-        v--
-        v shouldBe b
+    "inc" - {
+        withData(
+            row(0, 1),
+            row(-1, 0),
+            row(123, 124),
+            row(-456, -455),
+        ) { (aInt, expectedInt) ->
+            val a = BigInteger.of(aInt)
+            val expected = BigInteger.of(expectedInt)
+            var v = a
+            v++
+            v shouldBe expected
+        }
+    }
+
+    "dec" - {
+        withData(
+            row(0, -1),
+            row(1, 0),
+            row(123, 122),
+            row(-456, -457),
+        ) { (aInt, expectedInt) ->
+            val a = BigInteger.of(aInt)
+            val expected = BigInteger.of(expectedInt)
+            var v = a
+            v--
+            v shouldBe expected
+        }
     }
 
     val shiftLeftExamples = listOf(
@@ -276,18 +386,62 @@ class BigIntegerTest : FreeSpec({
     }
 
     "equals and hashCode" {
-        val a = BigInteger.of(123)
-        val b = BigInteger.of(123)
-        assertSoftly {
-            a shouldNotBeSameInstanceAs b
-            a shouldBeEqual b
-            a shouldBeEqualComparingTo b
-            a shouldHaveSameHashCodeAs b
+        checkAll(Arb.int()) { aInt ->
+            val a = BigInteger.of(aInt)
+            val b = BigInteger.of(aInt)
+            withAssumptions(aInt in -16..16) {
+                a shouldBeSameInstanceAs b
+            }
+            withAssumptions(aInt !in -16..16) {
+                assertSoftly {
+                    a shouldNotBeSameInstanceAs b
+                    a shouldBeEqual b
+                    a shouldBeEqualComparingTo b
+                    a shouldHaveSameHashCodeAs b
+                }
+            }
         }
     }
 
-    "toString" {
-        val a = BigInteger.of(123)
-        a.toString() shouldBe "BigInteger[sign=Positive, words=[123]]"
+    "toString" - {
+        "for values which fit in int" {
+            checkAll(Arb.int()) { aInt ->
+                val a = BigInteger.of(aInt)
+                a.toString() shouldBe aInt.toString()
+            }
+        }
+        "for larger values" {
+            checkAll(Arb.numericString()) { string ->
+                val a = BigInteger.of(string)
+                a.toString() shouldBe string
+            }
+        }
+    }
+
+    "toString with radix" - {
+        "for values which fit in int" - {
+            withData(Character.MIN_RADIX..Character.MAX_RADIX) { radix ->
+                checkAll(Arb.int()) { aInt ->
+                    val a = BigInteger.of(aInt)
+                    a.toString(radix = radix) shouldBe aInt.toString(radix = radix)
+                }
+            }
+        }
+        "for larger values" - {
+            withData(Character.MIN_RADIX..Character.MAX_RADIX) { radix ->
+                checkAll(Arb.numericString(radix)) { string ->
+                    val a = BigInteger.of(value = string, radix = radix)
+                    a.toString(radix = radix) shouldBe string
+                }
+            }
+        }
+        "for invalid radix" {
+            shouldThrow<IllegalArgumentException> {
+                BigInteger.ZERO.toString(radix = 1)
+            }
+            shouldThrow<IllegalArgumentException> {
+                BigInteger.ZERO.toString(radix = 37)
+            }
+        }
     }
 })

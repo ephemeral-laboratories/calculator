@@ -1,17 +1,25 @@
 package garden.ephemeral.calculator.creals.math
 
+import garden.ephemeral.calculator.creals.math.BigInteger.ToStringHelpers.digitsPerLong
+import kotlin.concurrent.Volatile
+import kotlin.math.floor
+import kotlin.math.ln
+import kotlin.math.roundToInt
 import kotlin.math.sign
 
 /**
  * Arbitrarily big integer.
  *
- * @property oldSign the sign of the number.
+ * @property sign the sign of the number.
  * @property words multiple words making up the number. Most significant words come first.
  */
 @OptIn(ExperimentalUnsignedTypes::class)
-class BigInteger private constructor(private val sign: Sign, private val words: UIntArray) : Comparable<BigInteger> {
+class BigInteger(private val sign: Sign, private val words: UIntArray) : Comparable<BigInteger> {
     init {
-        if (words.isNotEmpty()) {
+        if (sign == Sign.Zero) {
+            require(words.isEmpty()) { "words array is not empty for zero case" }
+        } else {
+            require(words.isNotEmpty()) { "words array is empty for non-zero case" }
             require(words[0] != 0U) { "words array contains leading zeroes: ${words.contentToString()}" }
         }
     }
@@ -95,40 +103,9 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
             return ZERO
         }
 
-        val leftFactorWords = words
-        val rightFactorWords = other.words
-
-        val results = mutableListOf<UIntArray>()
-        val lastLeftIndex = leftFactorWords.lastIndex
-        val lastRightIndex = rightFactorWords.lastIndex
-
-        for (rightIndex in lastRightIndex downTo 0) {
-            val currentResult = mutableListOf<UInt>()
-
-            // Entries need progressively more zeroes as you go further down.
-            // Similar to how you offset the numbers when writing out long multiplication.
-            repeat(lastRightIndex - rightIndex) {
-                currentResult.add(0U)
-            }
-
-            var carry = 0UL
-            val rightFactorWord = rightFactorWords[rightIndex].toULong()
-            for (leftIndex in lastLeftIndex downTo 0) {
-                val leftFactorWord = leftFactorWords[leftIndex].toULong()
-                val sum = leftFactorWord * rightFactorWord + carry
-
-                currentResult.add(sum.toUInt())
-                carry = sum shr STORAGE_BASE_LOG2
-            }
-            if (carry > 0UL) {
-                currentResult.add(carry.toUInt())
-            }
-            results.add(presentResultWords(currentResult))
-        }
-
         return BigInteger(
             sign = if (sign == other.sign) Sign.Positive else Sign.Negative,
-            words = results.fold(uintArrayOf()) { acc, words -> addWordArrays(acc, words) },
+            words = multiplyWordArrays(words, other.words),
         )
     }
 
@@ -175,7 +152,6 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
         val divisorWords = other.words
 
         val quotientSign = if (sign == other.sign) Sign.Positive else Sign.Negative
-        val remainderSign = sign
 
         val absComparison = compareWordArrays(dividendWords, divisorWords)
         if (absComparison < 0) {
@@ -191,7 +167,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
 
         // Classical long division in binary
         val quotientWords = UIntArray(dividendWords.size)
-        var remainder = uintArrayOf()
+        var remainderWords = uintArrayOf()
 
         for (wordIndex in dividendWords.indices) {
             var startIndexWithinWord = 31
@@ -202,25 +178,26 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
             for (indexWithinWord in startIndexWithinWord downTo 0) {
                 // Append the current bit of the dividend to the remainder
                 val currentBitOfDividend = (dividendWords[wordIndex] shr indexWithinWord) and 1U
-                remainder = shiftWordArrayLeft(remainder, 1)
-                if (remainder.isEmpty()) {
-                    remainder = uintArrayOf(0U)
+                remainderWords = shiftWordArrayLeft(remainderWords, 1)
+                if (remainderWords.isEmpty()) {
+                    remainderWords = uintArrayOf(0U)
                 }
-                remainder[remainder.lastIndex] = remainder[remainder.lastIndex] or currentBitOfDividend
+                remainderWords[remainderWords.lastIndex] = remainderWords[remainderWords.lastIndex] or currentBitOfDividend
 
                 // Can we subtract the divisor yet?
-                if (compareWordArrays(remainder, divisorWords) >= 0) {
-                    remainder = subtractWordArrays(remainder, divisorWords)
+                if (compareWordArrays(remainderWords, divisorWords) >= 0) {
+                    remainderWords = subtractWordArrays(remainderWords, divisorWords)
                     quotientWord = quotientWord or (1U shl indexWithinWord)
                 }
             }
             quotientWords[wordIndex] = quotientWord
         }
+        remainderWords = trimLeadingZeroes(remainderWords)
 
-        return QuotientWithRemainder(
-            BigInteger(sign = quotientSign, words = trimLeadingZeroes(quotientWords)),
-            BigInteger(sign = remainderSign, words = trimLeadingZeroes(remainder)),
-        )
+        val quotient = BigInteger(sign = quotientSign, words = trimLeadingZeroes(quotientWords))
+        val remainder = if (remainderWords.isEmpty()) ZERO else BigInteger(sign = sign, words = remainderWords)
+
+        return QuotientWithRemainder(quotient = quotient, remainder = remainder)
     }
 
     // Unary operators
@@ -411,16 +388,124 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
 
     override fun hashCode() = sign.hashCode() * 31 + words.contentHashCode()
 
+    // Narrowing conversions
+
+    /** Returns an int of sign bits. */
+    private fun signInt() = if (sign == Sign.Negative) -1 else 0
+
+    /**
+     * The first index where [getInt] for that index returns non-zero.
+     * Cached for performance.
+     */
+    private val indexOfFirstNonzeroInt: Int by lazy {
+        val wordCount = words.size
+        var i = wordCount - 1
+        while (i >= 0 && words[i] == 0U) {
+            i--
+        }
+        wordCount - i - 1
+    }
+
+    /**
+     * Two's complement helper to return one int of the result.
+     *
+     * @param n the index of the int to return. Int 0 is the least significant.
+     *        This can be arbitrarily high - values are logically preceded by infinitely many sign ints.
+     * @return the int.
+     */
+    private fun getInt(n: Int): Int {
+        if (n < 0) return 0
+        if (n >= words.size) return signInt()
+
+        val wordInt: Int = words[words.size - n - 1].toInt()
+        return when {
+            sign != Sign.Negative -> wordInt
+            n <= indexOfFirstNonzeroInt -> -wordInt
+            else -> wordInt.inv()
+        }
+    }
+
+    /**
+     * Converts this [BigInteger] to a [Long].
+     *
+     * If it is too big to fit in a `Long`, only the low-order 64 bits are returned.
+     * Note that this conversion can lose information about the overall magnitude of
+     * the value, as well as return a result with the opposite sign.
+     *
+     * @return this [BigInteger] converted to a [Long].
+     * @see [toLongExact]
+     */
+    fun toLong(): Long {
+        var result = 0L
+        for (i in 1 downTo 0) {
+            result = (result shl 32) + getInt(i).toUInt().toLong()
+        }
+        return result
+    }
+
+    /**
+     * Converts this [BigInteger] to a [Long], checking for lost information.
+     *
+     * If it is out of the range of the `Long` type, then an [ArithmeticException] is thrown.
+     *
+     * @return this [BigInteger] converted to a [Long].
+     * @throws ArithmeticException if the value cannot fit in a `Long`.
+     * @see [toLong]
+     */
+    fun toLongExact() = toLongExactOrNull() ?: throw ArithmeticException("BigInteger out of long range")
+
+    /**
+     * Converts this [BigInteger] to a [Long], checking for lost information.
+     *
+     * If it is out of the range of the `Long` type, returns `null`.
+     *
+     * @return this [BigInteger] converted to a [Long], or `null`.
+     * @see [toLong]
+     */
+    fun toLongExactOrNull() = if (words.size <= 2 && bitLength <= 63) toLong() else null
+
     // Misc
 
     override fun toString(): String {
-        return "BigInteger[sign=$sign, words=${words.contentToString()}]"
+        return toString(10)
+    }
+
+    /**
+     * Converts to a string for a specific radix.
+     *
+     * @param radix the radix.
+     * @return the string.
+     */
+    fun toString(radix: Int): String {
+        require(radix in Character.MIN_RADIX..Character.MAX_RADIX)
+        if (sign == Sign.Zero) {
+            return "0"
+        }
+
+        val abs = abs()
+
+        // Calculate the builder size in advance so that it doesn't have to grow its array dynamically.
+        val numChars = (floor(abs.bitLength * PowerCache.LOG_TWO / PowerCache.getCachedLog(radix)) + 1).toInt() +
+                (if (sign == Sign.Negative) 1 else 0)
+        val builder = StringBuilder(numChars)
+
+        if (sign == Sign.Negative) {
+            builder.append('-')
+        }
+
+        ToStringHelpers.recursiveToString(abs, builder, radix, 0)
+
+        return builder.toString()
     }
 
     companion object {
         fun of(value: String, radix: Int = 10): BigInteger {
             require(value.isNotEmpty()) { "value must not be empty" }
-            require(value.matches(Regex("^[+-]?[0-9_]+$"))) { "value must be a number" }
+            if (radix <= 10) {
+                require(value.matches(Regex("^[+-]?[0-9_]+$"))) { "value must be a number" }
+            } else {
+                require(value.matches(Regex("^[+-]?[0-9a-z_]+$"))) { "value must be a number" }
+            }
 
             var charIndex = 0
             var sign = Sign.Positive
@@ -429,6 +514,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
                     sign = Sign.Negative
                     charIndex++
                 }
+
                 value.startsWith("+") -> {
                     charIndex++
                 }
@@ -437,21 +523,22 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
             // Simple approach of reusing the existing * and + operations to build up the value as we parse it.
             // The rest BigInteger's equivalent method has some smarts which make it run faster, by processing
             // multiple digits in a single pass.
-            var unsignedValue = ZERO
-            val bigRadix = of(radix)
+            var resultWords = uintArrayOf()
+            val radixWords = uintArrayOf(radix.toUInt())
             while (charIndex < value.length) {
                 val ch = value[charIndex]
                 if (ch != '_') {
                     val digit = Character.digit(ch, radix)
-                    unsignedValue = unsignedValue * bigRadix + of(digit)
+                    resultWords = multiplyWordArrays(resultWords, radixWords)
+                    resultWords = addWordArrays(resultWords, uintArrayOf(digit.toUInt()))
                 }
                 charIndex++
             }
 
-            return if (unsignedValue == ZERO) {
-                unsignedValue
+            return if (resultWords.isEmpty()) {
+                ZERO
             } else {
-                BigInteger(sign = sign, words = unsignedValue.words)
+                BigInteger(sign = sign, words = resultWords)
             }
         }
 
@@ -472,12 +559,16 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
 
         fun of(value: Long): BigInteger {
             ConstantCache.getCached(value)?.let { return it }
+            if (value == Long.MIN_VALUE) {
+                // Negating Long.MIN_VALUE returns Long.MIN_VALUE
+                return BigInteger(sign = Sign.Negative, words = uintArrayOf((value shr 32).toUInt(), value.toUInt()))
+            }
             val absValue = if (value < 0L) -value else value
             val words = when {
                 absValue <= UInt.MAX_VALUE.toLong() -> uintArrayOf(absValue.toUInt())
                 else -> uintArrayOf((absValue shr 32).toUInt(), absValue.toUInt())
             }
-            return BigInteger(sign = Sign.ofLong(value), words = words)
+            return BigInteger(sign = Sign.ofLong(value), words = trimLeadingZeroes(words))
         }
 
         fun of(value: ULong): BigInteger {
@@ -564,6 +655,38 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
             }
 
             return presentResultWords(result)
+        }
+
+        private fun multiplyWordArrays(leftFactorWords: UIntArray, rightFactorWords: UIntArray): UIntArray {
+            val results = mutableListOf<UIntArray>()
+            val lastLeftIndex = leftFactorWords.lastIndex
+            val lastRightIndex = rightFactorWords.lastIndex
+
+            for (rightIndex in lastRightIndex downTo 0) {
+                val currentResult = mutableListOf<UInt>()
+
+                // Entries need progressively more zeroes as you go further down.
+                // Similar to how you offset the numbers when writing out long multiplication.
+                repeat(lastRightIndex - rightIndex) {
+                    currentResult.add(0U)
+                }
+
+                var carry = 0UL
+                val rightFactorWord = rightFactorWords[rightIndex].toULong()
+                for (leftIndex in lastLeftIndex downTo 0) {
+                    val leftFactorWord = leftFactorWords[leftIndex].toULong()
+                    val sum = leftFactorWord * rightFactorWord + carry
+
+                    currentResult.add(sum.toUInt())
+                    carry = sum shr STORAGE_BASE_LOG2
+                }
+                if (carry > 0UL) {
+                    currentResult.add(carry.toUInt())
+                }
+                results.add(presentResultWords(currentResult))
+            }
+
+            return results.fold(uintArrayOf()) { acc, words -> addWordArrays(acc, words) }
         }
 
         private fun shiftWordArrayLeft(words: UIntArray, n: Int): UIntArray {
@@ -733,6 +856,7 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
         private const val MAX_CONSTANT = 16
         private val positiveConstants: Array<BigInteger>
         private val negativeConstants: Array<BigInteger>
+
         init {
             // We share the constant arrays, but the word arrays inside each object are the same for
             // both the positive and the negative cases, so we share those as well.
@@ -767,6 +891,214 @@ class BigInteger private constructor(private val sign: Sign, private val words: 
             in 0UL..MAX_CONSTANT.toULong() -> positiveConstants[value.toInt()]
             else -> null
         }
+    }
 
+    /**
+     * Cache of powers and logs for each radix.
+     */
+    internal object PowerCache {
+        /**
+         * The cache of powers of each radix.
+         *
+         * Initialised with just the first value. Additional values will be created on demand.
+         */
+        @Volatile
+        private var powerCache = Array(Character.MAX_RADIX + 1) { i -> arrayOf(of(i.toLong())) }
+
+        /**
+         * The cache of logarithms of radices for base conversion.
+         */
+        private val logCache = DoubleArray(Character.MAX_RADIX + 1) { i -> ln(i.toDouble()) }
+
+        /**
+         * The natural log of 2.
+         */
+        internal val LOG_TWO: Double = ln(2.0)
+
+        /**
+         * Gets the value `radix^(2^exponent)` from the cache.
+         * If this value doesn't already exist in the cache, it is added.
+         */
+        internal fun getCachedPower(radix: Int, exponent: Int): BigInteger {
+            var cacheLine = powerCache[radix] // volatile read
+            if (exponent < cacheLine.size) {
+                return cacheLine[exponent]
+            }
+
+            // Copy to a list in order to add the new elements to the end.
+            // The original Java code for this copied the array, but I found it hard to reconcile
+            // that with Kotlin null safety.
+            val temp = cacheLine.toMutableList()
+            var tempValue = temp[temp.lastIndex]
+            while (temp.size < exponent + 1) {
+                // tempValue.pow(2)
+                tempValue *= tempValue
+                temp.add(tempValue)
+            }
+            cacheLine = temp.toTypedArray()
+
+            // Someone else may have modified it in another thread while we were working on it,
+            // so the code here checks again whether the exponent is cached.
+
+            var powerCacheCopy = powerCache // volatile read again
+            if (exponent >= powerCacheCopy[radix].size) {
+                powerCacheCopy = powerCacheCopy.clone()
+                powerCacheCopy[radix] = cacheLine
+                powerCache = powerCacheCopy // volatile write, publish
+            }
+
+            return cacheLine[exponent]
+        }
+
+        /**
+         * Gets a log value from the log cache..
+         */
+        internal fun getCachedLog(radix: Int) = logCache[radix]
+    }
+
+    /**
+     * Helpers related to [BigInteger.toString].
+     */
+    internal object ToStringHelpers {
+        private const val ZEROS_LENGTH = 63
+        private val ZEROS = "0".repeat(ZEROS_LENGTH)
+
+        /**
+         * The number of digits of the given radix that can fit in a [Long] without "going negative".
+         */
+        private var digitsPerLong = intArrayOf(
+            0, 0,
+            62, 39, 31, 27, 24, 22, 20, 19, 18, 18, 17, 17, 16, 16, 15, 15, 15, 14,
+            14, 14, 14, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 12, 12
+        )
+
+        /**
+         * The threshold value for using Schoenhage recursive base conversion.
+         */
+        private const val SCHOENHAGE_BASE_CONVERSION_THRESHOLD = 20
+
+        /**
+         * The "long radix" that tears each number into "long digits", each of which consists of
+         * the number of digits in the corresponding element in [digitsPerLong]
+         * (`longRadix[i] = i**digitPerLong[i]`).
+         */
+        private var longRadix = arrayOf(
+            ZERO, ZERO,
+            of(0x4000000000000000L), of(0x383d9170b85ff80bL),
+            of(0x4000000000000000L), of(0x6765c793fa10079dL),
+            of(0x41c21cb8e1000000L), of(0x3642798750226111L),
+            of(0x1000000000000000L), of(0x12bf307ae81ffd59L),
+            of(0xde0b6b3a7640000L), of(0x4d28cb56c33fa539L),
+            of(0x1eca170c00000000L), of(0x780c7372621bd74dL),
+            of(0x1e39a5057d810000L), of(0x5b27ac993df97701L),
+            of(0x1000000000000000L), of(0x27b95e997e21d9f1L),
+            of(0x5da0e1e53c5c8000L), of(0xb16a458ef403f19L),
+            of(0x16bcc41e90000000L), of(0x2d04b7fdd9c0ef49L),
+            of(0x5658597bcaa24000L), of(0x6feb266931a75b7L),
+            of(0xc29e98000000000L), of(0x14adf4b7320334b9L),
+            of(0x226ed36478bfa000L), of(0x383d9170b85ff80bL),
+            of(0x5a3c23e39c000000L), of(0x4e900abb53e6b71L),
+            of(0x7600ec618141000L), of(0xaee5720ee830681L),
+            of(0x1000000000000000L), of(0x172588ad4f5f0981L),
+            of(0x211e44f7d02c1000L), of(0x2ee56725f06e5c71L),
+            of(0x41c21cb8e1000000L)
+        )
+
+        /**
+         * If `numZeros > 0`, appends that many zeros to the specified [StringBuilder].
+         * Uses a string of zeroes to make this slightly faster than just appending
+         * individual characters over and over.
+         *
+         * @param builder the [StringBuilder] to append to
+         * @param numZeros the number of zeros to append.
+         */
+        private fun padWithZeros(builder: StringBuilder, numZeros: Int) {
+            var temp = numZeros
+            while (temp >= ZEROS_LENGTH) {
+                builder.append(ZEROS)
+                temp -= ZEROS_LENGTH
+            }
+            if (temp > 0) {
+                builder.append(ZEROS, 0, temp)
+            }
+        }
+
+        /**
+         * Performs `toString` when arguments are small. The value must be non-negative!
+         * Performs no padding if `digits <= 0`.
+         *
+         * @param value the value to format to a string.
+         * @param builder the [StringBuilder] to append to.
+         * @param radix the base to convert to.
+         * @param digits the minimum number of digits to pad to.
+         * @see [recursiveToString]
+         */
+        private fun smallToString(value: BigInteger, builder: StringBuilder, radix: Int, digits: Int) {
+            assert(radix in Character.MIN_RADIX..Character.MAX_RADIX)
+            assert(value.sign != Sign.Negative)
+
+            if (value.sign == Sign.Zero) {
+                return padWithZeros(builder, digits)
+            }
+
+            // Compute upper bound on number of digit groups and allocate space
+            val maxNumDigitGroups = (4 * value.words.size + 6) / 7
+            val digitGroups = LongArray(maxNumDigitGroups)
+
+            // Translate number to string, a digit group at a time
+            var temp = value
+            var numGroups = 0
+            while (temp.sign != Sign.Zero) {
+                val (quotient, remainder) = temp.divRem(longRadix[radix])
+                digitGroups[numGroups++] = remainder.toLong()
+                temp = quotient
+            }
+
+            // Put first digit group into result buffer
+            var digitsString = digitGroups[numGroups - 1].toString(radix)
+            padWithZeros(builder, digits - (digitsString.length + (numGroups - 1) * digitsPerLong[radix]))
+            builder.append(digitsString)
+
+            // Append remaining digit groups each padded with leading zeros
+            for (i in numGroups - 2 downTo 0) {
+                digitsString = digitGroups[i].toString(radix)
+                padWithZeros(builder, digitsPerLong[radix] - digitsString.length)
+                builder.append(digitsString)
+            }
+        }
+
+        /**
+         * Converts the specified [BigInteger] to a string and appends to the provided builder.
+         * This implements the recursive Schoenhage algorithm for base conversions.
+         * The value must be non-negative!
+         *
+         * @param value the value to format to a string.
+         * @param builder the [StringBuilder] to append to.
+         * @param radix the base to convert to.
+         * @param digits the minimum number of digits to pad to.
+         */
+        internal fun recursiveToString(value: BigInteger, builder: StringBuilder, radix: Int, digits: Int) {
+            assert(radix in Character.MIN_RADIX..Character.MAX_RADIX)
+            assert(value.signum() >= 0)
+
+            // Use smallToString when it gets sufficiently small (recursion termination case.)
+            if (value.words.size <= SCHOENHAGE_BASE_CONVERSION_THRESHOLD) {
+                return smallToString(value, builder, radix, digits)
+            }
+
+            // Calculate a value for n in the equation radix^(2^n) = u and subtract 1 from that value.
+            // This is used to find the cache index that contains the best value to divide u.
+            val exponent = (ln(value.bitLength * PowerCache.LOG_TWO / PowerCache.getCachedLog(radix)) / PowerCache.LOG_TWO - 1.0)
+                .roundToInt()
+
+            val power = PowerCache.getCachedPower(radix, exponent)
+            val (quotient, remainder) = value.divRem(power)
+
+            val expectedDigits = 1 shl exponent
+
+            // Now recursively build the two halves of each number.
+            recursiveToString(quotient, builder, radix, digits - expectedDigits)
+            recursiveToString(remainder, builder, radix, expectedDigits)
+        }
     }
 }

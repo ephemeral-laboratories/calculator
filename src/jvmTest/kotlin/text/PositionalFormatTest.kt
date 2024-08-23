@@ -4,11 +4,11 @@ import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.creals.shouldBeCloseTo
 import garden.ephemeral.calculator.ui.NumberFormatOption
 import garden.ephemeral.calculator.util.row
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
-import org.junit.jupiter.api.assertThrows
 
 class PositionalFormatTest : FreeSpec({
     fun newPositionalFormat() = PositionalFormat(10, NumberFormatOption.DECIMAL.defaultSymbols)
@@ -68,7 +68,7 @@ class PositionalFormatTest : FreeSpec({
         "throwing exception" - {
             withData(parseInvalidExamples) { (text, _, expectedErrorIndex) ->
                 val format = newPositionalFormat()
-                assertThrows<ParseException> {
+                shouldThrow<ParseException> {
                     format.parse(text)
                 }.errorOffset shouldBe expectedErrorIndex
             }
