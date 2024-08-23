@@ -1,9 +1,9 @@
 package garden.ephemeral.calculator.creals.math
 
-import garden.ephemeral.calculator.creals.math.BigInteger.ToStringHelpers.digitsPerLong
 import kotlin.concurrent.Volatile
 import kotlin.math.floor
 import kotlin.math.ln
+import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -22,6 +22,7 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
             require(words.isNotEmpty()) { "words array is empty for non-zero case" }
             require(words[0] != 0U) { "words array contains leading zeroes: ${words.contentToString()}" }
         }
+        require(words.size <= MAX_WORD_ARRAY_SIZE) { "words array is too large" }
     }
 
     /**
@@ -282,12 +283,73 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
         }
     }
 
-    // TODO: Are these methods even sensible when talking about signed values?
-    // infix fun and(other: BigInteger): BigInteger = TODO()
-    // infix fun or(other: BigInteger): BigInteger = TODO()
-    // infix fun xor(other: BigInteger): BigInteger = TODO()
-    // infix fun andNot(other: BigInteger): BigInteger = TODO()
-    // fun not(): BigInteger = TODO()
+    /**
+     * Performs a bitwise AND operation between this integer and another.
+     * Treats both as two's complement.
+     *
+     * @param other the other integer.
+     * @return the result.
+     */
+    infix fun and(other: BigInteger) = if (sign == Sign.Zero || other.sign == Sign.Zero) {
+        ZERO
+    } else {
+        IntArrayHelpers.bitwiseBinaryOp(this, other) { a, b -> a and b }
+    }
+
+    /**
+     * Performs a bitwise OR operation between this integer and another.
+     * Treats both as two's complement.
+     *
+     * @param other the other integer.
+     * @return the result.
+     */
+    infix fun or(other: BigInteger) = if (sign == Sign.Zero) {
+        other
+    } else if (other.sign == Sign.Zero) {
+        this
+    } else {
+        IntArrayHelpers.bitwiseBinaryOp(this, other) { a, b -> a or b }
+    }
+
+    /**
+     * Performs a bitwise XOR operation between this integer and another.
+     * Treats both as two's complement.
+     *
+     * @param other the other integer.
+     * @return the result.
+     */
+    infix fun xor(other: BigInteger) = if (sign == Sign.Zero) {
+        other
+    } else if (other.sign == Sign.Zero) {
+        this
+    } else {
+        IntArrayHelpers.bitwiseBinaryOp(this, other) { a, b -> a xor b }
+    }
+
+    /**
+     * Performs a bitwise AND NOT operation between this integer and another.
+     * Treats both as two's complement.
+     *
+     * Equivalent to `and(other.not())`, but should produce less temporary heap data.
+     *
+     * @param other the other integer.
+     * @return the result.
+     */
+    infix fun andNot(other: BigInteger) = if (sign == Sign.Zero) {
+        ZERO
+    } else if (other.sign == Sign.Zero) {
+        this
+    } else {
+        IntArrayHelpers.bitwiseBinaryOp(this, other) { a, b -> a and b.inv() }
+    }
+
+    /**
+     * Performs a bitwise NOT operation on this integer.
+     * Treats the integer as two's complement.
+     *
+     * @return the result.
+     */
+    fun not() = IntArrayHelpers.bitwiseUnaryOp(this) { a -> a.inv() }
 
     // fun testBit(n: Int): Boolean = TODO()
     // fun setBit(n: Int): BigInteger = TODO()
@@ -390,12 +452,10 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
 
     // Narrowing conversions
 
-    /** Returns an int of sign bits. */
-    private fun signInt() = if (sign == Sign.Negative) -1 else 0
-
     /**
-     * The first index where [getInt] for that index returns non-zero.
-     * Cached for performance.
+     * The first index where [IntArrayHelpers.getInt] for that index returns non-zero.
+     *
+     * Cached here for performance. If I had a way to move it to `IntArrayHelpers` it would be there instead.
      */
     private val indexOfFirstNonzeroInt: Int by lazy {
         val wordCount = words.size
@@ -404,25 +464,6 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
             i--
         }
         wordCount - i - 1
-    }
-
-    /**
-     * Two's complement helper to return one int of the result.
-     *
-     * @param n the index of the int to return. Int 0 is the least significant.
-     *        This can be arbitrarily high - values are logically preceded by infinitely many sign ints.
-     * @return the int.
-     */
-    private fun getInt(n: Int): Int {
-        if (n < 0) return 0
-        if (n >= words.size) return signInt()
-
-        val wordInt: Int = words[words.size - n - 1].toInt()
-        return when {
-            sign != Sign.Negative -> wordInt
-            n <= indexOfFirstNonzeroInt -> -wordInt
-            else -> wordInt.inv()
-        }
     }
 
     /**
@@ -438,7 +479,7 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
     fun toLong(): Long {
         var result = 0L
         for (i in 1 downTo 0) {
-            result = (result shl 32) + getInt(i).toUInt().toLong()
+            result = (result shl 32) + IntArrayHelpers.getInt(this, i).toUInt().toLong()
         }
         return result
     }
@@ -1099,6 +1140,137 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
             // Now recursively build the two halves of each number.
             recursiveToString(quotient, builder, radix, digits - expectedDigits)
             recursiveToString(remainder, builder, radix, expectedDigits)
+        }
+    }
+
+    /**
+     * Helpers for treating big integers as int arrays in two's complement form.
+     */
+    object IntArrayHelpers {
+        /**
+         * Gets the length of the two's complement representation in ints,
+         * including space for at least one sign bit.
+         */
+        private fun intLength(value: BigInteger): Int {
+            return (value.bitLength ushr 5) + 1
+        }
+
+        /**
+         * Returns an int of sign bits.
+         */
+        private fun signInt(value: BigInteger) = if (value.sign == Sign.Negative) -1 else 0
+
+        /**
+         * Two's complement helper to return one int of the result.
+         *
+         * @param n the index of the int to return. Int 0 is the least significant.
+         *        This can be arbitrarily high - values are logically preceded by infinitely many sign ints.
+         * @return the int.
+         */
+        internal fun getInt(value: BigInteger, n: Int): Int {
+            if (n < 0) return 0
+            if (n >= value.words.size) return signInt(value)
+
+            val wordInt: Int = value.words[value.words.size - n - 1].toInt()
+            return when {
+                value.sign != Sign.Negative -> wordInt
+                n <= value.indexOfFirstNonzeroInt -> -wordInt
+                else -> wordInt.inv()
+            }
+        }
+
+        /**
+         * Converts a two's complement int array to the equivalent positive uint array.
+         */
+        private fun makePositive(a: IntArray): UIntArray {
+            var j: Int
+
+            // Find first non-sign (0xffffffff) int of input
+            var keep = 0
+            while (keep < a.size && a[keep] == -1) {
+                keep++
+            }
+
+            // Allocate output array.  If all non-sign ints are 0x00, we allocate space for one extra output int.
+            j = keep
+            while (j < a.size && a[j] == 0) {
+                j++
+            }
+            val extraInt = if (j == a.size) 1 else 0
+            val result = UIntArray(a.size - keep + extraInt)
+
+            // Copy one's complement of input into output, leaving extra int (if it exists) == 0x00
+            for (i in keep until a.size) {
+                result[i - keep + extraInt] = a[i].inv().toUInt()
+            }
+
+            // Add one to one's complement to generate two's complement
+            var i = result.size - 1
+            while (++result[i] == 0U) {
+                i--
+            }
+
+            return trimLeadingZeroes(result)
+        }
+
+        /**
+         * Creates a [BigInteger] from an int array.
+         *
+         * @param value the int array.
+         * @return the equivalent [BigInteger].
+         * @see getInt
+         */
+        internal fun bigIntFromArray(value: IntArray): BigInteger {
+            if (value.isEmpty()) {
+                return ZERO
+            }
+
+            val words: UIntArray
+            val sign: Sign
+
+            if (value[0] < 0) {
+                words = makePositive(value)
+                sign = Sign.Negative
+            } else {
+                words = trimLeadingZeroes(value.toUIntArray())
+                sign = if (words.isEmpty()) Sign.Zero else Sign.Positive
+            }
+
+            return BigInteger(sign = sign, words = words)
+        }
+
+        /**
+         * Performs a bitwise unary op on a big integer.
+         *
+         * @param value the value.
+         * @param intOp the operation to perform for individual ints.
+         * @return the result.
+         */
+       internal fun bitwiseUnaryOp(value: BigInteger, intOp: (Int) -> Int): BigInteger {
+            val resultSize = intLength(value)
+            val result = IntArray(resultSize) { i ->
+                val a = getInt(value, resultSize - i - 1)
+                intOp(a)
+            }
+            return bigIntFromArray(result)
+        }
+
+        /**
+         * Performs a bitwise binary op between two big integers.
+         *
+         * @param first the first value.
+         * @param second the second value.
+         * @param intOp the operation to perform for individual pairs of ints.
+         * @return the result.
+         */
+        internal fun bitwiseBinaryOp(first: BigInteger, second: BigInteger, intOp: (Int, Int) -> Int): BigInteger {
+            val resultSize = max(intLength(first), intLength(second))
+            val result = IntArray(resultSize) { i ->
+                val a = getInt(first, resultSize - i - 1)
+                val b = getInt(second, resultSize - i - 1)
+                intOp(a, b)
+            }
+            return bigIntFromArray(result)
         }
     }
 }

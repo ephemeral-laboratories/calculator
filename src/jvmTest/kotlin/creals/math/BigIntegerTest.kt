@@ -14,6 +14,7 @@ import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.intArray
 import io.kotest.property.arbitrary.long
 import io.kotest.property.arbitrary.positiveInt
 import io.kotest.property.arbitrary.uInt
@@ -21,6 +22,7 @@ import io.kotest.property.arbitrary.uLong
 import io.kotest.property.checkAll
 import io.kotest.property.withAssumptions
 
+@OptIn(ExperimentalUnsignedTypes::class)
 class BigIntegerTest : FreeSpec({
 
     "creating from int" {
@@ -434,6 +436,84 @@ class BigIntegerTest : FreeSpec({
                 val aShiftedLeft = a shl n
                 (aShiftedLeft shr n) shouldBe a
             }
+        }
+    }
+
+    "and" {
+        checkAll(
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+        ) { aArray, bArray ->
+            val a = BigInteger.IntArrayHelpers.bigIntFromArray(aArray)
+            val b = BigInteger.IntArrayHelpers.bigIntFromArray(bArray)
+
+            val expected = BigInteger.IntArrayHelpers.bigIntFromArray(
+                IntArray(aArray.size) { i -> aArray[i] and bArray[i] }
+            )
+
+            a and b shouldBe expected
+        }
+    }
+
+    "or" {
+        checkAll(
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+        ) { aArray, bArray ->
+            val a = BigInteger.IntArrayHelpers.bigIntFromArray(aArray)
+            val b = BigInteger.IntArrayHelpers.bigIntFromArray(bArray)
+
+            val expected = BigInteger.IntArrayHelpers.bigIntFromArray(
+                IntArray(aArray.size) { i -> aArray[i] or bArray[i] }
+            )
+
+            a or b shouldBe expected
+        }
+    }
+
+    "xor" {
+        checkAll(
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+        ) { aArray, bArray ->
+            val a = BigInteger.IntArrayHelpers.bigIntFromArray(aArray)
+            val b = BigInteger.IntArrayHelpers.bigIntFromArray(bArray)
+
+            val expected = BigInteger.IntArrayHelpers.bigIntFromArray(
+                IntArray(aArray.size) { i -> aArray[i] xor bArray[i] }
+            )
+
+            a xor b shouldBe expected
+        }
+    }
+
+    "andNot" {
+        checkAll(
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+        ) { aArray, bArray ->
+            val a = BigInteger.IntArrayHelpers.bigIntFromArray(aArray)
+            val b = BigInteger.IntArrayHelpers.bigIntFromArray(bArray)
+
+            val expected = BigInteger.IntArrayHelpers.bigIntFromArray(
+                IntArray(aArray.size) { i -> aArray[i] and bArray[i].inv() }
+            )
+
+            a andNot b shouldBe expected
+        }
+    }
+
+    "not" {
+        checkAll(
+            Arb.intArray(length = Arb.int(3..3), content = Arb.int()),
+        ) { aArray ->
+            val a = BigInteger.IntArrayHelpers.bigIntFromArray(aArray)
+
+            val expected = BigInteger.IntArrayHelpers.bigIntFromArray(
+                IntArray(aArray.size) { i -> aArray[i].inv() }
+            )
+
+            a.not() shouldBe expected
         }
     }
 
