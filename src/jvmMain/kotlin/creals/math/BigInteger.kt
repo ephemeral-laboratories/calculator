@@ -674,7 +674,7 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
 
     // Consider these. Do we detect exact for these too?
     fun toFloat(): Float = TODO()
-    fun toDouble(): Float = TODO()
+    fun toDouble(): Double = TODO()
 
     // Misc
 
