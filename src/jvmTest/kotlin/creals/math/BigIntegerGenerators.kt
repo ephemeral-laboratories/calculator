@@ -15,7 +15,7 @@ import kotlin.math.ceil
 import kotlin.random.Random
 
 private fun randomBigInteger(rand: Random, range: ClosedRange<BigInteger>): BigInteger {
-    fun BigInteger.toBigDecimal() = BigDecimal(this.toString()) // BUG: toSrting() currently formats the output
+    fun BigInteger.toBigDecimal() = BigDecimal(this.toString())
     fun BigDecimal.toOurBigInteger() = BigInteger.of(this.toString())
 
     val rangeStart = range.start
