@@ -12,6 +12,7 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldHaveSameHashCodeAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.kotest.property.Arb
+import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.long
 import io.kotest.property.arbitrary.positiveInt
@@ -92,20 +93,54 @@ class BigIntegerTest : FreeSpec({
     )
 
     "plus" - {
-        withData(additionExamples) { (aLong, bLong, cLong) ->
-            val addend1 = BigInteger.of(aLong)
-            val addend2 = BigInteger.of(bLong)
-            val expectedSum = BigInteger.of(cLong)
-            (addend1 + addend2) shouldBe expectedSum
+        "specific examples" - {
+            withData(additionExamples) { (aLong, bLong, cLong) ->
+                val addend1 = BigInteger.of(aLong)
+                val addend2 = BigInteger.of(bLong)
+                val expectedSum = BigInteger.of(cLong)
+                (addend1 + addend2) shouldBe expectedSum
+            }
+        }
+        "commutative property" {
+            checkAll(Arb.bigInt(), Arb.bigInt()) { a, b ->
+                a + b shouldBe b + a
+            }
+        }
+        "associative property" {
+            checkAll(Arb.bigInt(), Arb.bigInt(), Arb.bigInt()) { a, b, c ->
+                (a + b) + c shouldBe a + (b + c)
+            }
+        }
+        "identity property" {
+            checkAll(Arb.bigInt()) { a ->
+                a + BigInteger.ZERO shouldBe a
+            }
         }
     }
 
     "minus" - {
-        withData(additionExamples) { (aLong, bLong, cLong) ->
-            val minuend = BigInteger.of(cLong)
-            val subtrahend = BigInteger.of(aLong)
-            val expectedDifference = BigInteger.of(bLong)
-            (minuend - subtrahend) shouldBe expectedDifference
+        "specific examples" - {
+            withData(additionExamples) { (aLong, bLong, cLong) ->
+                val minuend = BigInteger.of(cLong)
+                val subtrahend = BigInteger.of(aLong)
+                val expectedDifference = BigInteger.of(bLong)
+                (minuend - subtrahend) shouldBe expectedDifference
+            }
+        }
+        "ordering property" {
+            checkAll(Arb.bigInt(), Arb.bigInt()) { a, b ->
+                a - b shouldBe -(b - a)
+            }
+        }
+        "identity property" {
+            checkAll(Arb.bigInt()) { a ->
+                a - BigInteger.ZERO shouldBe a
+            }
+        }
+        "subtracting a number from itself" {
+            checkAll(Arb.bigInt()) { a ->
+                a - a shouldBe BigInteger.ZERO
+            }
         }
     }
 
@@ -192,73 +227,90 @@ class BigIntegerTest : FreeSpec({
     )
 
     "div" - {
-        withData(multiplicationExamples) { (aLong, bLong, cLong) ->
-            val dividend = BigInteger.of(cLong)
-            val divisor = BigInteger.of(aLong)
-            val expectedQuotient = BigInteger.of(bLong)
-            (dividend / divisor) shouldBe expectedQuotient
+        "specific examples" - {
+            withData(multiplicationExamples) { (aLong, bLong, cLong) ->
+                val dividend = BigInteger.of(cLong)
+                val divisor = BigInteger.of(aLong)
+                val expectedQuotient = BigInteger.of(bLong)
+                (dividend / divisor) shouldBe expectedQuotient
+            }
+            withData(largeMultiplicationExamples) { (aString, bString, cString) ->
+                val divisor = BigInteger.of(aString)
+                val dividend = BigInteger.of(cString)
+                val expectedQuotient = BigInteger.of(bString)
+                (dividend / divisor) shouldBe expectedQuotient
+            }
+            withData(divisionWithRemainderExamples) { (aLong, bLong, cLong, _) ->
+                val dividend = BigInteger.of(aLong)
+                val divisor = BigInteger.of(bLong)
+                val expectedQuotient = BigInteger.of(cLong)
+                (dividend / divisor) shouldBe expectedQuotient
+            }
         }
-        withData(largeMultiplicationExamples) { (aString, bString, cString) ->
-            val divisor = BigInteger.of(aString)
-            val dividend = BigInteger.of(cString)
-            val expectedQuotient = BigInteger.of(bString)
-            (dividend / divisor) shouldBe expectedQuotient
+        "division by zero" - {
+            withData(divisionByZeroExamples) { (aLong) ->
+                val dividend = BigInteger.of(aLong)
+                shouldThrow<ArithmeticException> {
+                    dividend / BigInteger.ZERO
+                }
+            }
         }
-        withData(divisionWithRemainderExamples) { (aLong, bLong, cLong, _) ->
-            val dividend = BigInteger.of(aLong)
-            val divisor = BigInteger.of(bLong)
-            val expectedQuotient = BigInteger.of(cLong)
-            (dividend / divisor) shouldBe expectedQuotient
+        "identity property" {
+            checkAll(Arb.bigInt()) { a ->
+                a / BigInteger.ONE shouldBe a
+            }
         }
-        withData(divisionByZeroExamples) { (aLong) ->
-            val dividend = BigInteger.of(aLong)
-            shouldThrow<ArithmeticException> {
-                dividend / BigInteger.ZERO
+        "dividing a number by itself" {
+            checkAll(Arb.bigInt().filter { it.signum() != 0 }) { a ->
+                a / a shouldBe BigInteger.ONE
             }
         }
     }
 
     "rem" - {
-        withData(divisionWithRemainderExamples) { (aLong, bLong, _, dLong) ->
-            val dividend = BigInteger.of(aLong)
-            val divisor = BigInteger.of(bLong)
-            val expectedRemainder = BigInteger.of(dLong)
-            (dividend % divisor) shouldBe expectedRemainder
+        "specific examples" - {
+            withData(divisionWithRemainderExamples) { (aLong, bLong, _, dLong) ->
+                val dividend = BigInteger.of(aLong)
+                val divisor = BigInteger.of(bLong)
+                val expectedRemainder = BigInteger.of(dLong)
+                (dividend % divisor) shouldBe expectedRemainder
+            }
         }
-        withData(divisionByZeroExamples) { (aLong) ->
-            val dividend = BigInteger.of(aLong)
-            shouldThrow<ArithmeticException> {
-                dividend / BigInteger.ZERO
+        "division by zero" - {
+            withData(divisionByZeroExamples) { (aLong) ->
+                val dividend = BigInteger.of(aLong)
+                shouldThrow<ArithmeticException> {
+                    dividend / BigInteger.ZERO
+                }
             }
         }
     }
 
     "divRem" - {
-        withData(divisionWithRemainderExamples) { (aLong, bLong, cLong, dLong) ->
-            val dividend = BigInteger.of(aLong)
-            val divisor = BigInteger.of(bLong)
-            val expectedQuotient = BigInteger.of(cLong)
-            val expectedRemainder = BigInteger.of(dLong)
-            dividend.divRem(divisor) shouldBe BigInteger.QuotientWithRemainder(
-                quotient = expectedQuotient,
-                remainder = expectedRemainder,
-            )
+        "specific examples" - {
+            withData(divisionWithRemainderExamples) { (aLong, bLong, cLong, dLong) ->
+                val dividend = BigInteger.of(aLong)
+                val divisor = BigInteger.of(bLong)
+                val expectedQuotient = BigInteger.of(cLong)
+                val expectedRemainder = BigInteger.of(dLong)
+                dividend.divRem(divisor) shouldBe BigInteger.QuotientWithRemainder(
+                    quotient = expectedQuotient,
+                    remainder = expectedRemainder,
+                )
+            }
         }
-        withData(divisionByZeroExamples) { (aLong) ->
-            val dividend = BigInteger.of(aLong)
-            shouldThrow<ArithmeticException> {
-                dividend.divRem(BigInteger.ZERO)
+        "division by zero" - {
+            withData(divisionByZeroExamples) { (aLong) ->
+                val dividend = BigInteger.of(aLong)
+                shouldThrow<ArithmeticException> {
+                    dividend.divRem(BigInteger.ZERO)
+                }
             }
         }
     }
 
     "unaryPlus" - {
-        withData(
-            row(0),
-            row(123),
-            row(-456),
-        ) { (aInt) ->
-            val a = BigInteger.of(aInt)
+        checkAll(Arb.bigInt()) { a ->
             +a shouldBe a
         }
     }
