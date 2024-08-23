@@ -12,11 +12,13 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldHaveSameHashCodeAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.kotest.property.Arb
+import io.kotest.property.arbitrary.byte
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.intArray
 import io.kotest.property.arbitrary.long
 import io.kotest.property.arbitrary.positiveInt
+import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.uInt
 import io.kotest.property.arbitrary.uLong
 import io.kotest.property.checkAll
@@ -640,6 +642,158 @@ class BigIntegerTest : FreeSpec({
                     a shouldHaveSameHashCodeAs b
                 }
             }
+        }
+    }
+
+    "toLong" {
+        checkAll(Arb.long()) { aLong ->
+            BigInteger.of(aLong).toLong() shouldBe aLong
+        }
+    }
+
+    "toLongExact" - {
+        "for values in range" {
+            checkAll(Arb.long()) { aLong ->
+                BigInteger.of(aLong).toLongExact() shouldBe aLong
+            }
+        }
+        "for one above" {
+            shouldThrow<ArithmeticException> {
+                BigInteger.of(Long.MAX_VALUE).inc().toLongExact()
+            }
+        }
+        "for one below" {
+            shouldThrow<ArithmeticException> {
+                BigInteger.of(Long.MIN_VALUE).dec().toLongExact()
+            }
+        }
+    }
+
+    "toLongExactOrNull" - {
+        "for values in range" {
+            checkAll(Arb.long()) { aLong ->
+                BigInteger.of(aLong).toLongExactOrNull() shouldBe aLong
+            }
+        }
+        "for one above" {
+            BigInteger.of(Long.MAX_VALUE).inc().toLongExactOrNull() shouldBe null
+        }
+        "for one below" {
+            BigInteger.of(Long.MIN_VALUE).dec().toLongExactOrNull() shouldBe null
+        }
+    }
+
+    "toInt" {
+        checkAll(Arb.int()) { anInt ->
+            BigInteger.of(anInt).toInt() shouldBe anInt
+        }
+    }
+
+    "toIntExact" - {
+        "for values in range" {
+            checkAll(Arb.int()) { anInt ->
+                BigInteger.of(anInt).toIntExact() shouldBe anInt
+            }
+        }
+        "for one above" {
+            shouldThrow<ArithmeticException> {
+                BigInteger.of(Int.MAX_VALUE).inc().toIntExact()
+            }
+        }
+        "for one below" {
+            shouldThrow<ArithmeticException> {
+                BigInteger.of(Int.MIN_VALUE).dec().toIntExact()
+            }
+        }
+    }
+
+    "toIntExactOrNull" - {
+        "for values in range" {
+            checkAll(Arb.int()) { anInt ->
+                BigInteger.of(anInt).toIntExactOrNull() shouldBe anInt
+            }
+        }
+        "for one above" {
+            BigInteger.of(Int.MAX_VALUE).inc().toIntExactOrNull() shouldBe null
+        }
+        "for one below" {
+            BigInteger.of(Int.MIN_VALUE).dec().toIntExactOrNull() shouldBe null
+        }
+    }
+
+    "toShort" {
+        checkAll(Arb.short()) { aShort ->
+            BigInteger.of(aShort.toInt()).toShort() shouldBe aShort
+        }
+    }
+
+    "toShortExact" - {
+        "for values in range" {
+            checkAll(Arb.short()) { aShort ->
+                BigInteger.of(aShort.toInt()).toShortExact() shouldBe aShort
+            }
+        }
+        "for one above" {
+            shouldThrow<ArithmeticException> {
+                BigInteger.of(Short.MAX_VALUE.toInt()).inc().toShortExact()
+            }
+        }
+        "for one below" {
+            shouldThrow<ArithmeticException> {
+                BigInteger.of(Short.MIN_VALUE.toInt()).dec().toShortExact()
+            }
+        }
+    }
+
+    "toShortExactOrNull" - {
+        "for values in range" {
+            checkAll(Arb.short()) { aShort ->
+                BigInteger.of(aShort.toInt()).toShortExactOrNull() shouldBe aShort
+            }
+        }
+        "for one above" {
+            BigInteger.of(Short.MAX_VALUE.toInt()).inc().toShortExactOrNull() shouldBe null
+        }
+        "for one below" {
+            BigInteger.of(Short.MIN_VALUE.toInt()).dec().toShortExactOrNull() shouldBe null
+        }
+    }
+
+    "toByte" {
+        checkAll(Arb.byte()) { aByte ->
+            BigInteger.of(aByte.toInt()).toByte() shouldBe aByte
+        }
+    }
+
+    "toByteExact" - {
+        "for values in range" {
+            checkAll(Arb.byte()) { aByte ->
+                BigInteger.of(aByte.toInt()).toByteExact() shouldBe aByte
+            }
+        }
+        "for one above" {
+            shouldThrow<ArithmeticException> {
+                BigInteger.of(Byte.MAX_VALUE.toInt()).inc().toByteExact()
+            }
+        }
+        "for one below" {
+            shouldThrow<ArithmeticException> {
+                BigInteger.of(Byte.MIN_VALUE.toInt()).dec().toByteExact()
+            }
+        }
+    }
+
+    "toByteExactOrNull" - {
+        "for values in range" {
+            checkAll(Arb.byte()) { aByte ->
+                BigInteger.of(aByte.toInt()).toByteExactOrNull() shouldBe aByte
+            }
+        }
+        "for one above" {
+            BigInteger.of(Byte.MAX_VALUE.toInt()).inc().toByteExactOrNull() shouldBe null
+        }
+        "for one below" {
+            BigInteger.of(Byte.MIN_VALUE.toInt()).dec().toByteExactOrNull() shouldBe null
         }
     }
 

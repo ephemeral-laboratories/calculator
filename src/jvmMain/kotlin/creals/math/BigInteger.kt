@@ -573,6 +573,109 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
      */
     fun toLongExactOrNull() = if (words.size <= 2 && bitLength <= 63) toLong() else null
 
+    /**
+     * Converts this [BigInteger] to an [Int].
+     *
+     * If it is too big to fit in an `Int`, only the low-order 32 bits are returned.
+     * Note that this conversion can lose information about the overall magnitude of
+     * the value, as well as return a result with the opposite sign.
+     *
+     * @return this [BigInteger] converted to a [Int].
+     * @see [toIntExact]
+     */
+    fun toInt() = IntArrayHelpers.getInt(this, 0)
+
+    /**
+     * Converts this [BigInteger] to an [Int], checking for lost information.
+     *
+     * If it is out of the range of the `Int` type, then an [ArithmeticException] is thrown.
+     *
+     * @return this [BigInteger] converted to an [Int].
+     * @throws ArithmeticException if the value cannot fit in an `Int`.
+     * @see [toInt]
+     */
+    fun toIntExact() = toIntExactOrNull() ?: throw ArithmeticException("BigInteger out of int range")
+
+    /**
+     * Converts this [BigInteger] to an [Int], checking for lost information.
+     *
+     * If it is out of the range of the `Int` type, returns `null`.
+     *
+     * @return this [BigInteger] converted to an [Int], or `null`.
+     * @see [toInt]
+     */
+    fun toIntExactOrNull(): Int? = if (words.size <= 1 && bitLength <= 31) toInt() else null
+
+    /**
+     * Converts this [BigInteger] to a [Short].
+     *
+     * If it is too big to fit in a `Short`, only the low-order 16 bits are returned.
+     * Note that this conversion can lose information about the overall magnitude of
+     * the value, as well as return a result with the opposite sign.
+     *
+     * @return this [BigInteger] converted to a [Short].
+     * @see [toShortExact]
+     */
+    fun toShort() = toInt().toShort()
+
+    /**
+     * Converts this [BigInteger] to a [Short], checking for lost information.
+     *
+     * If it is out of the range of the `Short` type, then an [ArithmeticException] is thrown.
+     *
+     * @return this [BigInteger] converted to a [Short].
+     * @throws ArithmeticException if the value cannot fit in an `Short`.
+     * @see [toShort]
+     */
+    fun toShortExact() = toShortExactOrNull() ?: throw ArithmeticException("BigInteger out of short range")
+
+    /**
+     * Converts this [BigInteger] to a [Short], checking for lost information.
+     *
+     * If it is out of the range of the `Short` type, returns `null`.
+     *
+     * @return this [BigInteger] converted to a [Short], or `null`.
+     * @see [toShort]
+     */
+    fun toShortExactOrNull(): Short? = if (words.size <= 1 && bitLength <= 15) toShort() else null
+
+    /**
+     * Converts this [BigInteger] to a [Byte].
+     *
+     * If it is too big to fit in a `Byte`, only the low-order 8 bits are returned.
+     * Note that this conversion can lose information about the overall magnitude of
+     * the value, as well as return a result with the opposite sign.
+     *
+     * @return this [BigInteger] converted to a [Byte].
+     * @see [toByteExact]
+     */
+    fun toByte(): Byte = toInt().toByte()
+
+    /**
+     * Converts this [BigInteger] to a [Byte], checking for lost information.
+     *
+     * If it is out of the range of the `Byte` type, then an [ArithmeticException] is thrown.
+     *
+     * @return this [BigInteger] converted to a [Byte].
+     * @throws ArithmeticException if the value cannot fit in an `Byte`.
+     * @see [toByte]
+     */
+    fun toByteExact(): Byte = toByteExactOrNull() ?: throw ArithmeticException("BigInteger out of byte range")
+
+    /**
+     * Converts this [BigInteger] to a [Byte], checking for lost information.
+     *
+     * If it is out of the range of the `Byte` type, returns `null`.
+     *
+     * @return this [BigInteger] converted to a [Byte], or `null`.
+     * @see [toByte]
+     */
+    fun toByteExactOrNull(): Byte? = if (words.size <= 1 && bitLength <= 7) toByte() else null
+
+    // Consider these. Do we detect exact for these too?
+    fun toFloat(): Float = TODO()
+    fun toDouble(): Float = TODO()
+
     // Misc
 
     override fun toString(): String {
@@ -1089,7 +1192,7 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
         /**
          * The "long radix" that tears each number into "long digits", each of which consists of
          * the number of digits in the corresponding element in [digitsPerLong]
-         * (`longRadix[i] = i**digitPerLong[i]`).
+         * (`longRadix\[i] = i**digitPerLong\[i]`).
          */
         private var longRadix = arrayOf(
             ZERO, ZERO,
