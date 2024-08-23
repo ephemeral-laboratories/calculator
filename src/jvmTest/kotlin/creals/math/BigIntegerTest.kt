@@ -517,6 +517,114 @@ class BigIntegerTest : FreeSpec({
         }
     }
 
+    "testBit" - {
+        withData(
+            row(33_572_994, 20, false),
+            row(34_621_570, 20, true),
+        ) { (valueInt, n, expectedResult) ->
+            val value = BigInteger.of(valueInt)
+            value.testBit(n) shouldBe expectedResult
+        }
+    }
+
+    "setBit" - {
+        withData(
+            row(33_572_994, 20, 34_621_570),
+            row(34_621_570, 20, 34_621_570),
+        ) { (valueInt, n, expectedResultInt) ->
+            val value = BigInteger.of(valueInt)
+            val expectedResult = BigInteger.of(expectedResultInt)
+            value.setBit(n) shouldBe expectedResult
+        }
+    }
+
+    "clearBit" - {
+        withData(
+            row(33_572_994, 20, 33_572_994),
+            row(34_621_570, 20, 33_572_994),
+        ) { (valueInt, n, expectedResultInt) ->
+            val value = BigInteger.of(valueInt)
+            val expectedResult = BigInteger.of(expectedResultInt)
+            value.clearBit(n) shouldBe expectedResult
+        }
+    }
+
+    "flipBit" - {
+        withData(
+            row(33_572_994, 20, 34_621_570),
+            row(34_621_570, 20, 33_572_994),
+        ) { (valueInt, n, expectedResultInt) ->
+            val value = BigInteger.of(valueInt)
+            val expectedResult = BigInteger.of(expectedResultInt)
+            value.flipBit(n) shouldBe expectedResult
+        }
+    }
+
+    "lowestSetBit" - {
+        withData(
+            row(0, -1),
+            row(1, 0),
+            row(-1, 0),
+            row(2, 1),
+            row(-2, 1),
+            row(3, 0),
+            row(-3, 0),
+            row(42, 1),
+            row(-42, 1),
+            row(2_650_112, 12),
+        ) { (valueInt, expectedResult) ->
+            val value = BigInteger.of(valueInt)
+            value.lowestSetBit shouldBe expectedResult
+        }
+    }
+
+    "bitCount" - {
+        withData(
+            row(0, 0),
+            row(1, 1),
+            row(2, 1),
+            row(3, 2),
+            row(4, 1),
+            row(7, 3),
+            row(42, 3),
+            row(-1, 0),
+            row(-2, 1),
+            row(-3, 1),
+            row(-4, 2),
+            row(-5, 1),
+            row(-7, 2),
+            row(-8, 3),
+        ) { (valueInt, expectedResult) ->
+            val value = BigInteger.of(valueInt)
+            value.bitCount shouldBe expectedResult
+        }
+    }
+
+    "bitLength" - {
+        withData(
+            row(0, 0),
+            row(1, 1),
+            row(2, 2),
+            row(3, 2),
+            row(4, 3),
+            row(7, 3),
+            row(8, 4),
+
+            row(-1, 0),
+            row(-2, 1),
+            row(-3, 2),
+            row(-4, 2),
+            row(-5, 3),
+            row(-7, 3),
+            row(-8, 3),
+            row(-9, 4),
+
+            ) { (valueInt, expectedResult) ->
+            val value = BigInteger.of(valueInt)
+            value.bitLength shouldBe expectedResult
+        }
+    }
+
     "equals and hashCode" {
         checkAll(Arb.int()) { aInt ->
             val a = BigInteger.of(aInt)

@@ -351,11 +351,109 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
      */
     fun not() = IntArrayHelpers.bitwiseUnaryOp(this) { a -> a.inv() }
 
-    // fun testBit(n: Int): Boolean = TODO()
-    // fun setBit(n: Int): BigInteger = TODO()
-    // fun clearBit(n: Int): BigInteger = TODO()
-    // fun flipBit(n: Int): BigInteger = TODO()
-    // fun getLowestSetBit(): Int = TODO()
+    /**
+     * Returns `true` if and only if the designated bit is set.
+     * (Computes `((this & (1<<n)) != 0)`.)
+     *
+     * @param n the index of the bit to test.
+     * @return `true` if and only if the designated bit is set.
+     * @throws ArithmeticException if `n` is negative.
+     */
+    fun testBit(n: Int): Boolean {
+        if (n < 0) {
+            throw ArithmeticException("Negative bit address")
+        }
+
+        return (IntArrayHelpers.getInt(this, n ushr 5) and (1 shl (n and 31))) != 0
+    }
+
+    /**
+     * Creates a copy of this integer with a bit set.
+     *
+     * @param n the index of the bit to set.
+     * @return the new integer.
+     * @throws ArithmeticException if `n` is negative.
+     */
+    fun setBit(n: Int): BigInteger {
+        if (n < 0) {
+            throw ArithmeticException("Negative bit address")
+        }
+
+        return IntArrayHelpers.manipulateBit(this, n) { a, b -> a or b }
+    }
+
+    /**
+     * Creates a copy of this integer with a bit cleared.
+     *
+     * @param n the index of the bit to clear.
+     * @return the new integer.
+     * @throws ArithmeticException if `n` is negative.
+     */
+    fun clearBit(n: Int): BigInteger {
+        if (n < 0) {
+            throw ArithmeticException("Negative bit address")
+        }
+
+        return IntArrayHelpers.manipulateBit(this, n) { a, b -> a and b.inv() }
+    }
+
+    /**
+     * Creates a copy of this integer with a bit flipped.
+     *
+     * @param n the index of the bit to flip.
+     * @return the new integer.
+     * @throws ArithmeticException if `n` is negative.
+     */
+    fun flipBit(n: Int): BigInteger {
+        if (n < 0) {
+            throw ArithmeticException("Negative bit address")
+        }
+
+        return IntArrayHelpers.manipulateBit(this, n) { a, b -> a xor b }
+    }
+
+    /**
+     * The index of the rightmost (lowest-order) one bit in this [BigInteger]
+     * (the number of zero bits to the right of the rightmost one bit).
+     * Returns -1 if this [BigInteger] contains no one bits.
+     *
+     * (Computes `(this == 0? -1 : log2(this & -this))`.)
+     *
+     * @return the index of the rightmost one bit in this [BigInteger].
+     */
+    val lowestSetBit: Int by lazy {
+        if (sign == Sign.Zero) {
+            -1
+        } else {
+            var magTrailingZeroCount = 0
+            var j: Int = words.lastIndex
+            while (words[j] == 0U) {
+                magTrailingZeroCount += 32
+                j--
+            }
+            magTrailingZeroCount += words[j].countTrailingZeroBits()
+            magTrailingZeroCount
+        }
+    }
+
+    /**
+     * Gets the number of bits in the two's complement representation of this [BigInteger]
+     * that differ from its sign.
+     * This method is useful when implementing bit-vector style sets.
+     *
+     * @return the number of bits in the two's complement representation of this [BigInteger]
+     *         that differ from its sign.
+     */
+    val bitCount: Int by lazy {
+        if (sign == Sign.Zero) {
+            return@lazy 0
+        }
+        var bitCount = words.sumOf { word -> word.countOneBits() }
+        if (sign == Sign.Negative) {
+            bitCount += lowestSetBit - 1
+        }
+        bitCount
+    }
 
     /**
      * Gets the number of bits in the minimal two's-complement representation of this [BigInteger].
@@ -374,42 +472,12 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
         }
         var bitLength = STORAGE_BASE_LOG2 * words.size - words[0].countLeadingZeroBits()
         if (sign == Sign.Negative) {
-            val magnitudeIsPowerOf2 = bitCount == 1
-            if (magnitudeIsPowerOf2) {
+            val absIsPowerOf2 = words[0].countOneBits() == 1 && words.indexOfLast { x -> x != 0U } == 0
+            if (absIsPowerOf2) {
                 bitLength -= 1
             }
         }
         bitLength
-    }
-
-    /**
-     * Gets the number of bits in the two's complement representation of this [BigInteger]
-     * that differ from its sign.
-     * This method is useful when implementing bit-vector style sets.
-     *
-     * @return the number of bits in the two's complement representation of this [BigInteger]
-     *         that differ from its sign\.
-     */
-    val bitCount: Int by lazy {
-        if (sign == Sign.Zero) {
-            return@lazy 0
-        }
-        var bitCount = words.sumOf { word -> word.countOneBits() }
-        if (sign == Sign.Negative) {
-            bitCount += trailingZeroCount() - 1
-        }
-        bitCount
-    }
-
-    private fun trailingZeroCount(): Int {
-        var magTrailingZeroCount = 0
-        var j: Int = words.lastIndex
-        while (words[j] == 0U) {
-            magTrailingZeroCount += 32
-            j--
-        }
-        magTrailingZeroCount += words[j].countTrailingZeroBits()
-        return magTrailingZeroCount
     }
 
     // Comparisons
@@ -1177,6 +1245,45 @@ class BigInteger(private val sign: Sign, private val words: UIntArray) : Compara
                 n <= value.indexOfFirstNonzeroInt -> -wordInt
                 else -> wordInt.inv()
             }
+        }
+
+        /**
+         * Converts the big integer to an int array.
+         *
+         * @see getInt
+         */
+        internal fun toIntArray(value: BigInteger, minimumSize: Int = value.words.size): IntArray {
+            val result = IntArray(intLength(value).coerceAtLeast(minimumSize))
+
+            for (i in result.indices) {
+                result[result.size - i - 1] = getInt(value, i)
+            }
+
+            return result
+        }
+
+        /**
+         * Creates a new big integer where one bit has been manipulated somehow.
+         *
+         * @param value the big integer.
+         * @param n the bit index to manipulate.
+         * @param manipulationOp the operation to perform. Receives the existing value, and
+         *        an int indicating which bit to manipulate, returns the result.
+         * @return the result.
+         */
+        internal fun manipulateBit(value: BigInteger, n: Int, manipulationOp: (Int, Int) -> Int): BigInteger {
+            val intNum = n ushr 5
+
+            val result = IntArray(intLength(value).coerceAtLeast(intNum + 2))
+            for (i in result.indices) {
+                result[result.size - i - 1] = getInt(value, i)
+            }
+
+            var intToModify = result[result.lastIndex - intNum]
+            intToModify = manipulationOp(intToModify, 1 shl (n and 31))
+            result[result.lastIndex - intNum] = intToModify
+
+            return bigIntFromArray(result)
         }
 
         /**
