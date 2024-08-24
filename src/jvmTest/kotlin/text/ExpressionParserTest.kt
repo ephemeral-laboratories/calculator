@@ -14,6 +14,7 @@ import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.shouldBeCloseTo
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
+import garden.ephemeral.calculator.nodes.values.Degrees
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.util.row
 import io.kotest.assertions.throwables.shouldThrow
@@ -207,6 +208,9 @@ class ExpressionParserTest : FreeSpec({
                 Value(Real.valueOf("79496847203390844133441536")),
             ),
         ),
+
+        // Degrees
+        row("39°", Degrees(Value(45.0))),
     )
 
     val function1Examples = mapOf(

@@ -16,6 +16,7 @@ import garden.ephemeral.calculator.nodes.operators.PrefixOperator
 import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
+import garden.ephemeral.calculator.nodes.values.Degrees
 import garden.ephemeral.calculator.nodes.values.Value
 import org.antlr.v4.kotlinruntime.BailErrorStrategy
 import org.antlr.v4.kotlinruntime.BaseErrorListener
@@ -139,8 +140,17 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             }
 
             is ExpressionParser.RealNumberContext -> {
-                val real = parseReal(tree.magnitude!!)
-                Value(real)
+                if (tree.magnitude != null) {
+                    tree.magnitude!!.let { magnitude ->
+                        val real = parseReal(magnitude)
+                        Value(real)
+                    }
+                } else {
+                    tree.angle!!.let { angle ->
+                        val real = parseReal(angle)
+                        Degrees(Value(real))
+                    }
+                }
             }
 
             is ExpressionParser.ComplexNumberContext -> {

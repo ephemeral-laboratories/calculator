@@ -52,6 +52,7 @@ TAU: 'τ' | 't' 'a' 'u';
 PI: 'π' | 'p' 'i';
 E: 'e';
 COMMA: ',';
+DEGREE_SIGN: '°';
 
 fragment RadixSeparator: ( ';' | '.' | ',' );
 fragment Digit: ( [0-9] | '↊' | '↋' );

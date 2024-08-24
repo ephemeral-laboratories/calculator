@@ -6,15 +6,8 @@ import garden.ephemeral.calculator.creals.abs
 import garden.ephemeral.calculator.nodes.BaseLeafNode
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.text.ValueFormat
-import org.jetbrains.annotations.TestOnly
 
-class Value(value: Any) : BaseLeafNode() {
-
-    @TestOnly
-    constructor(value: Double) : this(value as Any)
-
-    constructor(value: Real) : this(value as Any)
-    constructor(value: Complex) : this(value as Any)
+class Value internal constructor(value: Any) : BaseLeafNode() {
 
     /**
      * The contained value.
@@ -49,3 +42,6 @@ class Value(value: Any) : BaseLeafNode() {
         return mapOf("value" to "$value {$valueType}")
     }
 }
+
+fun Value(value: Real) = Value(value as Any)
+fun Value(value: Complex) = Value(value as Any)
