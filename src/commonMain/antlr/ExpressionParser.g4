@@ -18,6 +18,7 @@ expression
     | implicitTimesExpression
     | powerExpression
     | unaryMinusExpression
+    | degreeExpression
     ;
 
 parenthesizedExpression
@@ -32,6 +33,7 @@ plusMinusChildExpression
     | implicitTimesExpression
     | powerExpression
     | unaryMinusExpression
+    | degreeExpression
     | parenthesizedExpression
     ;
 
@@ -42,6 +44,7 @@ timesDivideChildExpression
     | implicitTimesExpression
     | powerExpression
     | unaryMinusExpression
+    | degreeExpression
     | parenthesizedExpression
     ;
 
@@ -51,6 +54,7 @@ implicitTimesFirstChildExpression
     | functionExpression
     | powerExpression
     | unaryMinusExpression
+    | degreeExpression
     | parenthesizedExpression
     ;
 implicitTimesChildExpression
@@ -66,11 +70,19 @@ powerChildExpression
     : value
     | functionExpression
     | unaryMinusExpression
+    | degreeExpression
     | parenthesizedExpression
     ;
 
 unaryMinusExpression: MINUS unaryMinusChildExpression;
 unaryMinusChildExpression
+    : value
+    | functionExpression
+    | parenthesizedExpression
+    ;
+
+degreeExpression: degreeChildExpression DEGREE_SIGN;
+degreeChildExpression
     : value
     | functionExpression
     | parenthesizedExpression
@@ -100,12 +112,7 @@ function2Expression
 value
     : complexNumber
     | realNumber
-    | realNumberDegrees
     | constant
-    ;
-
-realNumberDegrees
-    : angle=realNumber DEGREE_SIGN
     ;
 
 complexNumber
@@ -115,7 +122,6 @@ complexNumber
 
 realNumber
     : magnitude=NUMBER
-    | angle=NUMBER DEGREE_SIGN
     ;
 
 constant

@@ -12,11 +12,12 @@ import garden.ephemeral.calculator.nodes.functions.Function2
 import garden.ephemeral.calculator.nodes.functions.Function2Node
 import garden.ephemeral.calculator.nodes.operators.InfixOperator
 import garden.ephemeral.calculator.nodes.operators.InfixOperatorNode
+import garden.ephemeral.calculator.nodes.operators.PostfixOperator
+import garden.ephemeral.calculator.nodes.operators.PostfixOperatorNode
 import garden.ephemeral.calculator.nodes.operators.PrefixOperator
 import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
-import garden.ephemeral.calculator.nodes.values.Degrees
 import garden.ephemeral.calculator.nodes.values.Value
 import org.antlr.v4.kotlinruntime.BailErrorStrategy
 import org.antlr.v4.kotlinruntime.BaseErrorListener
@@ -123,6 +124,11 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                 }
             }
 
+            is ExpressionParser.DegreeExpressionContext -> {
+                val childNode = transform(tree.degreeChildExpression())
+                PostfixOperatorNode(PostfixOperator.DEGREES, childNode)
+            }
+
             is ExpressionParser.Function1ExpressionContext -> {
                 val func = tree.func!!
                 val name = func.text!!
@@ -140,17 +146,8 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             }
 
             is ExpressionParser.RealNumberContext -> {
-                if (tree.magnitude != null) {
-                    tree.magnitude!!.let { magnitude ->
-                        val real = parseReal(magnitude)
-                        Value(real)
-                    }
-                } else {
-                    tree.angle!!.let { angle ->
-                        val real = parseReal(angle)
-                        Degrees(Value(real))
-                    }
-                }
+                val real = parseReal(tree.magnitude!!)
+                Value(real)
             }
 
             is ExpressionParser.ComplexNumberContext -> {
@@ -192,12 +189,13 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.ImplicitTimesChildExpressionContext,
             is ExpressionParser.PowerChildExpressionContext,
             is ExpressionParser.UnaryMinusChildExpressionContext,
+            is ExpressionParser.DegreeChildExpressionContext,
             is ExpressionParser.FunctionExpressionContext,
             is ExpressionParser.ValueContext,
             ->
                 transform(tree.getChild(0)!!)
 
-            else -> throw UnsupportedOperationException("Unknown tree node: $tree")
+            else -> throw UnsupportedOperationException("Unknown tree node: $tree (type ${tree.javaClass})")
         }
     }
 

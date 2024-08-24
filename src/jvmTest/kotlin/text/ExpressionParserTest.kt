@@ -9,12 +9,13 @@ import garden.ephemeral.calculator.nodes.functions.Function2
 import garden.ephemeral.calculator.nodes.functions.Function2Node
 import garden.ephemeral.calculator.nodes.operators.InfixOperator
 import garden.ephemeral.calculator.nodes.operators.InfixOperatorNode
+import garden.ephemeral.calculator.nodes.operators.PostfixOperator
+import garden.ephemeral.calculator.nodes.operators.PostfixOperatorNode
 import garden.ephemeral.calculator.nodes.operators.PrefixOperator
 import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.shouldBeCloseTo
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
-import garden.ephemeral.calculator.nodes.values.Degrees
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.util.row
 import io.kotest.assertions.throwables.shouldThrow
@@ -210,7 +211,7 @@ class ExpressionParserTest : FreeSpec({
         ),
 
         // Degrees
-        row("39°", Degrees(Value(45.0))),
+        row("39°", PostfixOperatorNode(PostfixOperator.DEGREES, Value(45.0))),
     )
 
     val function1Examples = mapOf(

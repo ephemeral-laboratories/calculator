@@ -8,11 +8,12 @@ import garden.ephemeral.calculator.nodes.functions.Function2
 import garden.ephemeral.calculator.nodes.functions.Function2Node
 import garden.ephemeral.calculator.nodes.operators.InfixOperator
 import garden.ephemeral.calculator.nodes.operators.InfixOperatorNode
+import garden.ephemeral.calculator.nodes.operators.PostfixOperator
+import garden.ephemeral.calculator.nodes.operators.PostfixOperatorNode
 import garden.ephemeral.calculator.nodes.operators.PrefixOperator
 import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
 import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
-import garden.ephemeral.calculator.nodes.values.Degrees
 import garden.ephemeral.calculator.nodes.values.Value
 import garden.ephemeral.calculator.util.row
 import io.kotest.core.spec.style.FreeSpec
@@ -63,7 +64,7 @@ class EvaluateTest : FreeSpec({
             ),
             row(Function2Node(Function2.POW, Value(1 + 1.i), Value(2.0)), Value(2.i)),
 
-            row(Degrees(Value(30.0)), Value(0.5235987755982988)),
+            row(PostfixOperatorNode(PostfixOperator.DEGREES, Value(30.0)), Value(0.5235987755982988)),
         ) { (input, expected) ->
             val result = input.evaluate()
             result shouldBeCloseTo expected
