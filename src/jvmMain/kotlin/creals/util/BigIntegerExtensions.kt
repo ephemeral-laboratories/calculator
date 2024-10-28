@@ -12,24 +12,13 @@ operator fun BigInteger.div(other: BigInteger): BigInteger = this.divide(other)
 operator fun BigInteger.rem(other: BigInteger): BigInteger = this.remainder(other)
 
 /**
- * Multiply `this` by `2**n`.
- */
-fun BigInteger.shift(n: Int): BigInteger {
-    return when {
-        n == 0 -> this
-        n < 0 -> shiftRight(-n)
-        else -> shiftLeft(n)
-    }
-}
-
-/**
  * Multiply by `2**n`, rounding result
  */
 fun BigInteger.scale(n: Int): BigInteger {
     if (n >= 0) {
         return shiftLeft(n)
     } else {
-        val adjK = shift(n + 1) + Real.BIG1
+        val adjK = shiftLeft(n + 1) + Real.BIG1
         return adjK.shiftRight(1)
     }
 }
