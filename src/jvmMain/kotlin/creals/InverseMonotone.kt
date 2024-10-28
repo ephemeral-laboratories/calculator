@@ -285,7 +285,7 @@ fun inverseMonotone(func: (Real) -> Real, low: Real, high: Real): (Real) -> Real
     val derivMSD: Int = ((maybeNegatedFHigh - maybeNegatedFLow) / (high - low)).msd()
 
     return { argument ->
-        val maybeNegatedArg = if (funcIsNegated) argument.unaryMinus() else argument
+        val maybeNegatedArg = if (funcIsNegated) -argument else argument
         InverseIncreasingReal(
             func = maybeNegatedFunc,
             low = low,

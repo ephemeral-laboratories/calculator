@@ -48,8 +48,8 @@ class Complex(val real: Real, val imag: Real) {
     operator fun div(other: Complex) = (this * other.conjugate) / (other * other.conjugate).real
     operator fun div(other: Real) = times(other.reciprocal())
 
-    operator fun unaryMinus(): Complex = Complex(-real, -imag)
-    operator fun unaryPlus(): Complex = this
+    operator fun unaryMinus() = Complex(-real, -imag)
+    operator fun unaryPlus() = this
 
     fun pow(exponent: Complex) = exp(ln(this) * exponent)
     fun pow(exponent: Real) = exp(ln(this) * exponent)
