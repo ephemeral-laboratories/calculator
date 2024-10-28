@@ -9,7 +9,6 @@ import garden.ephemeral.calculator.creals.impl.NegationReal
 import garden.ephemeral.calculator.creals.impl.ReciprocalReal
 import garden.ephemeral.calculator.creals.impl.ShiftedReal
 import garden.ephemeral.calculator.creals.util.StringFloatRep
-import garden.ephemeral.calculator.creals.util.minus
 import garden.ephemeral.calculator.creals.util.scale
 import java.math.BigInteger
 import kotlin.math.abs

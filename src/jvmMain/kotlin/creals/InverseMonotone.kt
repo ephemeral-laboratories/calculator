@@ -1,9 +1,6 @@
 package garden.ephemeral.calculator.creals
 
-import garden.ephemeral.calculator.creals.util.minus
-import garden.ephemeral.calculator.creals.util.plus
 import garden.ephemeral.calculator.creals.util.scale
-import garden.ephemeral.calculator.creals.util.times
 import java.math.BigInteger
 
 private class InverseIncreasingReal(

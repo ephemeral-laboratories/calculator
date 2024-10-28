@@ -1,6 +1,5 @@
 package garden.ephemeral.calculator.creals
 
-import garden.ephemeral.calculator.creals.util.times
 import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.doubles.plusOrMinus
