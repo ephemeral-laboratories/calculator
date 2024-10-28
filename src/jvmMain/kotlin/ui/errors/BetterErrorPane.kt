@@ -31,7 +31,6 @@ import garden.ephemeral.calculator.calculator.generated.resources.error_dialog_i
 import garden.ephemeral.calculator.ui.ThemeOption
 import garden.ephemeral.calculator.ui.theme.AppTheme
 import garden.ephemeral.calculator.ui.util.rememberIconPainter
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.UIManager
 
@@ -46,7 +45,6 @@ internal fun BetterErrorPanePreview() {
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 internal fun BetterErrorPane(throwable: Throwable, onDismissClicked: () -> Unit) {
     Surface(
@@ -88,7 +86,6 @@ internal fun BetterErrorPane(throwable: Throwable, onDismissClicked: () -> Unit)
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun SwingErrorIcon() {
     // Some Swing esoterica here.

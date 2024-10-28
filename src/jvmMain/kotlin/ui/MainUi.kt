@@ -67,7 +67,6 @@ import garden.ephemeral.calculator.ui.common.Localizable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import kotlin.reflect.KMutableProperty0
 
@@ -90,7 +89,6 @@ fun MainUi(appState: AppState) {
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun DrawerContent(appState: AppState) {
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -186,7 +184,6 @@ private fun <T : Localizable> OptionDropDown(
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: CoroutineScope) {
     val focusRequester = remember { FocusRequester() }
@@ -223,10 +220,7 @@ fun BottomBarContent(appState: AppState, valueTextStyle: TextStyle, scope: Corou
     }
 }
 
-@OptIn(
-    ExperimentalResourceApi::class,
-    ExperimentalMaterial3Api::class,
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(
     appState: AppState,

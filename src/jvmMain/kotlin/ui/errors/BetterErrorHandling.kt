@@ -12,7 +12,6 @@ import androidx.compose.ui.window.WindowExceptionHandler
 import androidx.compose.ui.window.WindowExceptionHandlerFactory
 import garden.ephemeral.calculator.calculator.generated.resources.Res
 import garden.ephemeral.calculator.calculator.generated.resources.error_dialog_title
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Dialog
 import java.awt.Point
@@ -23,7 +22,7 @@ import javax.swing.AbstractAction
 import javax.swing.JDialog
 import javax.swing.KeyStroke
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalResourceApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BetterErrorHandling(content: @Composable () -> Unit) {
     val settings = ErrorDialogSettings(

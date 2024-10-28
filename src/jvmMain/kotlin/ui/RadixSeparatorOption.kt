@@ -6,11 +6,9 @@ import garden.ephemeral.calculator.calculator.generated.resources.radix_separato
 import garden.ephemeral.calculator.calculator.generated.resources.radix_separator_period
 import garden.ephemeral.calculator.calculator.generated.resources.radix_separator_semicolon
 import garden.ephemeral.calculator.ui.common.Localizable
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalResourceApi::class)
 enum class RadixSeparatorOption(
     private val stringResourceKey: StringResource,
     val symbol: String,

@@ -17,9 +17,7 @@ import garden.ephemeral.calculator.text.ParseException
 import garden.ephemeral.calculator.text.ValueFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 
-@OptIn(ExperimentalResourceApi::class)
 class AppState {
     val outputState = LazyListState()
     var inputText by mutableStateOf(TextFieldValue(""))

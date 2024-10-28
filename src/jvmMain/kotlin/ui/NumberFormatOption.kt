@@ -6,11 +6,9 @@ import garden.ephemeral.calculator.calculator.generated.resources.number_format_
 import garden.ephemeral.calculator.calculator.generated.resources.number_format_dozenal
 import garden.ephemeral.calculator.text.PositionalFormatSymbols
 import garden.ephemeral.calculator.ui.common.Localizable
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalResourceApi::class)
 enum class NumberFormatOption(
     private val stringResourceKey: StringResource,
     val radix: Int,
