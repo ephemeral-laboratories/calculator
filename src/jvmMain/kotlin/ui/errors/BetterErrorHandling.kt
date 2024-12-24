@@ -10,6 +10,7 @@ import androidx.compose.ui.window.WindowExceptionHandler
 import androidx.compose.ui.window.WindowExceptionHandlerFactory
 import garden.ephemeral.calculator.calculator.generated.resources.Res
 import garden.ephemeral.calculator.calculator.generated.resources.error_dialog_title
+import io.sentry.Sentry
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Dialog
 import java.awt.Window
@@ -70,6 +71,7 @@ private class CustomWindowExceptionHandlerFactory(private val state: ErrorDialog
     WindowExceptionHandlerFactory {
 
     override fun exceptionHandler(window: Window) = WindowExceptionHandler { throwable ->
+        Sentry.captureException(throwable)
         state.showError(throwable = throwable, window = window)
     }
 }

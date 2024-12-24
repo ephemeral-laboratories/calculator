@@ -1,17 +1,20 @@
-
+import com.codingfeline.buildkonfig.compiler.FieldSpec
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.konan.properties.loadProperties
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.buildkonfig)
     alias(libs.plugins.spotless)
     idea
     alias(libs.plugins.antlr.kotlin)
     id("utf8-workarounds")
+    alias(libs.plugins.sentry)
 }
 
 group = "garden.ephemeral.calculator"
@@ -20,8 +23,24 @@ description = "Simple calculator application built in Compose Desktop"
 
 val generatedAntlrDir: Provider<Directory> = layout.buildDirectory.dir("generated/antlr")
 
+buildkonfig {
+    packageName = "garden.ephemeral.calculator"
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "CopyrightYears", "2024")
+        buildConfigField(FieldSpec.Type.STRING, "OrganisationName", "Ephemeral Laboratories")
+        buildConfigField(FieldSpec.Type.STRING, "ApplicationName", "Calculator")
+        buildConfigField(FieldSpec.Type.STRING, "Version", version.toString())
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "SentryDSN",
+            "https://5ca64c177663f7bc15fd6943d2357c50@o4508522554130432.ingest.de.sentry.io/4508522556948560",
+        )
+    }
+}
+
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
     jvm()
     sourceSets {
         commonMain {
@@ -30,6 +49,7 @@ kotlin {
             }
             dependencies {
                 implementation(compose.components.resources)
+                implementation(libs.sentry)
             }
         }
         jvmMain.dependencies {
@@ -68,7 +88,7 @@ val generateKotlinGrammarSource by tasks.registering(AntlrKotlinTask::class) {
 tasks.withType<KotlinCompile> {
     dependsOn(generateKotlinGrammarSource)
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget = JvmTarget.JVM_21
         freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
@@ -92,13 +112,13 @@ compose.desktop {
             windows {
                 upgradeUuid = "3e9ee76f-453c-4819-9371-41745b72b8cc"
                 menuGroup = packageName
-                iconFile.set(file("src/installers/AppIcon.ico"))
+                iconFile = file("src/installers/AppIcon.ico")
             }
             macOS {
-                iconFile.set(file("src/installers/AppIcon.icns"))
+                iconFile = file("src/installers/AppIcon.icns")
             }
             linux {
-                iconFile.set(file("src/installers/AppIcon.png"))
+                iconFile = file("src/installers/AppIcon.png")
             }
         }
     }
@@ -117,5 +137,17 @@ spotless {
 idea {
     module {
         isDownloadSources = true
+    }
+}
+
+sentry {
+    // Uploads source to Sentry (project is open source so that is OK)
+    includeSourceContext = true
+
+    org = "ephemeral-laboratories"
+    projectName = "calculator"
+    authToken = provider {
+        System.getenv("SENTRY_AUTH_TOKEN")
+            ?: loadProperties("secrets.properties").getProperty("SENTRY_AUTH_TOKEN")
     }
 }

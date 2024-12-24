@@ -8,10 +8,14 @@ ktlint = "0.48.0"
 kotlin = "2.0.0"
 antlr-kotlin = "1.0.0-RC4"
 icu4j = "75.1"
+buildkonfig = "0.15.2"
+sentry = "7.19.0"
+sentry-gradle = "4.14.1"
 
 [libraries]
 antlr-kotlin-runtime = {module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin"}
 icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
+sentry = {module = "io.sentry:sentry", version.ref = "sentry"}
 kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
 kotest-assertions-core = {module = "io.kotest:kotest-assertions-core", version.ref = "kotest"}
 kotest-framework-datatest = {module = "io.kotest:kotest-framework-datatest", version.ref = "kotest"}
@@ -25,3 +29,5 @@ compose = {id = "org.jetbrains.compose", version.ref = "compose"}
 compose-compiler = {id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin"}
 spotless = {id = "com.diffplug.spotless", version.ref = "spotless"}
 antlr-kotlin = {id  = "com.strumenta.antlr-kotlin", version.ref = "antlr-kotlin"}
+buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
+sentry = {id = "io.sentry.jvm.gradle", version.ref = "sentry-gradle"}
