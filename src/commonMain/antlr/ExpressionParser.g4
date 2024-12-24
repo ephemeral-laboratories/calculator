@@ -127,5 +127,6 @@ realNumber
 constant
     : TAU
     | PI
+    | PHI
     | E
     ;

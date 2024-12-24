@@ -12,7 +12,7 @@ import garden.ephemeral.calculator.creals.Real
  * @property radix the radix of the representation.  Also the base of the exponent field.
  * @property exponent the mantissa is scaled by radix**exponent.
  */
-data class StringFloatRep internal constructor(
+data class ScientificNotation internal constructor(
     val sign: Int,
     val mantissaDigits: List<Int>,
     val radix: Int,

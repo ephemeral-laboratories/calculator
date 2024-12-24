@@ -1,6 +1,6 @@
 package garden.ephemeral.calculator.nodes
 
-import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.values.Value
 import garden.ephemeral.calculator.text.ValueFormat
 
 class Parentheses(private val inner: Node) : BaseBranchNode() {

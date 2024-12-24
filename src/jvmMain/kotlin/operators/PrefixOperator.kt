@@ -1,7 +1,8 @@
-package garden.ephemeral.calculator.nodes.operators
+package garden.ephemeral.calculator.operators
 
 import garden.ephemeral.calculator.complex.Complex
 import garden.ephemeral.calculator.creals.Real
+import garden.ephemeral.calculator.values.Value
 
 enum class PrefixOperator(
     val printedSymbol: String,
@@ -11,11 +12,8 @@ enum class PrefixOperator(
     UNARY_MINUS("-", Real::unaryMinus, Complex::unaryMinus),
     ;
 
-    fun apply(value: Any): Any {
-        return when (value) {
-            is Real -> realFunction(value)
-            is Complex -> complexFunction(value)
-            else -> throw IllegalStateException("Cannot apply function $name to value $value")
-        }
+    fun apply(value: Value): Value = when (value) {
+        is Value.OfReal -> Value.OfReal(realFunction(value.value))
+        is Value.OfComplex -> Value.OfComplex(complexFunction(value.value))
     }
 }

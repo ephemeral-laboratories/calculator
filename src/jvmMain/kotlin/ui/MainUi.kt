@@ -258,7 +258,7 @@ fun MainContent(
                             // Newlines added here purely for people who copy the text
                             val input = item.input.prettyPrint(appState.valueFormat)
                             Text(text = "$input =\n", maxLines = 1)
-                            val output = item.output.prettyPrint(appState.valueFormat)
+                            val output = appState.valueFormat.format(item.output)
                             Text(text = "$output\n", maxLines = 1, style = valueTextStyle)
                         }
                     }

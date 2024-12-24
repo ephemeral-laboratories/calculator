@@ -2,8 +2,9 @@ package garden.ephemeral.calculator.nodes.operators
 
 import garden.ephemeral.calculator.nodes.BaseBranchNode
 import garden.ephemeral.calculator.nodes.Node
-import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.operators.InfixOperator
 import garden.ephemeral.calculator.text.ValueFormat
+import garden.ephemeral.calculator.values.Value
 
 class InfixOperatorNode(
     private val operator: InfixOperator,
@@ -22,7 +23,7 @@ class InfixOperatorNode(
     }
 
     override fun evaluate(): Value {
-        return Value(operator.apply(first.evaluate().value, second.evaluate().value))
+        return operator.apply(first.evaluate(), second.evaluate())
     }
 
     override fun isCloseTo(other: Node, delta: Double): Boolean {

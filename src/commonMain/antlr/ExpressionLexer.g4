@@ -50,6 +50,7 @@ CLOSE_PAREN: ')';
 IMAG_UNIT: 'i';
 TAU: 'τ' | 't' 'a' 'u';
 PI: 'π' | 'p' 'i';
+PHI: 'φ' | 'p' 'h' 'i';
 E: 'e';
 COMMA: ',';
 DEGREE_SIGN: '°';

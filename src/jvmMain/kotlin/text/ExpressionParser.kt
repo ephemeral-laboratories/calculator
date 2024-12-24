@@ -2,23 +2,24 @@ package garden.ephemeral.calculator.text
 
 import garden.ephemeral.calculator.complex.Complex
 import garden.ephemeral.calculator.creals.Real
+import garden.ephemeral.calculator.functions.Function1
+import garden.ephemeral.calculator.functions.Function2
 import garden.ephemeral.calculator.grammar.ExpressionLexer
 import garden.ephemeral.calculator.grammar.ExpressionParser
 import garden.ephemeral.calculator.nodes.Node
 import garden.ephemeral.calculator.nodes.Parentheses
-import garden.ephemeral.calculator.nodes.functions.Function1
 import garden.ephemeral.calculator.nodes.functions.Function1Node
-import garden.ephemeral.calculator.nodes.functions.Function2
 import garden.ephemeral.calculator.nodes.functions.Function2Node
-import garden.ephemeral.calculator.nodes.operators.InfixOperator
 import garden.ephemeral.calculator.nodes.operators.InfixOperatorNode
-import garden.ephemeral.calculator.nodes.operators.PostfixOperator
 import garden.ephemeral.calculator.nodes.operators.PostfixOperatorNode
-import garden.ephemeral.calculator.nodes.operators.PrefixOperator
 import garden.ephemeral.calculator.nodes.operators.PrefixOperatorNode
-import garden.ephemeral.calculator.nodes.values.Constant
 import garden.ephemeral.calculator.nodes.values.ConstantNode
-import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.nodes.values.ValueNode
+import garden.ephemeral.calculator.operators.InfixOperator
+import garden.ephemeral.calculator.operators.PostfixOperator
+import garden.ephemeral.calculator.operators.PrefixOperator
+import garden.ephemeral.calculator.values.Constant
+import garden.ephemeral.calculator.values.Value
 import org.antlr.v4.kotlinruntime.BailErrorStrategy
 import org.antlr.v4.kotlinruntime.BaseErrorListener
 import org.antlr.v4.kotlinruntime.CharStreams
@@ -117,8 +118,8 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
             is ExpressionParser.UnaryMinusExpressionContext -> {
                 // Simplify things like -2 to a single value
                 val childNode = transform(tree.unaryMinusChildExpression())
-                if (childNode is Value) {
-                    Value(PrefixOperator.UNARY_MINUS.apply(childNode.value))
+                if (childNode is ValueNode) {
+                    ValueNode(PrefixOperator.UNARY_MINUS.apply(childNode.value))
                 } else {
                     PrefixOperatorNode(PrefixOperator.UNARY_MINUS, childNode)
                 }
@@ -147,7 +148,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
 
             is ExpressionParser.RealNumberContext -> {
                 val real = parseReal(tree.magnitude!!)
-                Value(real)
+                ValueNode(Value.OfReal(real))
             }
 
             is ExpressionParser.ComplexNumberContext -> {
@@ -163,7 +164,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                     // so we want 1 for the imaginary part, not 0.
                     Real.ONE
                 }
-                Value(Complex(real, imag))
+                ValueNode(Value.OfComplex(Complex(real, imag)))
             }
 
             is ExpressionParser.ConstantContext ->
@@ -173,6 +174,8 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
                     ConstantNode(Constant.PI)
                 } else if (tree.E() != null) {
                     ConstantNode(Constant.E)
+                } else if (tree.PHI() != null) {
+                    ConstantNode(Constant.PHI)
                 } else {
                     throw UnsupportedOperationException("Unknown tree node: $tree")
                 }
@@ -201,7 +204,7 @@ class ExpressionParser(private val realFormat: PositionalFormat) {
 
     private fun parseReal(token: Token): Real {
         try {
-            return realFormat.parse(token.text ?: "") as Real
+            return realFormat.parse(token.text ?: "")
         } catch (e: ParseException) {
             // Rethrowing with the right index for the full input string
             throw ParseException(

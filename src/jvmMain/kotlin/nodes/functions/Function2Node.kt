@@ -1,8 +1,9 @@
 package garden.ephemeral.calculator.nodes.functions
 
+import garden.ephemeral.calculator.functions.Function2
 import garden.ephemeral.calculator.nodes.BaseBranchNode
 import garden.ephemeral.calculator.nodes.Node
-import garden.ephemeral.calculator.nodes.values.Value
+import garden.ephemeral.calculator.values.Value
 import garden.ephemeral.calculator.text.ValueFormat
 
 class Function2Node(val function: Function2, val arg1: Node, val arg2: Node) : BaseBranchNode() {
@@ -14,7 +15,7 @@ class Function2Node(val function: Function2, val arg1: Node, val arg2: Node) : B
     }
 
     override fun evaluate(): Value {
-        return Value(function(arg1.evaluate().value, arg2.evaluate().value))
+        return function(arg1.evaluate(), arg2.evaluate())
     }
 
     override fun isCloseTo(other: Node, delta: Double): Boolean {

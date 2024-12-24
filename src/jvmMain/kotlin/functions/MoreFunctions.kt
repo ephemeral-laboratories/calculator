@@ -1,4 +1,4 @@
-package garden.ephemeral.calculator.nodes.functions
+package garden.ephemeral.calculator.functions
 
 import garden.ephemeral.calculator.complex.Complex
 import garden.ephemeral.calculator.complex.acos
@@ -28,6 +28,7 @@ import garden.ephemeral.calculator.creals.sinh
 import garden.ephemeral.calculator.creals.sqrt
 import garden.ephemeral.calculator.creals.tan
 import garden.ephemeral.calculator.creals.tanh
+import garden.ephemeral.calculator.values.Value
 
 internal fun sec(x: Real) = Real.ONE / cos(x)
 internal fun sec(z: Complex) = Complex.ONE / cos(z)
@@ -55,12 +56,12 @@ internal fun acsch(z: Complex) = asinh(Complex.ONE / z)
 internal fun acoth(x: Real) = atanh(Real.ONE / x)
 internal fun acoth(z: Complex) = atanh(Complex.ONE / z)
 
-internal fun maybeComplexSqrt(x: Real): Any {
+internal fun maybeComplexSqrt(x: Real): Value {
     // FIXME: Strictly speaking, we should be delaying this decision depending on the requested precision.
     //        But select() only works for reals, and we don't have "constructive complex" values.
     return if (x.signum(-20) < 0) {
-        Complex(Real.ZERO, sqrt(abs(x)))
+        Value.OfComplex(Complex(Real.ZERO, sqrt(abs(x))))
     } else {
-        sqrt(x)
+        Value.OfReal(sqrt(x))
     }
 }

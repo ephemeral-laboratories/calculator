@@ -8,7 +8,7 @@ import garden.ephemeral.calculator.creals.impl.MultiplyReal
 import garden.ephemeral.calculator.creals.impl.NegationReal
 import garden.ephemeral.calculator.creals.impl.ReciprocalReal
 import garden.ephemeral.calculator.creals.impl.ShiftedReal
-import garden.ephemeral.calculator.creals.util.StringFloatRep
+import garden.ephemeral.calculator.creals.util.ScientificNotation
 import garden.ephemeral.calculator.creals.util.scale
 import java.math.BigInteger
 import kotlin.math.abs
@@ -353,7 +353,7 @@ abstract class Real : Number() {
      * @param msdPrecision Number of digits of precision (in the specified radix)
      *        used to distinguish number from zero.
      */
-    fun toStringFloatRep(pointsOfPrecision: Int, radix: Int, msdPrecision: Int): StringFloatRep {
+    fun toStringFloatRep(pointsOfPrecision: Int, radix: Int, msdPrecision: Int): ScientificNotation {
         if (pointsOfPrecision <= 0) throw ArithmeticException()
         val log2Radix = ln(radix.toDouble()) / LN2_DOUBLE
         val bigRadix = radix.toBigInteger()
@@ -362,7 +362,7 @@ abstract class Real : Number() {
         val msdPrecisionBits = longMSDPrecisionBits.toInt()
         checkPrecision(msdPrecisionBits)
         val msd = iterMSD(msdPrecisionBits - 2)
-        if (msd == Int.MIN_VALUE) return StringFloatRep(0, listOf(0), radix, 0)
+        if (msd == Int.MIN_VALUE) return ScientificNotation(0, listOf(0), radix, 0)
         var exponent = ceil(msd.toDouble() / log2Radix).toInt()
         // Guess for the exponent.  Try to get it usually right.
         val scaleExponent = exponent - pointsOfPrecision
@@ -389,7 +389,7 @@ abstract class Real : Number() {
             exponent += (scaledMantissa.size - pointsOfPrecision)
             scaledMantissa = scaledMantissa.subList(0, pointsOfPrecision)
         }
-        return StringFloatRep(sign, scaledMantissa, radix, exponent)
+        return ScientificNotation(sign, scaledMantissa, radix, exponent)
     }
 
     private fun intToDigits(value: BigInteger, radix: Int): List<Int> = buildList {
