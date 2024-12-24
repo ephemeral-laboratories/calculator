@@ -1,9 +1,7 @@
 package garden.ephemeral.calculator.ui.errors
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.window.DialogWindow
@@ -14,7 +12,6 @@ import garden.ephemeral.calculator.calculator.generated.resources.Res
 import garden.ephemeral.calculator.calculator.generated.resources.error_dialog_title
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Dialog
-import java.awt.Point
 import java.awt.Window
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
@@ -25,44 +22,45 @@ import javax.swing.KeyStroke
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BetterErrorHandling(content: @Composable () -> Unit) {
-    val settings = ErrorDialogSettings(
-        title = stringResource(Res.string.error_dialog_title),
-        colorScheme = MaterialTheme.colorScheme,
-        shapes = MaterialTheme.shapes,
-        typography = MaterialTheme.typography,
-    )
-    val state = remember { ErrorDialogState(settings) }
+    val state = rememberErrorDialogState()
 
     CompositionLocalProvider(LocalWindowExceptionHandlerFactory provides CustomWindowExceptionHandlerFactory(state)) {
         content()
     }
 
+    // Error dialog itself is outside the CompositionLocalProvider override above,
+    // because we don't want an error in our own dialog to overwrite the real one.
+    ErrorDialogWindow(state)
+}
+
+@Composable
+private fun ErrorDialogWindow(state: ErrorDialogState) {
     val errorInfo = state.errorInfo
     if (errorInfo != null) {
+        val dialogTitle = stringResource(Res.string.error_dialog_title)
+
+        // Avoid using the window if it is not displayable, e.g. when an error occurs initialising it.
+        // If you use it in that state, you just get another error.
+        val owningWindow = errorInfo.window.takeIf { it.isDisplayable }
+
         DialogWindow(
             create = {
                 ComposeDialog(
-                    owner = errorInfo.window,
+                    owner = owningWindow,
                     modalityType = Dialog.ModalityType.DOCUMENT_MODAL,
                 ).also { dialog ->
-                    dialog.title = state.settings.title
+                    dialog.title = dialogTitle
                     bindCloseAction(dialog)
                 }
             },
             update = { dialog ->
                 dialog.pack()
                 dialog.isResizable = false
-                setDialogLocationRelativeTo(dialog, errorInfo.window)
+                dialog.setLocationRelativeTo(owningWindow)
             },
             dispose = ComposeDialog::dispose,
         ) {
-            MaterialTheme(
-                colorScheme = state.settings.colorScheme,
-                shapes = state.settings.shapes,
-                typography = state.settings.typography,
-            ) {
-                BetterErrorPane(throwable = errorInfo.throwable, onDismissClicked = state::dismissError)
-            }
+            BetterErrorPane(throwable = errorInfo.throwable, onDismissClicked = state::dismissError)
         }
     }
 }
@@ -70,37 +68,23 @@ fun BetterErrorHandling(content: @Composable () -> Unit) {
 @OptIn(ExperimentalComposeUiApi::class)
 private class CustomWindowExceptionHandlerFactory(private val state: ErrorDialogState) :
     WindowExceptionHandlerFactory {
-    override fun exceptionHandler(window: Window): WindowExceptionHandler {
-        return CustomWindowExceptionHandler(window, state)
-    }
-}
 
-@OptIn(ExperimentalComposeUiApi::class)
-private class CustomWindowExceptionHandler(private val window: Window, private val state: ErrorDialogState) :
-    WindowExceptionHandler {
-    override fun onException(throwable: Throwable) {
+    override fun exceptionHandler(window: Window) = WindowExceptionHandler { throwable ->
         state.showError(throwable = throwable, window = window)
     }
 }
 
+private const val CLOSE_ACTION_KEY = "close"
+
 private fun bindCloseAction(dialog: JDialog) {
     // Wiring up ESC to work correctly since apparently that's not default behaviour. >:-/
-    dialog.rootPane.inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "close")
+    dialog.rootPane.inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CLOSE_ACTION_KEY)
     dialog.rootPane.actionMap.put(
-        "close",
-        object : AbstractAction("close") {
+        CLOSE_ACTION_KEY,
+        object : AbstractAction(CLOSE_ACTION_KEY) {
             override fun actionPerformed(e: ActionEvent?) {
                 dialog.dispose()
             }
         },
-    )
-}
-
-private fun setDialogLocationRelativeTo(dialog: JDialog, parent: Window) {
-    // `dialog.setLocationRelativeTo` doesn't work, seemingly because the parent we pass in is a `Window`?
-    // Their definition of "is showing" might always return false for windows, even if the window is showing.
-    dialog.location = Point(
-        /* x = */ parent.x + (parent.width - dialog.width) / 2,
-        /* y = */ parent.y + (parent.height - dialog.height) / 2,
     )
 }

@@ -1,11 +1,13 @@
 package garden.ephemeral.calculator.ui.errors
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import java.awt.Window
 
-internal class ErrorDialogState(val settings: ErrorDialogSettings) {
+internal class ErrorDialogState {
     data class ErrorInfo(
         val throwable: Throwable,
         val window: Window,
@@ -21,3 +23,6 @@ internal class ErrorDialogState(val settings: ErrorDialogSettings) {
         errorInfo = null
     }
 }
+
+@Composable
+internal fun rememberErrorDialogState() = remember { ErrorDialogState() }
