@@ -2,7 +2,7 @@ package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 /**
  * Representation of:
@@ -18,7 +18,7 @@ internal class SelectReal(private val selector: Real, private val whenNegative: 
         if (selectorSign > 0) return whenPositive.getApproximation(precision)
         val whenNegativeApproximation = whenNegative.getApproximation(precision - 1)
         val whenPositiveApproximation = whenPositive.getApproximation(precision - 1)
-        val diff = (whenNegativeApproximation - whenPositiveApproximation).abs()
+        val diff = (whenNegativeApproximation - whenPositiveApproximation).absoluteValue
         if (diff <= BIG1) {
             // close enough; use either
             return whenNegativeApproximation.scale(-1)

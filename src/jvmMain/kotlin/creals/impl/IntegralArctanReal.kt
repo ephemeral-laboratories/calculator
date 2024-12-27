@@ -1,7 +1,7 @@
 package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 /**
  * The constructive real atan(1/n), where n is a small integer > base.
@@ -21,22 +21,22 @@ internal class IntegralArctanReal(private val op: Int) : SlowReal() {
         // Series truncation error < 1/4 ulp.
         // Final rounding error is <= 1/2 ulp.
         // Thus, final error is < 1 ulp.
-        val scaled1 = BIG1.shiftLeft(-calcPrecision)
-        val bigOp = op.toBigInteger()
-        val bigOpSquared = (op * op).toBigInteger()
+        val scaled1 = BIG1.shl(-calcPrecision)
+        val bigOp = BigInteger.of(op)
+        val bigOpSquared = BigInteger.of(op * op)
         val opInverse = scaled1 / bigOp
         var currentPower = opInverse
         var currentTerm = opInverse
         var currentSum = opInverse
         var currentSign = 1
         var n = 1
-        val maxTruncError = BIG1.shiftLeft(precision - 2 - calcPrecision)
-        while (currentTerm.abs() >= maxTruncError) {
+        val maxTruncError = BIG1.shl(precision - 2 - calcPrecision)
+        while (currentTerm.absoluteValue >= maxTruncError) {
             checkForAbort()
             n += 2
             currentPower /= bigOpSquared
             currentSign = -currentSign
-            currentTerm = currentPower / (currentSign * n).toBigInteger()
+            currentTerm = currentPower / (currentSign * n)
             currentSum += currentTerm
         }
         return currentSum.scale(calcPrecision - precision)

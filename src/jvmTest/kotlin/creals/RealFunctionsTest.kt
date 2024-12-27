@@ -4,6 +4,7 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
+import org.gciatto.kt.math.BigInteger
 import kotlin.math.exp
 
 class RealFunctionsTest : FreeSpec({
@@ -125,8 +126,8 @@ class RealFunctionsTest : FreeSpec({
     }
 
     "tan for huge atan" {
-        val million = 1000_000.toBigInteger()
-        val thousand = 1000.toBigInteger()
+        val million = BigInteger.of(1000_000)
+        val thousand = BigInteger.of(1000)
         val huge = Real.valueOf(million * million * thousand)
         tan(atan(huge)) shouldBeCloseTo "1000000000000000.00000000000000000000"
     }

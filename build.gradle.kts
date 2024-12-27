@@ -49,6 +49,7 @@ kotlin {
             }
             dependencies {
                 implementation(compose.components.resources)
+                implementation(libs.kt.math)
                 implementation(libs.sentry)
             }
         }

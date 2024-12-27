@@ -2,7 +2,7 @@ package garden.ephemeral.calculator.creals.impl
 
 import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 /**
  * Representation of the cosine of a constructive real.
@@ -25,17 +25,17 @@ internal class PrescaledCosineReal(private val op: Real) : SlowReal() {
         // Series truncation error < 1/16 ulp.
         // Final rounding error is <= 1/2 ulp.
         // Thus final error is < 1 ulp.
-        val maxTruncError = BIG1.shiftLeft(precision - 4 - calcPrecision)
+        val maxTruncError = BIG1.shl(precision - 4 - calcPrecision)
         var n = 0
-        var currentTerm = BIG1.shiftLeft(-calcPrecision)
+        var currentTerm = BIG1.shl(-calcPrecision)
         var currentSum = currentTerm
-        while (currentTerm.abs() >= maxTruncError) {
+        while (currentTerm.absoluteValue >= maxTruncError) {
             checkForAbort()
             n += 2
             // current_term = - current_term * op * op / n * (n - 1)
             currentTerm = (currentTerm * opApproximation).scale(opPrecision)
             currentTerm = (currentTerm * opApproximation).scale(opPrecision)
-            val divisor = (-n).toBigInteger() * (n - 1).toBigInteger()
+            val divisor = BigInteger.of(-n) * (n - 1)
             currentTerm /= divisor
             currentSum += currentTerm
         }

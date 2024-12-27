@@ -1,7 +1,7 @@
 package garden.ephemeral.calculator.creals
 
 import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import org.gciatto.kt.math.BigInteger
 
 private class InverseIncreasingReal(
     private val func: (Real) -> Real,
@@ -99,8 +99,8 @@ private class InverseIncreasingReal(
                 println("Setting interval based on prev. appr")
                 println("prev. prec = $roughPrecision appr = $roughApproximation")
             }
-            h = (roughApproximation + BIG1).shiftLeft(roughPrecision - workingArgPrecision)
-            l = (roughApproximation - BIG1).shiftLeft(roughPrecision - workingArgPrecision)
+            h = (roughApproximation + BIG1).shl(roughPrecision - workingArgPrecision)
+            l = (roughApproximation - BIG1).shl(roughPrecision - workingArgPrecision)
             if (h > highApproximation) {
                 h = highApproximation
                 fH = fHigh.getApproximation(workingEvalPrecision)
@@ -134,22 +134,22 @@ private class InverseIncreasingReal(
                 // Answer is less than 1/2 ulp away from h.
                 return h.scale(-extraArgPrecision)
             }
-            val fDifference = fH.subtract(fL)
+            val fDifference = fH - fL
             // Narrow the interval by dividing at a cleverly
             // chosen point (guess) in the middle.
             run {
                 var guess: BigInteger
-                if (smallSteps >= 2 || fDifference.signum() == 0) {
+                if (smallSteps >= 2 || fDifference.signum == 0) {
                     // Do a binary search step to guarantee linear
                     // convergence.
-                    guess = (l + h).shiftRight(1)
+                    guess = (l + h).shr(1)
                 } else {
                     // interpolate.
                     // f_difference is nonzero here.
                     val argDifference = argApproximation - fL
                     val t = argDifference * difference
                     var adj = t / fDifference
-                    if (adj < difference.shiftRight(2)) {
+                    if (adj < difference.shr(2)) {
                         // Very close to left side of interval;
                         // move closer to center.
                         // If one of the endpoints is very close to
@@ -157,13 +157,13 @@ private class InverseIncreasingReal(
                         // But it greatly increases the probability
                         // that the answer will be in the smaller
                         // subinterval.
-                        adj = adj.shiftLeft(1)
-                    } else if (adj > (difference * BIG3).shiftRight(2)) {
-                        adj = difference - (difference - adj).shiftLeft(1)
+                        adj = adj.shl(1)
+                    } else if (adj > (difference * BIG3).shr(2)) {
+                        adj = difference - (difference - adj).shl(1)
                     }
-                    if (adj.signum() <= 0) adj = BIG2
+                    if (adj.signum <= 0) adj = BIG2
                     if (adj >= difference) adj = difference - BIG2
-                    guess = (if (adj.signum() <= 0) l + BIG2 else l + adj)
+                    guess = (if (adj.signum <= 0) l + BIG2 else l + adj)
                 }
                 var outcome: Int
                 var tweak = BIG2
@@ -209,14 +209,14 @@ private class InverseIncreasingReal(
                         if (trace) println("tweaking guess")
                         val newGuess = guess + tweak
                         guess = if (newGuess >= h) {
-                            guess.subtract(tweak)
+                            guess - tweak
                         } else {
                             newGuess
                         }
                         // If we keep hitting the right answer, it's
                         // important to alternate which side we move it
                         // to, so that the interval shrinks rapidly.
-                        tweak = tweak.negate()
+                        tweak = -tweak
                     }
                     adjustPrecision = !adjustPrecision
                 }
@@ -229,8 +229,8 @@ private class InverseIncreasingReal(
                     fL = fGuess
                     atLeft = false
                 }
-                val newDifference = h.subtract(l)
-                if (newDifference >= difference.shiftRight(1)) {
+                val newDifference = h - l
+                if (newDifference >= difference.shr(1)) {
                     ++smallSteps
                 } else {
                     smallSteps = 0

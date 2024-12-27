@@ -56,7 +56,7 @@ fun sgn(x: Real): Real = SignumReal(x)
 fun exp(x: Real): Real {
     val lowPrecision = -10
     val roughApproximation = x.getApproximation(lowPrecision)
-    if (roughApproximation.signum() < 0) return exp(-x).reciprocal()
+    if (roughApproximation.signum < 0) return exp(-x).reciprocal()
     if (roughApproximation > Real.BIG2) {
         val squareRoot = exp(x.shiftRight(1))
         return squareRoot * squareRoot
@@ -82,7 +82,7 @@ fun ln(x: Real): Real {
             val quarter = ln(sqrt(sqrt(x)))
             return quarter.shiftLeft(2)
         } else {
-            val extraBits = roughApprox.bitLength() - 3
+            val extraBits = roughApprox.bitLength - 3
             val scaledResult = ln(x.shiftRight(extraBits))
             return scaledResult + Real.valueOf(extraBits) * Real.LN2
         }
@@ -116,12 +116,12 @@ fun sin(x: Real) = cos(Real.HALF_PI - x)
  */
 fun cos(x: Real): Real {
     val roughApproximation = x.getApproximation(-1)
-    val absoluteRoughApproximation = roughApproximation.abs()
+    val absoluteRoughApproximation = roughApproximation.absoluteValue
     if (absoluteRoughApproximation >= Real.BIG6) {
         // Subtract multiples of PI
         val multiplier = roughApproximation / Real.BIG6
         val adjustment = Real.PI * Real.Companion.valueOf(multiplier)
-        return if (multiplier.and(Real.BIG1).signum() != 0) {
+        return if (multiplier.and(Real.BIG1).signum != 0) {
             -cos(x - adjustment)
         } else {
             cos(x - adjustment)

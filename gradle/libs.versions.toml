@@ -11,10 +11,12 @@ icu4j = "75.1"
 buildkonfig = "0.15.2"
 sentry = "7.19.0"
 sentry-gradle = "4.14.1"
+kt-math = "0.10.0"
 
 [libraries]
 antlr-kotlin-runtime = {module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin"}
 icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
+kt-math = {module = "io.github.gciatto:kt-math", version.ref = "kt-math"}
 sentry = {module = "io.sentry:sentry", version.ref = "sentry"}
 kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
 kotest-assertions-core = {module = "io.kotest:kotest-assertions-core", version.ref = "kotest"}
