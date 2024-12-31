@@ -35,17 +35,6 @@ import org.jetbrains.compose.resources.stringResource
 import javax.swing.UIManager
 
 @Composable
-@Preview
-internal fun BetterErrorPanePreview() {
-    AppTheme(ThemeOption.DARK) {
-        BetterErrorPane(
-            throwable = RuntimeException("Synthetic exception for preview!"),
-            onDismissClicked = {},
-        )
-    }
-}
-
-@Composable
 internal fun BetterErrorPane(throwable: Throwable, onDismissClicked: () -> Unit) {
     Surface(
         modifier = Modifier
@@ -94,4 +83,15 @@ private fun SwingErrorIcon() {
         contentDescription = stringResource(Res.string.error_dialog_icon),
         tint = Color.Unspecified,
     )
+}
+
+@Composable
+@Preview
+internal fun BetterErrorPanePreview() {
+    AppTheme(ThemeOption.DARK) {
+        BetterErrorPane(
+            throwable = RuntimeException("Synthetic exception for preview!"),
+            onDismissClicked = {},
+        )
+    }
 }

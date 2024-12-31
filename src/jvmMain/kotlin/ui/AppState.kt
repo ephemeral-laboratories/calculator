@@ -14,15 +14,16 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
-import com.russhwolf.settings.ObservableSettings
+import com.russhwolf.settings.Settings
 import garden.ephemeral.calculator.text.ExpressionParser
 import garden.ephemeral.calculator.text.ParseException
 import garden.ephemeral.calculator.text.ValueFormat
+import garden.ephemeral.calculator.util.mutableBooleanState
 import garden.ephemeral.calculator.util.mutableEnumState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class AppState internal constructor(settings: ObservableSettings) {
+class AppState internal constructor(settings: Settings) {
     val outputState = LazyListState()
     var inputText by mutableStateOf(TextFieldValue(""))
     var isInputError by mutableStateOf(false)
@@ -35,6 +36,7 @@ class AppState internal constructor(settings: ObservableSettings) {
     var dozenalRadixSeparatorOption by settings.mutableEnumState(
         "dozenalRadixSeparatorOption", RadixSeparatorOption.defaultFor(NumberFormatOption.DOZENAL)
     )
+    var enableCrashReporting by settings.mutableBooleanState("enableCrashReporting", false)
 
     val history: MutableList<HistoryEntry> = mutableStateListOf()
 
@@ -101,4 +103,4 @@ class AppState internal constructor(settings: ObservableSettings) {
 }
 
 @Composable
-fun rememberAppState(settings: ObservableSettings) = remember { AppState(settings) }
+fun rememberAppState(settings: Settings) = remember { AppState(settings) }

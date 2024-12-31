@@ -2,10 +2,12 @@ package garden.ephemeral.calculator.ui
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import com.russhwolf.settings.MapSettings
@@ -26,6 +28,17 @@ class MainUiTest {
             appState = rememberAppState(settings = MapSettings())
             MainUi(appState = appState)
         }
+    }
+
+    @Test
+    fun `settings are not open by default`() {
+        compose.onNodeWithTag("Settings").assertIsNotDisplayed()
+    }
+
+    @Test
+    fun `opening settings`() {
+        compose.onNodeWithTag("SettingsButton").performClick()
+        compose.onNodeWithTag("Settings").assertIsDisplayed()
     }
 
     @Test

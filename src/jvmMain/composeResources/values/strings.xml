@@ -3,6 +3,7 @@
     <string name="input_error">Input error</string>
     <string name="undefined">undefined</string>
     <string name="settings">Settings</string>
+    <string name="privacy_tip">Privacy Tip</string>
 
     <string name="theme">Theme</string>
     <string name="theme_system_default">System default</string>
@@ -17,6 +18,14 @@
     <string name="radix_separator_period">Period (.)</string>
     <string name="radix_separator_comma">Comma (,)</string>
     <string name="radix_separator_semicolon">Semicolon (;)</string>
+
+    <string name="enable_crash_reporting">Enable crash reporting</string>
+    <string-array name="enable_crash_reporting_privacy">
+        <item>We send:</item>
+        <item>• The stack trace of the error</item>
+        <item>• Which version you are running</item>
+        <item>• Which platform you are running on</item>
+    </string-array>
 
     <string name="error_dialog_title">Error</string>
     <string name="error_dialog_content_action">An error occurred executing an action:</string>

@@ -1,6 +1,6 @@
 package garden.ephemeral.calculator
 
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.russhwolf.settings.PreferencesSettings
@@ -11,26 +11,41 @@ import garden.ephemeral.calculator.ui.errors.BetterErrorHandling
 import garden.ephemeral.calculator.ui.rememberAppState
 import garden.ephemeral.calculator.ui.theme.AppTheme
 import io.sentry.Sentry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import java.util.prefs.Preferences
+import kotlin.time.measureTime
 
 private val preferencesNode = Preferences.userRoot().node("garden/ephemeral/calculator")
 
 // `singleWindowApplication` doesn't work if I want an icon:
 // https://github.com/JetBrains/compose-jb/issues/2369
 fun main() = application {
-    // Sentry initialisation should occur at most once, but we also want to complete
-    // its initialisation before anything else happens.
-    remember {
-        Sentry.init { options ->
-            options.dsn = BuildKonfig.SentryDSN
-            options.release = BuildKonfig.Version
-            // TODO: To decide - decrease this value for production builds, but to what?
-            options.tracesSampleRate = 1.0
+    val appState = rememberAppState(settings = PreferencesSettings(preferencesNode))
+
+    // Sentry initialisation is unfortunately very slow at times, and we don't want it blocking
+    // UI if the user decides to click the checkbox fast.
+    LaunchedEffect(appState.enableCrashReporting) {
+        launch(Dispatchers.IO) {
+            val sentryInitTime = measureTime {
+                Sentry.init { options ->
+                    options.isEnabled = appState.enableCrashReporting
+
+                    options.dsn = BuildKonfig.SentryDSN
+                    options.release = BuildKonfig.ApplicationName + '@' + BuildKonfig.Version
+                    // Add later once we build more than one variety. I think it's freeform text?
+                    // options.dist = "x86"
+
+                    options.setLogger(Logger.asSentryLogger())
+                }
+            }
+            Logger.info {
+                val enabledOrDisabled = if (appState.enableCrashReporting) "enabled" else "disabled"
+                "Time to (re)initialise Sentry with crash reporting $enabledOrDisabled: $sentryInitTime"
+            }
         }
     }
-
-    val appState = rememberAppState(settings = PreferencesSettings(preferencesNode))
 
     AppTheme(appState.themeOption) {
         BetterErrorHandling {
