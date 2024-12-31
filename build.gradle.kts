@@ -49,8 +49,14 @@ kotlin {
             }
             dependencies {
                 implementation(compose.components.resources)
+                implementation(libs.multiplatform.settings)
                 implementation(libs.sentry)
             }
+        }
+        commonTest.dependencies {
+            implementation(libs.kotest.assertions.core)
+            implementation(libs.kotest.framework.datatest)
+            implementation(libs.multiplatform.settings.test)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -62,8 +68,6 @@ kotlin {
         jvmTest.dependencies {
             implementation(compose.desktop.uiTestJUnit4)
             implementation(libs.kotest.runner.junit5)
-            implementation(libs.kotest.assertions.core)
-            implementation(libs.kotest.framework.datatest)
             runtimeOnly(libs.junit.platform.launcher)
             runtimeOnly(libs.junit.vintage.engine)
         }

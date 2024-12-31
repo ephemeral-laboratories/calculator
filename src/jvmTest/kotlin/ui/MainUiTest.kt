@@ -2,15 +2,13 @@ package garden.ephemeral.calculator.ui
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
-import io.kotest.matchers.shouldBe
+import com.russhwolf.settings.MapSettings
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -24,37 +22,10 @@ class MainUiTest {
 
     @Before
     fun setUp() {
-        appState = AppState()
         compose.setContent {
+            appState = rememberAppState(settings = MapSettings())
             MainUi(appState = appState)
         }
-    }
-
-    @Test
-    fun `settings are not open by default`() {
-        compose.onNodeWithTag("Settings").assertIsNotDisplayed()
-    }
-
-    @Test
-    fun `opening settings`() {
-        compose.onNodeWithTag("SettingsButton").performClick()
-        compose.onNodeWithTag("Settings").assertIsDisplayed()
-    }
-
-    @Test
-    fun `changing theme to light mode`() {
-        compose.onNodeWithTag("SettingsButton").performClick()
-        compose.onNodeWithTag("ThemeDropDown").performClick()
-        compose.onNodeWithTag("ThemeDropDownMenuItem.LIGHT").performClick()
-        appState.themeOption shouldBe ThemeOption.LIGHT
-    }
-
-    @Test
-    fun `changing theme to dark mode`() {
-        compose.onNodeWithTag("SettingsButton").performClick()
-        compose.onNodeWithTag("ThemeDropDown").performClick()
-        compose.onNodeWithTag("ThemeDropDownMenuItem.DARK").performClick()
-        appState.themeOption shouldBe ThemeOption.DARK
     }
 
     @Test

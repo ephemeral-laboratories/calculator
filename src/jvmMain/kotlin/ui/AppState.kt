@@ -2,30 +2,40 @@ package garden.ephemeral.calculator.ui
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ColorScheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
+import com.russhwolf.settings.ObservableSettings
 import garden.ephemeral.calculator.text.ExpressionParser
 import garden.ephemeral.calculator.text.ParseException
 import garden.ephemeral.calculator.text.ValueFormat
+import garden.ephemeral.calculator.util.mutableEnumState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class AppState {
+class AppState internal constructor(settings: ObservableSettings) {
     val outputState = LazyListState()
     var inputText by mutableStateOf(TextFieldValue(""))
     var isInputError by mutableStateOf(false)
-    var themeOption by mutableStateOf(ThemeOption.SYSTEM_DEFAULT)
-    var numberFormatOption by mutableStateOf(NumberFormatOption.DECIMAL)
-    var decimalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.defaultFor(NumberFormatOption.DECIMAL))
-    var dozenalRadixSeparatorOption by mutableStateOf(RadixSeparatorOption.defaultFor(NumberFormatOption.DOZENAL))
+
+    var themeOption by settings.mutableEnumState("themeOption", ThemeOption.SYSTEM_DEFAULT)
+    var numberFormatOption by settings.mutableEnumState("numberFormatOption", NumberFormatOption.DECIMAL)
+    var decimalRadixSeparatorOption by settings.mutableEnumState(
+        "decimalRadixSeparatorOption", RadixSeparatorOption.defaultFor(NumberFormatOption.DECIMAL)
+    )
+    var dozenalRadixSeparatorOption by settings.mutableEnumState(
+        "dozenalRadixSeparatorOption", RadixSeparatorOption.defaultFor(NumberFormatOption.DOZENAL)
+    )
+
     val history: MutableList<HistoryEntry> = mutableStateListOf()
 
     val valueFormat by derivedStateOf {
@@ -89,3 +99,6 @@ class AppState {
         history.clear()
     }
 }
+
+@Composable
+fun rememberAppState(settings: ObservableSettings) = remember { AppState(settings) }

@@ -11,11 +11,14 @@ icu4j = "75.1"
 buildkonfig = "0.15.2"
 sentry = "7.19.0"
 sentry-gradle = "4.14.1"
+multiplatform-settings = "1.2.0"
 
 [libraries]
 antlr-kotlin-runtime = {module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin"}
 icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
 sentry = {module = "io.sentry:sentry", version.ref = "sentry"}
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatform-settings" }
+multiplatform-settings-test = { module = "com.russhwolf:multiplatform-settings-test", version.ref = "multiplatform-settings" }
 kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
 kotest-assertions-core = {module = "io.kotest:kotest-assertions-core", version.ref = "kotest"}
 kotest-framework-datatest = {module = "io.kotest:kotest-framework-datatest", version.ref = "kotest"}
