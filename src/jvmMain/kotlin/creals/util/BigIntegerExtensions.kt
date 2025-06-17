@@ -8,9 +8,9 @@ import java.math.BigInteger
  */
 fun BigInteger.scale(n: Int): BigInteger {
     if (n >= 0) {
-        return shiftLeft(n)
+        return this shl n
     } else {
-        val adjK = shiftLeft(n + 1) + Real.BIG1
-        return adjK.shiftRight(1)
+        val adjK = (this shl (n + 1)) + Real.BIG1
+        return adjK shr 1
     }
 }

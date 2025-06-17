@@ -28,10 +28,10 @@ internal class ReciprocalReal(private val op: Real) : Real() {
         val precNeeded = msd - digitsNeeded
         val logScaleFactor = -precision - precNeeded
         if (logScaleFactor < 0) return BIG0
-        val dividend = BIG1.shiftLeft(logScaleFactor)
+        val dividend = BIG1 shl logScaleFactor
         val scaledDivisor = op.getApproximation(precNeeded)
         val absScaledDivisor = scaledDivisor.abs()
-        val adjDividend = dividend + absScaledDivisor.shiftRight(1)
+        val adjDividend = dividend + (absScaledDivisor shr 1)
         // Adjustment so that final result is rounded.
         val result = adjDividend / absScaledDivisor
         return if (scaledDivisor.signum() < 0) {

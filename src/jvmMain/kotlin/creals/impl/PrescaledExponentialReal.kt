@@ -28,12 +28,11 @@ internal class PrescaledExponentialReal(private val op: Real) : Real() {
         // Series truncation error < 1/16 ulp.
         // Final rounding error is <= 1/2 ulp.
         // Thus final error is < 1 ulp.
-        val scaled1 = BIG1.shiftLeft(-calcPrecision)
+        val scaled1 = BIG1 shl (-calcPrecision)
         var currentTerm = scaled1
         var currentSum = scaled1
         var n = 0
-        val maxTruncError =
-            BIG1.shiftLeft(precision - 4 - calcPrecision)
+        val maxTruncError = BIG1.shl (precision - 4 - calcPrecision)
         while (currentTerm.abs() >= maxTruncError) {
             checkForAbort()
             n += 1

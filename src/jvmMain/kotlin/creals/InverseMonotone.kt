@@ -99,14 +99,14 @@ private class InverseIncreasingReal(
                 println("Setting interval based on prev. appr")
                 println("prev. prec = $roughPrecision appr = $roughApproximation")
             }
-            h = (roughApproximation + BIG1).shiftLeft(roughPrecision - workingArgPrecision)
-            l = (roughApproximation - BIG1).shiftLeft(roughPrecision - workingArgPrecision)
+            h = (roughApproximation + BIG1) shl (roughPrecision - workingArgPrecision)
+            l = (roughApproximation - BIG1) shl (roughPrecision - workingArgPrecision)
             if (h > highApproximation) {
                 h = highApproximation
                 fH = fHigh.getApproximation(workingEvalPrecision)
                 atRight = true
             } else {
-                val hCR = valueOf(h).shiftLeft(workingArgPrecision)
+                val hCR = valueOf(h) shl workingArgPrecision
                 fH = fn(hCR).getApproximation(workingEvalPrecision)
                 atRight = false
             }
@@ -115,7 +115,7 @@ private class InverseIncreasingReal(
                 fL = fLow.getApproximation(workingEvalPrecision)
                 atLeft = true
             } else {
-                val lCR = valueOf(l).shiftLeft(workingArgPrecision)
+                val lCR = valueOf(l) shl workingArgPrecision
                 fL = fn(lCR).getApproximation(workingEvalPrecision)
                 atLeft = false
             }
@@ -142,14 +142,14 @@ private class InverseIncreasingReal(
                 if (smallSteps >= 2 || fDifference.signum() == 0) {
                     // Do a binary search step to guarantee linear
                     // convergence.
-                    guess = (l + h).shiftRight(1)
+                    guess = (l + h) shr 1
                 } else {
                     // interpolate.
                     // f_difference is nonzero here.
                     val argDifference = argApproximation - fL
                     val t = argDifference * difference
                     var adj = t / fDifference
-                    if (adj < difference.shiftRight(2)) {
+                    if (adj < (difference shr 2)) {
                         // Very close to left side of interval;
                         // move closer to center.
                         // If one of the endpoints is very close to
@@ -157,9 +157,9 @@ private class InverseIncreasingReal(
                         // But it greatly increases the probability
                         // that the answer will be in the smaller
                         // subinterval.
-                        adj = adj.shiftLeft(1)
-                    } else if (adj > (difference * BIG3).shiftRight(2)) {
-                        adj = difference - (difference - adj).shiftLeft(1)
+                        adj = adj shl 1
+                    } else if (adj > ((difference * BIG3) shr 2)) {
+                        adj = difference - ((difference - adj) shl 1)
                     }
                     if (adj.signum() <= 0) adj = BIG2
                     if (adj >= difference) adj = difference - BIG2
@@ -170,7 +170,7 @@ private class InverseIncreasingReal(
                 var fGuess: BigInteger
                 var adjustPrecision = false
                 while (true) {
-                    val guessCr = valueOf(guess).shiftLeft(workingArgPrecision)
+                    val guessCr = valueOf(guess) shl workingArgPrecision
                     if (trace) {
                         println("Evaluating at $guessCr with precision $workingEvalPrecision")
                     }
@@ -187,8 +187,8 @@ private class InverseIncreasingReal(
                     if (adjustPrecision) {
                         // adjust working_eval_prec to get enough resolution.
                         val adjustment = if (derivMSD > 0) -20 else derivMSD - 20
-                        val lCr = valueOf(l).shiftLeft(workingArgPrecision)
-                        val hCr = valueOf(h).shiftLeft(workingArgPrecision)
+                        val lCr = valueOf(l) shl workingArgPrecision
+                        val hCr = valueOf(h) shl workingArgPrecision
                         workingEvalPrecision += adjustment
                         if (trace) {
                             println("New eval prec = $workingEvalPrecision${if (atLeft) "(at left)" else ""}${if (atRight) "(at right)" else ""}")
@@ -230,7 +230,7 @@ private class InverseIncreasingReal(
                     atLeft = false
                 }
                 val newDifference = h.subtract(l)
-                if (newDifference >= difference.shiftRight(1)) {
+                if (newDifference >= (difference shr 1)) {
                     ++smallSteps
                 } else {
                     smallSteps = 0

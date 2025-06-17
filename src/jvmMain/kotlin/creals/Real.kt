@@ -304,7 +304,7 @@ abstract class Real : Number() {
      */
     fun toString(pointsOfPrecision: Int, radix: Int = 10): String {
         val scaledCR = if (16 == radix) {
-            shiftLeft(4 * pointsOfPrecision)
+            this shl 4 * pointsOfPrecision
         } else {
             val scaleFactor = radix.toBigInteger().pow(pointsOfPrecision)
             this * IntegerConstantReal(scaleFactor)
@@ -476,9 +476,10 @@ abstract class Real : Number() {
 
     /**
      * Multiply a constructive real by 2**n.
-     * @param n    shift count, may be negative
+     *
+     * @param n shift count, may be negative
      */
-    fun shiftLeft(n: Int): Real {
+    infix fun shl(n: Int): Real {
         checkPrecision(n)
         return ShiftedReal(this, n)
     }
@@ -487,7 +488,7 @@ abstract class Real : Number() {
      * Multiply a constructive real by 2**(-n).
      * @param n    shift count, may be negative
      */
-    fun shiftRight(n: Int): Real {
+    infix fun shr(n: Int): Real {
         checkPrecision(n)
         return ShiftedReal(this, -n)
     }
@@ -578,10 +579,10 @@ abstract class Real : Number() {
         /**
          * The ratio of a circle's circumference to its radius.
          */
-        val TAU = PI.shiftLeft(1)
+        val TAU = PI shl 1
 
         // pi/4 = 4*atan(1/5) - atan(1/239)
-        val HALF_PI: Real = PI.shiftRight(1)
+        val HALF_PI: Real = PI.shr(1)
 
         private val LN2_DOUBLE: Double = ln(2.0)
 
@@ -670,7 +671,7 @@ abstract class Real : Number() {
             } else {
                 mantissa = mantissa shl 1
             }
-            var result = valueOf(mantissa).shiftLeft(exponent)
+            var result = valueOf(mantissa) shl exponent
             if (negative) result = -result
             return result
         }

@@ -29,14 +29,14 @@ private class MonotoneDerivativeReal(
         val extraPrecision = 4
         // Ensure that we stay within the interval.
         val logDelta = (precision - derivative2MSD).coerceAtMost(maxDeltaMSD) - extraPrecision
-        val delta = ONE.shiftLeft(logDelta)
+        val delta = ONE shl logDelta
 
         val left = arg - delta
         val right = arg + delta
         val fLeft = func(left)
         val fRight = func(right)
-        val leftDerivative = (fArg - fLeft).shiftRight(logDelta)
-        val rightDerivative = (fRight - fArg).shiftRight(logDelta)
+        val leftDerivative = (fArg - fLeft) shr logDelta
+        val rightDerivative = (fRight - fArg) shr logDelta
         val evalPrecision = precision - extraPrecision
         val approximateLeftDerivative = leftDerivative.getApproximation(evalPrecision)
         val approximateRightDerivative = rightDerivative.getApproximation(evalPrecision)
@@ -60,7 +60,7 @@ private class MonotoneDerivativeReal(
  * The result is defined only in the open interval.
  */
 fun monotoneDerivative(func: (Real) -> Real, low: Real, high: Real): (Real) -> Real {
-    val midHolder = (low + high).shiftRight(1)
+    val midHolder = (low + high).shr(1)
     val fLow = func(low)
     val fMid = func(midHolder)
     val fHigh = func(high)
@@ -79,7 +79,7 @@ fun monotoneDerivative(func: (Real) -> Real, low: Real, high: Real): (Real) -> R
     // This should be a very rough appr to the second derivative.
     // We add a little slop to err on the high side, since
     // a low estimate will cause extra iterations.
-    val approximateDifference2 = fHigh - fMid.shiftLeft(1) + fLow
+    val approximateDifference2 = fHigh - (fMid shl 1) + fLow
     val differenceMSD: Int = difference.msd()
     val derivative2MSD: Int = approximateDifference2.msd() - differenceMSD + 4
 

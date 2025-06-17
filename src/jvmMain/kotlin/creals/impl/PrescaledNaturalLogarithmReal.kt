@@ -33,7 +33,7 @@ internal class PrescaledNaturalLogarithmReal(private val op: Real) : SlowReal() 
         var n = 1
         // (-1)^(n-1)
         var currentSign = 1
-        val maxTruncError = BIG1.shiftLeft(precision - 4 - calcPrecision)
+        val maxTruncError = BIG1 shl (precision - 4 - calcPrecision)
         while (currentTerm.abs() >= maxTruncError) {
             checkForAbort()
             n += 1

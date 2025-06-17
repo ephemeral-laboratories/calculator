@@ -58,7 +58,7 @@ fun exp(x: Real): Real {
     val roughApproximation = x.getApproximation(lowPrecision)
     if (roughApproximation.signum() < 0) return exp(-x).reciprocal()
     if (roughApproximation > Real.BIG2) {
-        val squareRoot = exp(x.shiftRight(1))
+        val squareRoot = exp(x.shr(1))
         return squareRoot * squareRoot
     } else {
         return PrescaledExponentialReal(x)
@@ -80,10 +80,10 @@ fun ln(x: Real): Real {
     if (roughApprox >= Real.highLnLimit) {
         if (roughApprox <= Real.scaled4) {
             val quarter = ln(sqrt(sqrt(x)))
-            return quarter.shiftLeft(2)
+            return quarter shl 2
         } else {
             val extraBits = roughApprox.bitLength() - 3
-            val scaledResult = ln(x.shiftRight(extraBits))
+            val scaledResult = ln(x.shr(extraBits))
             return scaledResult + Real.valueOf(extraBits) * Real.LN2
         }
     }
@@ -128,8 +128,8 @@ fun cos(x: Real): Real {
         }
     } else if (absoluteRoughApproximation >= Real.BIG2) {
         // Scale further with double angle formula
-        val cosHalf = cos(x.shiftRight(1))
-        return (cosHalf * cosHalf).shiftLeft(1) - Real.ONE
+        val cosHalf = cos(x.shr(1))
+        return ((cosHalf * cosHalf) shl 1) - Real.ONE
     } else {
         return PrescaledCosineReal(x)
     }

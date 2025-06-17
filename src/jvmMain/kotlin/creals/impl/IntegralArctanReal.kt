@@ -21,7 +21,7 @@ internal class IntegralArctanReal(private val op: Int) : SlowReal() {
         // Series truncation error < 1/4 ulp.
         // Final rounding error is <= 1/2 ulp.
         // Thus, final error is < 1 ulp.
-        val scaled1 = BIG1.shiftLeft(-calcPrecision)
+        val scaled1 = BIG1 shl (-calcPrecision)
         val bigOp = op.toBigInteger()
         val bigOpSquared = (op * op).toBigInteger()
         val opInverse = scaled1 / bigOp
@@ -30,7 +30,7 @@ internal class IntegralArctanReal(private val op: Int) : SlowReal() {
         var currentSum = opInverse
         var currentSign = 1
         var n = 1
-        val maxTruncError = BIG1.shiftLeft(precision - 2 - calcPrecision)
+        val maxTruncError = BIG1 shl (precision - 2 - calcPrecision)
         while (currentTerm.abs() >= maxTruncError) {
             checkForAbort()
             n += 2

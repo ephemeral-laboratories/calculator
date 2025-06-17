@@ -34,19 +34,19 @@ internal class SquareRootReal(private val op: Real) : Real() {
             val producedPrecisionScaledNumerator = (lastApproximation * lastApproximation) + opApproximation
             val scaledNumerator = producedPrecisionScaledNumerator.scale(approximationPrecision - precision)
             val shiftedResult = scaledNumerator / lastApproximation
-            return (shiftedResult + BIG1).shiftRight(1)
+            return (shiftedResult + BIG1) shr 1
         } else {
             // Use a double precision floating point approximation.
             // Make sure all precisions are even
             val opPrecision = (msd - fpOpPrecision) and 1.inv()
             val workingPrecision = opPrecision - fpOpPrecision
-            val scaledBiApproximation = op.getApproximation(opPrecision).shiftLeft(fpOpPrecision)
+            val scaledBiApproximation = op.getApproximation(opPrecision) shl fpOpPrecision
             val scaledApproximation = scaledBiApproximation.toDouble()
             if (scaledApproximation < 0.0) throw ArithmeticException()
             val scaledFpSqrt = kotlin.math.sqrt(scaledApproximation)
             val scaledSqrt = (scaledFpSqrt.toLong()).toBigInteger()
             val shiftCount = workingPrecision / 2 - precision
-            return scaledSqrt.shiftLeft(shiftCount)
+            return scaledSqrt shl shiftCount
         }
     }
 }

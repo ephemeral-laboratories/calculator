@@ -123,23 +123,23 @@ class RealTest : FreeSpec({
         }
     }
 
-    "shiftLeft" - {
+    "shl" - {
         withData(
             row(zero, "0.00000000000000000000"),
             row(oneHalf, "1.00000000000000000000"),
             row(one, "2.00000000000000000000"),
         ) { (value, expected) ->
-            value.shiftLeft(1) shouldBeCloseTo expected
+            (value shl 1) shouldBeCloseTo expected
         }
     }
 
-    "shiftRight" - {
+    "shr" - {
         withData(
             row(zero, "0.00000000000000000000"),
             row(one, "0.50000000000000000000"),
             row(two, "1.00000000000000000000"),
         ) { (value, expected) ->
-            value.shiftRight(1) shouldBeCloseTo expected
+            (value shr 1) shouldBeCloseTo expected
         }
     }
 
