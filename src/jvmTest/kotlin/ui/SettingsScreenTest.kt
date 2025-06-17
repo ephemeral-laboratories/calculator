@@ -76,14 +76,14 @@ class SettingsScreenTest {
 
     @Test
     fun `changing crash reporting to enabled by clicking the checkbox label`() {
-        compose.onNodeWithTag("EnableCrashReportingCheckboxLabel").performClick()
+        compose.onNodeWithTag("EnableCrashReportingCheckboxLabel", useUnmergedTree = true).performClick()
         appState.enableCrashReporting shouldBe true
     }
 
     @Test
     fun `changing crash reporting back to disabled by clicking the checkbox label again`() {
-        compose.onNodeWithTag("EnableCrashReportingCheckboxLabel").performClick()
-        compose.onNodeWithTag("EnableCrashReportingCheckboxLabel").performClick()
+        compose.onNodeWithTag("EnableCrashReportingCheckboxLabel", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("EnableCrashReportingCheckboxLabel", useUnmergedTree = true).performClick()
         appState.enableCrashReporting shouldBe false
     }
 }
