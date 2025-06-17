@@ -6,6 +6,7 @@ import androidx.compose.ui.window.application
 import com.russhwolf.settings.PreferencesSettings
 import garden.ephemeral.calculator.calculator.generated.resources.AppIcon
 import garden.ephemeral.calculator.calculator.generated.resources.Res
+import garden.ephemeral.calculator.logging.asSentryLogger
 import garden.ephemeral.calculator.ui.MainUi
 import garden.ephemeral.calculator.ui.errors.BetterErrorHandling
 import garden.ephemeral.calculator.ui.rememberAppState

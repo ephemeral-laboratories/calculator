@@ -28,7 +28,6 @@ private class InverseIncreasingReal(
     }
 
     override fun approximate(precision: Int): BigInteger {
-        val trace = false // Change to generate trace
         val extraArgPrecision = 4
         val fn = func
         var smallSteps = 0 // Number of preceding ineffective
@@ -73,9 +72,7 @@ private class InverseIncreasingReal(
         var argApproximation = arg.getApproximation(workingEvalPrecision)
         val haveGoodApproximation = (isMaxApproximationValid && minPrecision < maxMSD)
         if (digitsNeeded < 30 && !haveGoodApproximation) {
-            if (trace) {
-                println("Setting interval to entire domain")
-            }
+            Logger.debug { "Setting interval to entire domain" }
             h = highApproximation
             fH = fHigh.getApproximation(workingEvalPrecision)
             l = lowApproximation
@@ -95,9 +92,9 @@ private class InverseIncreasingReal(
                 roughPrecision = minPrecision
             }
             val roughApproximation = getApproximation(roughPrecision)
-            if (trace) {
-                println("Setting interval based on prev. appr")
-                println("prev. prec = $roughPrecision appr = $roughApproximation")
+            Logger.debug {
+                "Setting interval based on prev. appr\n" +
+                        "prev. prec = $roughPrecision appr = $roughApproximation"
             }
             h = (roughApproximation + BIG1) shl (roughPrecision - workingArgPrecision)
             l = (roughApproximation - BIG1) shl (roughPrecision - workingArgPrecision)
@@ -124,11 +121,11 @@ private class InverseIncreasingReal(
         var i = 0
         while (true) {
             checkForAbort()
-            if (trace) {
-                println("***Iteration: $i")
-                println("Arg prec = $workingArgPrecision eval prec = $workingEvalPrecision arg appr. = $argApproximation")
-                println("l = $l; h = $h")
-                println("f(l) = $fL; f(h) = $fH")
+            Logger.debug {
+                "***Iteration: $i" +
+                        "Arg prec = $workingArgPrecision eval prec = $workingEvalPrecision arg appr. = $argApproximation" +
+                        "l = $l; h = $h" +
+                        "f(l) = $fL; f(h) = $fH"
             }
             if (difference < BIG6) {
                 // Answer is less than 1/2 ulp away from h.
@@ -171,13 +168,9 @@ private class InverseIncreasingReal(
                 var adjustPrecision = false
                 while (true) {
                     val guessCr = valueOf(guess) shl workingArgPrecision
-                    if (trace) {
-                        println("Evaluating at $guessCr with precision $workingEvalPrecision")
-                    }
+                    Logger.debug { "Evaluating at $guessCr with precision $workingEvalPrecision" }
                     val fGuessCr = fn(guessCr)
-                    if (trace) {
-                        println("fn value = $fGuessCr")
-                    }
+                    Logger.debug { "fn value = $fGuessCr" }
                     fGuess = fGuessCr.getApproximation(workingEvalPrecision)
                     outcome = sloppyCompare(fGuess, argApproximation)
                     if (outcome != 0) break
@@ -190,9 +183,7 @@ private class InverseIncreasingReal(
                         val lCr = valueOf(l) shl workingArgPrecision
                         val hCr = valueOf(h) shl workingArgPrecision
                         workingEvalPrecision += adjustment
-                        if (trace) {
-                            println("New eval prec = $workingEvalPrecision${if (atLeft) "(at left)" else ""}${if (atRight) "(at right)" else ""}")
-                        }
+                        Logger.debug { "New eval prec = $workingEvalPrecision${if (atLeft) "(at left)" else ""}${if (atRight) "(at right)" else ""}" }
                         fL = if (atLeft) {
                             fLow.getApproximation(workingEvalPrecision)
                         } else {
@@ -206,7 +197,7 @@ private class InverseIncreasingReal(
                         argApproximation = arg.getApproximation(workingEvalPrecision)
                     } else {
                         // guess might be exactly right; tweak it slightly.
-                        if (trace) println("tweaking guess")
+                        Logger.debug { "tweaking guess" }
                         val newGuess = guess + tweak
                         guess = if (newGuess >= h) {
                             guess.subtract(tweak)

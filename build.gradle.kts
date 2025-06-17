@@ -51,6 +51,7 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation(libs.multiplatform.settings)
                 implementation(libs.sentry)
+                implementation(libs.kermit)
             }
         }
         commonTest.dependencies {

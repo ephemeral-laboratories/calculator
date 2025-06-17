@@ -120,7 +120,7 @@ fun cos(x: Real): Real {
     if (absoluteRoughApproximation >= Real.BIG6) {
         // Subtract multiples of PI
         val multiplier = roughApproximation / Real.BIG6
-        val adjustment = Real.PI * Real.Companion.valueOf(multiplier)
+        val adjustment = Real.PI * Real.valueOf(multiplier)
         return if (multiplier.and(Real.BIG1).signum() != 0) {
             -cos(x - adjustment)
         } else {
