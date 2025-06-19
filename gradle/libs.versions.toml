@@ -22,9 +22,10 @@ kermit = {module = "co.touchlab:kermit", version.ref = "kermit"}
 sentry = {module = "io.sentry:sentry", version.ref = "sentry"}
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatform-settings" }
 multiplatform-settings-test = { module = "com.russhwolf:multiplatform-settings-test", version.ref = "multiplatform-settings" }
-kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
 kotest-assertions-core = {module = "io.kotest:kotest-assertions-core", version.ref = "kotest"}
 kotest-framework-datatest = {module = "io.kotest:kotest-framework-datatest", version.ref = "kotest"}
+kotest-framework-engine = {module = "io.kotest:kotest-framework-engine", version.ref = "kotest"}
+kotest-runner-junit5 = {module = "io.kotest:kotest-runner-junit5", version.ref = "kotest"}
 kotest-property = {module = "io.kotest:kotest-property", version.ref = "kotest"}
 junit-vintage-engine = {module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit"}
 junit-platform-launcher = {module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform-launcher"}

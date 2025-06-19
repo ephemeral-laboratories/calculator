@@ -57,6 +57,8 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotest.assertions.core)
             implementation(libs.kotest.framework.datatest)
+            implementation(libs.kotest.framework.engine)
+            implementation(libs.kotest.property)
             implementation(libs.multiplatform.settings.test)
         }
         jvmMain.dependencies {
@@ -68,7 +70,7 @@ kotlin {
         }
         jvmTest.dependencies {
             implementation(compose.desktop.uiTestJUnit4)
-            implementation(libs.kotest.runner.junit5)
+            runtimeOnly(libs.kotest.runner.junit5)
             runtimeOnly(libs.junit.platform.launcher)
             runtimeOnly(libs.junit.vintage.engine)
         }
@@ -100,6 +102,9 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+    }
 }
 
 compose.desktop {

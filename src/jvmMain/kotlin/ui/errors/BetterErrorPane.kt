@@ -67,7 +67,7 @@ internal fun BetterErrorPane(throwable: Throwable, onDismissClicked: () -> Unit)
             }
 
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                Button(onClick = onDismissClicked) {
+                Button(modifier = Modifier.testTag("Dismiss"), onClick = onDismissClicked) {
                     Text(text = stringResource(Res.string.error_dialog_dismiss))
                 }
             }
