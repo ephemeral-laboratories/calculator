@@ -1,14 +1,13 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.bigint.BigInt
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
 
 /**
  * Representation of the product of 2 constructive reals.
  */
 internal class MultiplyReal(private var op1: Real, private var op2: Real) : Real() {
-    override fun approximate(precision: Int): BigInteger {
+    override fun approximate(precision: Int): BigInt {
         val halfPrecision = (precision shr 1) - 1
         var msdOp1 = op1.msd(halfPrecision)
         var msdOp2: Int
@@ -17,7 +16,7 @@ internal class MultiplyReal(private var op1: Real, private var op2: Real) : Real
             msdOp2 = op2.msd(halfPrecision)
             if (msdOp2 == Int.MIN_VALUE) {
                 // Product is small enough that zero will do as an approximation.
-                return BigInteger.ZERO
+                return BigInt.Zero
             } else {
                 // Swap them, so the larger operand (in absolute value) is first.
                 val tmp = op1
@@ -34,7 +33,7 @@ internal class MultiplyReal(private var op1: Real, private var op2: Real) : Real
         // to the rounding error, and the final rounding adds
         // another 1/2 ulp.
         val approx2 = op2.getApproximation(prec2)
-        if (approx2.signum() == 0) return BigInteger.ZERO
+        if (approx2.signum() == 0) return BigInt.Zero
         msdOp2 = op2.knownMSD()
         val prec1 = precision - msdOp2 - 3 // Precision needed for op1.
         val approx1 = op1.getApproximation(prec1)

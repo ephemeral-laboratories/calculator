@@ -1,8 +1,7 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.bigint.BigInt
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
 
 /**
  * A specialization of [Real] for cases in which [approximate] calls
@@ -18,7 +17,7 @@ import java.math.BigInteger
  */
 internal abstract class SlowReal : Real() {
     // Overridden to perform the change in calculated precision
-    override fun calcApproximation(precision: Int): BigInteger {
+    override fun calcApproximation(precision: Int): BigInt {
         val evalPrecision = if (precision >= MAX_PRECISION) {
             MAX_PRECISION
         } else {

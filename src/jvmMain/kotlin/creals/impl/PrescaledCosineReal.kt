@@ -1,16 +1,16 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.bigint.BigInt
+import garden.ephemeral.calculator.bigint.toBigInt
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
 
 /**
  * Representation of the cosine of a constructive real.
  * Uses a Taylor series expansion.  Assumes |x| < 1.
  */
 internal class PrescaledCosineReal(private val op: Real) : SlowReal() {
-    override fun approximate(precision: Int): BigInteger {
-        if (precision >= 1) return BIG0
+    override fun approximate(precision: Int): BigInt {
+        if (precision >= 1) return BigInt.Zero
         val iterationsNeeded = -precision / 2 + 4 // conservative estimate > 0.
         //  Claim: each intermediate term is accurate
         //  to 2*2^calc_precision.
@@ -25,9 +25,9 @@ internal class PrescaledCosineReal(private val op: Real) : SlowReal() {
         // Series truncation error < 1/16 ulp.
         // Final rounding error is <= 1/2 ulp.
         // Thus final error is < 1 ulp.
-        val maxTruncError = BIG1 shl (precision - 4 - calcPrecision)
+        val maxTruncError = BigInt.One shl (precision - 4 - calcPrecision)
         var n = 0
-        var currentTerm = BIG1 shl (-calcPrecision)
+        var currentTerm = BigInt.One shl (-calcPrecision)
         var currentSum = currentTerm
         while (currentTerm.abs() >= maxTruncError) {
             checkForAbort()
@@ -35,7 +35,7 @@ internal class PrescaledCosineReal(private val op: Real) : SlowReal() {
             // current_term = - current_term * op * op / n * (n - 1)
             currentTerm = (currentTerm * opApproximation).scale(opPrecision)
             currentTerm = (currentTerm * opApproximation).scale(opPrecision)
-            val divisor = (-n).toBigInteger() * (n - 1).toBigInteger()
+            val divisor = (-n).toBigInt() * (n - 1).toBigInt()
             currentTerm /= divisor
             currentSum += currentTerm
         }

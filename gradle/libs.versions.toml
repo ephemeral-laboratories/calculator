@@ -13,6 +13,7 @@ kermit = "2.0.6"
 sentry = "7.19.0"
 sentry-gradle = "4.14.1"
 multiplatform-settings = "1.2.0"
+k-big-numbers = "0.1.0"
 
 [libraries]
 antlr-kotlin-runtime = {module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin"}
@@ -27,6 +28,7 @@ kotest-framework-datatest = {module = "io.kotest:kotest-framework-datatest", ver
 kotest-property = {module = "io.kotest:kotest-property", version.ref = "kotest"}
 junit-vintage-engine = {module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit"}
 junit-platform-launcher = {module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform-launcher"}
+k-big-numbers = {module = "io.k-libs:big-numbers", version.ref = "k-big-numbers"}
 
 [plugins]
 kotlin-multiplatform = {id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin"}

@@ -1,5 +1,7 @@
 package garden.ephemeral.calculator.creals
 
+import garden.ephemeral.calculator.bigint.BigInt
+import garden.ephemeral.calculator.bigint.toBigInt
 import garden.ephemeral.calculator.creals.impl.AddReal
 import garden.ephemeral.calculator.creals.impl.AssumedIntReal
 import garden.ephemeral.calculator.creals.impl.IntegerConstantReal
@@ -9,8 +11,6 @@ import garden.ephemeral.calculator.creals.impl.NegationReal
 import garden.ephemeral.calculator.creals.impl.ReciprocalReal
 import garden.ephemeral.calculator.creals.impl.ShiftedReal
 import garden.ephemeral.calculator.creals.util.ScientificNotation
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.ln
@@ -82,7 +82,7 @@ abstract class Real : Number() {
      * The scaled approximation corresponding to [minPrecision].
      * Updated by [getApproximation] / [calcApproximation].
      */
-    protected var maxApproximation: BigInteger? = null
+    protected var maxApproximation: BigInt? = null
 
     /**
      * Tracks whether [maxApproximation] is valid. Original code used to store
@@ -104,7 +104,7 @@ abstract class Real : Number() {
      * @return `value / 2 ** precision` rounded to an integer.
      *         The error in the result is strictly `< 1`.
      */
-    protected abstract fun approximate(precision: Int): BigInteger
+    protected abstract fun approximate(precision: Int): BigInt
 
     /**
      * Returns `value / 2 ** prec` rounded to an integer.
@@ -116,7 +116,7 @@ abstract class Real : Number() {
      * Called only from `approximate` methods in subclasses.
      * Not needed if the provided operations on constructive reals suffice.
      */
-    fun getApproximation(precision: Int): BigInteger {
+    fun getApproximation(precision: Int): BigInt {
         checkPrecision(precision)
         return if (isMaxApproximationValid && precision >= minPrecision) {
             maxApproximation!!.scale(minPrecision - precision)
@@ -132,7 +132,7 @@ abstract class Real : Number() {
      * Function is open so that subclasses can choose to use a different
      * precision than requested, for performance reasons.
      */
-    protected open fun calcApproximation(precision: Int): BigInteger {
+    protected open fun calcApproximation(precision: Int): BigInt {
         val result = approximate(precision)
         minPrecision = precision
         maxApproximation = result
@@ -153,7 +153,7 @@ abstract class Real : Number() {
         val length = if (maxApproximation!!.signum() >= 0) {
             maxApproximation!!.bitLength()
         } else {
-            maxApproximation!!.negate().bitLength()
+            (-maxApproximation!!).bitLength()
         }
         firstDigit = minPrecision + length - 1
         return firstDigit
@@ -163,9 +163,9 @@ abstract class Real : Number() {
      * This version may return `Integer.MIN_VALUE` if the correct answer is `< n`.
      */
     fun msd(n: Int): Int {
-        if (!isMaxApproximationValid || maxApproximation!! in BIG_MINUS1..BIG1) {
+        if (!isMaxApproximationValid || maxApproximation!! in BigInt.MinusOne..BigInt.One) {
             getApproximation(n - 1)
-            if (maxApproximation!!.abs() <= BIG1) {
+            if (maxApproximation!!.abs() <= BigInt.One) {
                 // msd could still be arbitrarily far to the right.
                 return Int.MIN_VALUE
             }
@@ -238,9 +238,9 @@ abstract class Real : Number() {
         val neededPrecision = absoluteTolerance - 1
         val thisApproximation = getApproximation(neededPrecision)
         val xApproximation = other.getApproximation(neededPrecision)
-        val comp1 = thisApproximation.compareTo(xApproximation + BIG1)
+        val comp1 = thisApproximation.compareTo(xApproximation + BigInt.One)
         if (comp1 > 0) return 1
-        val comp2 = thisApproximation.compareTo(xApproximation - BIG1)
+        val comp2 = thisApproximation.compareTo(xApproximation - BigInt.One)
         if (comp2 < 0) return -1
         return 0
     }
@@ -306,7 +306,7 @@ abstract class Real : Number() {
         val scaledCR = if (16 == radix) {
             this shl 4 * pointsOfPrecision
         } else {
-            val scaleFactor = radix.toBigInteger().pow(pointsOfPrecision)
+            val scaleFactor = radix.toBigInt().pow(pointsOfPrecision)
             this * IntegerConstantReal(scaleFactor)
         }
         val scaledInt = scaledCR.getApproximation(0)
@@ -356,7 +356,7 @@ abstract class Real : Number() {
     fun toStringFloatRep(pointsOfPrecision: Int, radix: Int, msdPrecision: Int): ScientificNotation {
         if (pointsOfPrecision <= 0) throw ArithmeticException()
         val log2Radix = ln(radix.toDouble()) / LN2_DOUBLE
-        val bigRadix = radix.toBigInteger()
+        val bigRadix = radix.toBigInt()
         val longMSDPrecisionBits = (log2Radix * msdPrecision.toDouble()).toLong()
         if (longMSDPrecisionBits > Int.MAX_VALUE.toLong() || longMSDPrecisionBits < Int.MIN_VALUE.toLong()) throw PrecisionOverflowError()
         val msdPrecisionBits = longMSDPrecisionBits.toInt()
@@ -392,12 +392,12 @@ abstract class Real : Number() {
         return ScientificNotation(sign, scaledMantissa, radix, exponent)
     }
 
-    private fun intToDigits(value: BigInteger, radix: Int): List<Int> = buildList {
-        if (value == BigInteger.ZERO) return listOf(0)
+    private fun intToDigits(value: BigInt, radix: Int): List<Int> = buildList {
+        if (value == BigInt.Zero) return listOf(0)
         var remaining = value
-        val bigRadix = radix.toBigInteger()
-        while (remaining > BigInteger.ZERO) {
-            val (newRemaining, digit) = remaining.divideAndRemainder(bigRadix)
+        val bigRadix = radix.toBigInt()
+        while (remaining > BigInt.Zero) {
+            val (newRemaining, digit) = remaining.divAndRem(bigRadix)
             remaining = newRemaining
             add(digit.toInt())
         }
@@ -408,24 +408,24 @@ abstract class Real : Number() {
      * Return a BigInteger which differs by less than one from the
      * constructive real.
      */
-    fun toBigInteger(): BigInteger {
+    fun toBigInt(): BigInt {
         return getApproximation(0)
     }
 
     override fun toInt(): Int {
-        return toBigInteger().toInt()
+        return toBigInt().toInt()
     }
 
     override fun toShort(): Short {
-        return toBigInteger().toShort()
+        return toBigInt().toShort()
     }
 
     override fun toByte(): Byte {
-        return toBigInteger().toByte()
+        return toBigInt().toByte()
     }
 
     override fun toLong(): Long {
-        return toBigInteger().toLong()
+        return toBigInt().toLong()
     }
 
     /**
@@ -555,15 +555,6 @@ abstract class Real : Number() {
         // First some frequently used constants, so we don't have to
         // recompute these all over the place.
 
-        val BIG0: BigInteger = BigInteger.ZERO
-        val BIG1: BigInteger = BigInteger.ONE
-        val BIG_MINUS1 = (-1).toBigInteger()
-        val BIG2: BigInteger = BigInteger.TWO
-        val BIG3 = 3.toBigInteger()
-        val BIG6 = 6.toBigInteger()
-        val BIG8 = 8.toBigInteger()
-        val BIG10: BigInteger = BigInteger.TEN
-
         val ZERO = valueOf(0)
         val ONE = valueOf(1)
         val MINUS_ONE = valueOf(-1)
@@ -641,17 +632,17 @@ abstract class Real : Number() {
         /**
          * The constructive real number corresponding to a `BigInteger`.
          */
-        fun valueOf(n: BigInteger): Real = IntegerConstantReal(n)
+        fun valueOf(n: BigInt): Real = IntegerConstantReal(n)
 
         /**
          * The constructive real number corresponding to an `Int`.
          */
-        fun valueOf(n: Int) = valueOf(n.toBigInteger())
+        fun valueOf(n: Int) = valueOf(n.toBigInt())
 
         /**
          * The constructive real number corresponding to a `Long`.
          */
-        fun valueOf(n: Long) = valueOf(n.toBigInteger())
+        fun valueOf(n: Long) = valueOf(n.toBigInt())
 
         /**
          * The constructive real number corresponding to a
@@ -713,8 +704,12 @@ abstract class Real : Number() {
             var len = s.length
             var startPos = 0
             val fraction: String
-            while (s[startPos] == ' ') ++startPos
-            while (s[len - 1] == ' ') --len
+            while (s[startPos] == ' ') {
+                startPos++
+            }
+            while (s[len - 1] == ' ') {
+                len--
+            }
             var pointPos = s.indexOf('.', startPos)
             if (pointPos == -1) {
                 pointPos = len
@@ -723,17 +718,17 @@ abstract class Real : Number() {
                 fraction = s.substring(pointPos + 1, len)
             }
             val whole = s.substring(startPos, pointPos)
-            val scaledResult = (whole + fraction).toBigInteger(radix)
-            val divisor = radix.toBigInteger().pow(fraction.length)
+            val scaledResult = (whole + fraction).toBigInt(radix)
+            val divisor = radix.toBigInt().pow(fraction.length)
             return valueOf(scaledResult) / valueOf(divisor)
         }
 
         // sixteenths, i.e. 1/2
-        val lowLnLimit: BigInteger = BIG8
+        val lowLnLimit: BigInt = 8.toBigInt()
 
         // 1.5
-        val highLnLimit: BigInteger = (16 + 8).toBigInteger()
+        val highLnLimit: BigInt = (16 + 8).toBigInt()
 
-        val scaled4: BigInteger = (4 * 16).toBigInteger()
+        val scaled4: BigInt = (4 * 16).toBigInt()
     }
 }

@@ -1,5 +1,7 @@
 package garden.ephemeral.calculator.creals
 
+import garden.ephemeral.calculator.bigint.BigInt
+import garden.ephemeral.calculator.bigint.toBigInt
 import garden.ephemeral.calculator.creals.impl.Arctan2Real
 import garden.ephemeral.calculator.creals.impl.PrescaledCosineReal
 import garden.ephemeral.calculator.creals.impl.PrescaledExponentialReal
@@ -57,7 +59,7 @@ fun exp(x: Real): Real {
     val lowPrecision = -10
     val roughApproximation = x.getApproximation(lowPrecision)
     if (roughApproximation.signum() < 0) return exp(-x).reciprocal()
-    if (roughApproximation > Real.BIG2) {
+    if (roughApproximation > 2.toBigInt()) {
         val squareRoot = exp(x.shr(1))
         return squareRoot * squareRoot
     } else {
@@ -71,7 +73,7 @@ fun exp(x: Real): Real {
 fun ln(x: Real): Real {
     val lowPrec = -4
     val roughApprox = x.getApproximation(lowPrec) /* In sixteenths */
-    if (roughApprox < Real.BIG0) {
+    if (roughApprox < BigInt.Zero) {
         throw ArithmeticException()
     }
     if (roughApprox <= Real.lowLnLimit) {
@@ -117,16 +119,16 @@ fun sin(x: Real) = cos(Real.HALF_PI - x)
 fun cos(x: Real): Real {
     val roughApproximation = x.getApproximation(-1)
     val absoluteRoughApproximation = roughApproximation.abs()
-    if (absoluteRoughApproximation >= Real.BIG6) {
+    if (absoluteRoughApproximation >= 6.toBigInt()) {
         // Subtract multiples of PI
-        val multiplier = roughApproximation / Real.BIG6
+        val multiplier = roughApproximation / 6.toBigInt()
         val adjustment = Real.PI * Real.valueOf(multiplier)
-        return if (multiplier.and(Real.BIG1).signum() != 0) {
+        return if (multiplier.and(BigInt.One).signum() != 0) {
             -cos(x - adjustment)
         } else {
             cos(x - adjustment)
         }
-    } else if (absoluteRoughApproximation >= Real.BIG2) {
+    } else if (absoluteRoughApproximation >= 2.toBigInt()) {
         // Scale further with double angle formula
         val cosHalf = cos(x.shr(1))
         return ((cosHalf * cosHalf) shl 1) - Real.ONE

@@ -1,8 +1,8 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.bigint.BigInt
+import garden.ephemeral.calculator.bigint.toBigInt
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
 
 /**
  * Representation for ln(1 + op).
@@ -16,8 +16,8 @@ internal class PrescaledNaturalLogarithmReal(private val op: Real) : SlowReal() 
     // Note: this is known to be a bad algorithm for
     // floating point.  Unfortunately, other alternatives
     // appear to require precomputed tabular information.
-    override fun approximate(precision: Int): BigInteger {
-        if (precision >= 0) return BIG0
+    override fun approximate(precision: Int): BigInt {
+        if (precision >= 0) return BigInt.Zero
         // conservative estimate > 0
         val iterationsNeeded = -precision
         // Claim: each intermediate term is accurate to `2*2^calc_precision`.
@@ -33,13 +33,13 @@ internal class PrescaledNaturalLogarithmReal(private val op: Real) : SlowReal() 
         var n = 1
         // (-1)^(n-1)
         var currentSign = 1
-        val maxTruncError = BIG1 shl (precision - 4 - calcPrecision)
+        val maxTruncError = BigInt.One shl (precision - 4 - calcPrecision)
         while (currentTerm.abs() >= maxTruncError) {
             checkForAbort()
             n += 1
             currentSign = -currentSign
             xNth = (xNth * opApproximation).scale(opPrecision)
-            currentTerm = xNth / (n * currentSign).toBigInteger()
+            currentTerm = xNth / (n * currentSign).toBigInt()
             // x**n / (n * (-1)**(n-1))
             currentSum += currentTerm
         }

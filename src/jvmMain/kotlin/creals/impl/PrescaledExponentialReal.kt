@@ -1,8 +1,8 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.bigint.BigInt
+import garden.ephemeral.calculator.bigint.toBigInt
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
 
 /**
  * Representation of the exponential of a constructive real.
@@ -11,8 +11,8 @@ import java.math.BigInteger
  * Unfortunately, other alternatives appear to require precomputed information.
  */
 internal class PrescaledExponentialReal(private val op: Real) : Real() {
-    override fun approximate(precision: Int): BigInteger {
-        if (precision >= 1) return BIG0
+    override fun approximate(precision: Int): BigInt {
+        if (precision >= 1) return BigInt.Zero
         val iterationsNeeded = -precision / 2 + 2 // conservative estimate > 0.
         //  Claim: each intermediate term is accurate
         //  to 2*2^calc_precision.
@@ -28,17 +28,17 @@ internal class PrescaledExponentialReal(private val op: Real) : Real() {
         // Series truncation error < 1/16 ulp.
         // Final rounding error is <= 1/2 ulp.
         // Thus final error is < 1 ulp.
-        val scaled1 = BIG1 shl (-calcPrecision)
+        val scaled1 = BigInt.One shl (-calcPrecision)
         var currentTerm = scaled1
         var currentSum = scaled1
         var n = 0
-        val maxTruncError = BIG1.shl (precision - 4 - calcPrecision)
+        val maxTruncError = BigInt.One.shl(precision - 4 - calcPrecision)
         while (currentTerm.abs() >= maxTruncError) {
             checkForAbort()
             n += 1
             // current_term = current_term * op / n
             currentTerm = (currentTerm * opApproximation).scale(opPrecision)
-            currentTerm /= n.toBigInteger()
+            currentTerm /= n.toBigInt()
             currentSum += currentTerm
         }
         return currentSum.scale(calcPrecision - precision)

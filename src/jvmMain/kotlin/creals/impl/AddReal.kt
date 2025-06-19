@@ -1,14 +1,13 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.bigint.BigInt
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
 
 /**
  * Representation of the sum of 2 constructive reals.
  */
 internal class AddReal(private val op1: Real, private val op2: Real) : Real() {
-    override fun approximate(precision: Int): BigInteger {
+    override fun approximate(precision: Int): BigInt {
         // Args need to be evaluated so that each error is < 1/4 ulp.
         // Rounding error from the cale call is <= 1/2 ulp, so that
         // final error is < 1 ulp.

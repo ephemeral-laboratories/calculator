@@ -1,15 +1,15 @@
 package garden.ephemeral.calculator.creals.impl
 
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import garden.ephemeral.calculator.bigint.BigInt
+import garden.ephemeral.calculator.bigint.toBigInt
 
 /**
  * The constructive real atan(1/n), where n is a small integer > base.
  * This gives a simple and moderately fast way to compute PI.
  */
 internal class IntegralArctanReal(private val op: Int) : SlowReal() {
-    override fun approximate(precision: Int): BigInteger {
-        if (precision >= 1) return BIG0
+    override fun approximate(precision: Int): BigInt {
+        if (precision >= 1) return BigInt.Zero
         // conservative estimate > 0
         val iterationsNeeded = -precision / 2 + 2
         // Claim: each intermediate term is accurate to `2*base^calc_precision`.
@@ -21,22 +21,22 @@ internal class IntegralArctanReal(private val op: Int) : SlowReal() {
         // Series truncation error < 1/4 ulp.
         // Final rounding error is <= 1/2 ulp.
         // Thus, final error is < 1 ulp.
-        val scaled1 = BIG1 shl (-calcPrecision)
-        val bigOp = op.toBigInteger()
-        val bigOpSquared = (op * op).toBigInteger()
+        val scaled1 = BigInt.One shl (-calcPrecision)
+        val bigOp = op.toBigInt()
+        val bigOpSquared = (op * op).toBigInt()
         val opInverse = scaled1 / bigOp
         var currentPower = opInverse
         var currentTerm = opInverse
         var currentSum = opInverse
         var currentSign = 1
         var n = 1
-        val maxTruncError = BIG1 shl (precision - 2 - calcPrecision)
+        val maxTruncError = BigInt.One shl (precision - 2 - calcPrecision)
         while (currentTerm.abs() >= maxTruncError) {
             checkForAbort()
             n += 2
             currentPower /= bigOpSquared
             currentSign = -currentSign
-            currentTerm = currentPower / (currentSign * n).toBigInteger()
+            currentTerm = currentPower / (currentSign * n).toBigInt()
             currentSum += currentTerm
         }
         return currentSum.scale(calcPrecision - precision)

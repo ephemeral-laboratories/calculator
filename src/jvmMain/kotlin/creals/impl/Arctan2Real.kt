@@ -1,10 +1,10 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.bigint.BigInt
 import garden.ephemeral.calculator.creals.Real
 import garden.ephemeral.calculator.creals.abs
 import garden.ephemeral.calculator.creals.asin
 import garden.ephemeral.calculator.creals.sqrt
-import java.math.BigInteger
 
 /**
  * Real representation of `atan2(y, x)`.
@@ -16,7 +16,7 @@ import java.math.BigInteger
  * @param x the second parameter, corresponding to the X axis value.
  */
 internal class Arctan2Real(private val y: Real, private val x: Real) : Real() {
-    override fun approximate(precision: Int): BigInteger {
+    override fun approximate(precision: Int): BigInt {
         // Implemented by delegation. We deal with the special cases for 0s here as we know
         // the requested precision. Doing so at the [atan2] function itself was impossible,
         // as calling [signum] without precision causes overflows when the value is zero.

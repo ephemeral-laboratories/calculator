@@ -1,8 +1,7 @@
 package garden.ephemeral.calculator.creals.impl
 
+import garden.ephemeral.calculator.bigint.BigInt
 import garden.ephemeral.calculator.creals.Real
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
 
 /**
  * Representation of:
@@ -13,13 +12,13 @@ import java.math.BigInteger
 internal class SelectReal(private val selector: Real, private val whenNegative: Real, private val whenPositive: Real) : Real() {
     private var selectorSign: Int = selector.signum(-20)
 
-    override fun approximate(precision: Int): BigInteger {
+    override fun approximate(precision: Int): BigInt {
         if (selectorSign < 0) return whenNegative.getApproximation(precision)
         if (selectorSign > 0) return whenPositive.getApproximation(precision)
         val whenNegativeApproximation = whenNegative.getApproximation(precision - 1)
         val whenPositiveApproximation = whenPositive.getApproximation(precision - 1)
         val diff = (whenNegativeApproximation - whenPositiveApproximation).abs()
-        if (diff <= BIG1) {
+        if (diff <= BigInt.One) {
             // close enough; use either
             return whenNegativeApproximation.scale(-1)
         }

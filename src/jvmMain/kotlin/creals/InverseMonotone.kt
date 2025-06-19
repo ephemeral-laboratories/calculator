@@ -1,7 +1,7 @@
 package garden.ephemeral.calculator.creals
 
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import garden.ephemeral.calculator.bigint.BigInt
+import garden.ephemeral.calculator.bigint.toBigInt
 
 private class InverseIncreasingReal(
     private val func: (Real) -> Real,
@@ -16,18 +16,18 @@ private class InverseIncreasingReal(
 ) : Real() {
 
     // Comparison with a difference of one treated as equality.
-    private fun sloppyCompare(x: BigInteger, y: BigInteger): Int {
+    private fun sloppyCompare(x: BigInt, y: BigInt): Int {
         val difference = x - y
-        if (difference > BIG1) {
+        if (difference > BigInt.One) {
             return 1
         }
-        if (difference < BIG_MINUS1) {
+        if (difference < BigInt.MinusOne) {
             return -1
         }
         return 0
     }
 
-    override fun approximate(precision: Int): BigInteger {
+    override fun approximate(precision: Int): BigInt {
         val extraArgPrecision = 4
         val fn = func
         var smallSteps = 0 // Number of preceding ineffective
@@ -35,7 +35,7 @@ private class InverseIncreasingReal(
         // we perform a binary search step
         // to ensure forward progress.
         val digitsNeeded = maxMSD - precision
-        if (digitsNeeded < 0) return BIG0
+        if (digitsNeeded < 0) return BigInt.Zero
         var workingArgPrecision = precision - extraArgPrecision
         if (workingArgPrecision > maxArgPrecision) {
             workingArgPrecision = maxArgPrecision
@@ -63,12 +63,12 @@ private class InverseIncreasingReal(
         // on the derivative of f.
         var atLeft: Boolean
         var atRight: Boolean
-        var l: BigInteger
-        var fL: BigInteger
-        var h: BigInteger
-        var fH: BigInteger
-        val lowApproximation = low.getApproximation(workingArgPrecision) + BIG1
-        val highApproximation = high.getApproximation(workingArgPrecision) - BIG1
+        var l: BigInt
+        var fL: BigInt
+        var h: BigInt
+        var fH: BigInt
+        val lowApproximation = low.getApproximation(workingArgPrecision) + BigInt.One
+        val highApproximation = high.getApproximation(workingArgPrecision) - BigInt.One
         var argApproximation = arg.getApproximation(workingEvalPrecision)
         val haveGoodApproximation = (isMaxApproximationValid && minPrecision < maxMSD)
         if (digitsNeeded < 30 && !haveGoodApproximation) {
@@ -79,7 +79,7 @@ private class InverseIncreasingReal(
             fL = fLow.getApproximation(workingEvalPrecision)
             // Check for clear out-of-bounds case.
             // Close cases may fail in other ways.
-            if (fH < argApproximation - BIG1 || fL > argApproximation + BIG1) {
+            if (fH < argApproximation - BigInt.One || fL > argApproximation + BigInt.One) {
                 throw ArithmeticException()
             }
             atLeft = true
@@ -96,8 +96,8 @@ private class InverseIncreasingReal(
                 "Setting interval based on prev. appr\n" +
                         "prev. prec = $roughPrecision appr = $roughApproximation"
             }
-            h = (roughApproximation + BIG1) shl (roughPrecision - workingArgPrecision)
-            l = (roughApproximation - BIG1) shl (roughPrecision - workingArgPrecision)
+            h = (roughApproximation + BigInt.One) shl (roughPrecision - workingArgPrecision)
+            l = (roughApproximation - BigInt.One) shl (roughPrecision - workingArgPrecision)
             if (h > highApproximation) {
                 h = highApproximation
                 fH = fHigh.getApproximation(workingEvalPrecision)
@@ -127,15 +127,15 @@ private class InverseIncreasingReal(
                         "l = $l; h = $h" +
                         "f(l) = $fL; f(h) = $fH"
             }
-            if (difference < BIG6) {
+            if (difference < 6.toBigInt()) {
                 // Answer is less than 1/2 ulp away from h.
                 return h.scale(-extraArgPrecision)
             }
-            val fDifference = fH.subtract(fL)
+            val fDifference = fH - fL
             // Narrow the interval by dividing at a cleverly
             // chosen point (guess) in the middle.
             run {
-                var guess: BigInteger
+                var guess: BigInt
                 if (smallSteps >= 2 || fDifference.signum() == 0) {
                     // Do a binary search step to guarantee linear
                     // convergence.
@@ -155,16 +155,16 @@ private class InverseIncreasingReal(
                         // that the answer will be in the smaller
                         // subinterval.
                         adj = adj shl 1
-                    } else if (adj > ((difference * BIG3) shr 2)) {
+                    } else if (adj > ((difference * 3.toBigInt()) shr 2)) {
                         adj = difference - ((difference - adj) shl 1)
                     }
-                    if (adj.signum() <= 0) adj = BIG2
-                    if (adj >= difference) adj = difference - BIG2
-                    guess = (if (adj.signum() <= 0) l + BIG2 else l + adj)
+                    if (adj.signum() <= 0) adj = 2.toBigInt()
+                    if (adj >= difference) adj = difference - 2.toBigInt()
+                    guess = (if (adj.signum() <= 0) l + 2.toBigInt() else l + adj)
                 }
                 var outcome: Int
-                var tweak = BIG2
-                var fGuess: BigInteger
+                var tweak = 2.toBigInt()
+                var fGuess: BigInt
                 var adjustPrecision = false
                 while (true) {
                     val guessCr = valueOf(guess) shl workingArgPrecision
@@ -200,14 +200,14 @@ private class InverseIncreasingReal(
                         Logger.debug { "tweaking guess" }
                         val newGuess = guess + tweak
                         guess = if (newGuess >= h) {
-                            guess.subtract(tweak)
+                            guess - tweak
                         } else {
                             newGuess
                         }
                         // If we keep hitting the right answer, it's
                         // important to alternate which side we move it
                         // to, so that the interval shrinks rapidly.
-                        tweak = tweak.negate()
+                        tweak = -tweak
                     }
                     adjustPrecision = !adjustPrecision
                 }
@@ -220,15 +220,15 @@ private class InverseIncreasingReal(
                     fL = fGuess
                     atLeft = false
                 }
-                val newDifference = h.subtract(l)
+                val newDifference = h - l
                 if (newDifference >= (difference shr 1)) {
-                    ++smallSteps
+                    smallSteps++
                 } else {
                     smallSteps = 0
                 }
                 difference = newDifference
             }
-            ++i
+            i++
         }
     }
 }

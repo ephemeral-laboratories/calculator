@@ -1,7 +1,7 @@
 package garden.ephemeral.calculator.creals
 
-import garden.ephemeral.calculator.creals.util.scale
-import java.math.BigInteger
+import garden.ephemeral.calculator.bigint.BigInt
+import garden.ephemeral.calculator.bigint.toBigInt
 
 private class MonotoneDerivativeReal(
     private val func: (Real) -> Real,
@@ -25,7 +25,7 @@ private class MonotoneDerivativeReal(
         maxDeltaMSD = if (maxDeltaLeftMsd < maxDeltaRightMsd) maxDeltaLeftMsd else maxDeltaRightMsd
     }
 
-    override fun approximate(precision: Int): BigInteger {
+    override fun approximate(precision: Int): BigInt {
         val extraPrecision = 4
         // Ensure that we stay within the interval.
         val logDelta = (precision - derivative2MSD).coerceAtMost(maxDeltaMSD) - extraPrecision
@@ -40,8 +40,8 @@ private class MonotoneDerivativeReal(
         val evalPrecision = precision - extraPrecision
         val approximateLeftDerivative = leftDerivative.getApproximation(evalPrecision)
         val approximateRightDerivative = rightDerivative.getApproximation(evalPrecision)
-        val derivativeDifference = approximateRightDerivative.subtract(approximateLeftDerivative).abs()
-        if (derivativeDifference < BIG8) {
+        val derivativeDifference = (approximateRightDerivative - approximateLeftDerivative).abs()
+        if (derivativeDifference < 8.toBigInt()) {
             return approximateLeftDerivative.scale(-extraPrecision)
         } else {
             checkForAbort()

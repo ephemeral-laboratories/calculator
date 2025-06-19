@@ -1,5 +1,6 @@
 package garden.ephemeral.calculator.creals
 
+import garden.ephemeral.calculator.bigint.toBigInt
 import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.doubles.plusOrMinus
@@ -125,8 +126,8 @@ class RealFunctionsTest : FreeSpec({
     }
 
     "tan for huge atan" {
-        val million = 1000_000.toBigInteger()
-        val thousand = 1000.toBigInteger()
+        val million = 1000_000.toBigInt()
+        val thousand = 1000.toBigInt()
         val huge = Real.valueOf(million * million * thousand)
         tan(atan(huge)) shouldBeCloseTo "1000000000000000.00000000000000000000"
     }
