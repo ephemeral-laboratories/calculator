@@ -2,7 +2,7 @@
 junit = "5.10.2"
 junit-platform-launcher = "1.10.2"
 kotest = "5.9.1"
-compose = "1.6.11"
+compose = "1.8.2"
 spotless = "6.22.0"
 ktlint = "0.48.0"
 kotlin = "2.0.0"
