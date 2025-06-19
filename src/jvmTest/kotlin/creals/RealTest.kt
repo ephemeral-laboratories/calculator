@@ -93,7 +93,7 @@ class RealTest : FreeSpec({
             }
         }
         "passing an msdPrecision which overflows" {
-            shouldThrow<ArithmeticException> {
+            shouldThrow<PrecisionOverflowError> {
                 one.toStringFloatRep(pointsOfPrecision = 5, radix = 10, msdPrecision = 1_000_000_000)
             }
         }
