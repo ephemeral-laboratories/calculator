@@ -16,6 +16,7 @@ multiplatform-settings = "1.2.0"
 k-big-numbers = "0.1.0"
 kmath = "0.4.2"
 kt-math = "0.10.0"
+ionspin-bignum = "0.3.10"
 
 [libraries]
 antlr-kotlin-runtime = {module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin"}
@@ -34,6 +35,7 @@ junit-platform-launcher = {module = "org.junit.platform:junit-platform-launcher"
 k-big-numbers = {module = "io.k-libs:big-numbers", version.ref = "k-big-numbers"}
 kmath-core = {module = "space.kscience:kmath-core", version.ref = "kmath"}
 kt-math = {module = "io.github.gciatto:kt-math", version.ref = "kt-math"}
+ionspin-bignum = {module = "com.ionspin.kotlin:bignum", version.ref = "ionspin-bignum"}
 
 [plugins]
 kotlin-multiplatform = {id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin"}
