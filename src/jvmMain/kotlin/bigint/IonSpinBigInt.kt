@@ -1,7 +1,5 @@
 package garden.ephemeral.calculator.bigint
 
-import com.ionspin.kotlin.bignum.integer.BigInteger
-
 ///**
 // * Implementation of big integer on top of ionspin's bignum library.
 // */
