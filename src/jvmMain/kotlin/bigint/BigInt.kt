@@ -89,6 +89,7 @@ interface BigInt : Comparable<BigInt> {
      *
      * @param exponent the exponent.
      * @return the result.
+     * @throws ArithmeticException if `exponent` is negative.
      */
     fun pow(exponent: Int): BigInt
 
